@@ -3,9 +3,11 @@ from odoo import http
 
 
 class MySample(http.Controller):
-    @http.route('/my_sample/', auth='public', website=True)
-    def index(self, **kw):
-        return http.request.render('my_sample.index', {})
+    @http.route('/my_sample/<model("x_example1"):persona>', auth='public', website=True)
+    def fun_persona(self, persona):
+        return http.request.render('my_sample.index', {
+            "persona": persona
+        })
 
 #     @http.route('/my_sample/my_sample/objects/', auth='public')
 #     def list(self, **kw):

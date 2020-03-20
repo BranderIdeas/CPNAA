@@ -1,19 +1,13 @@
 <odoo>
     <data>
 
-<!--         <template id="assets_frontend" inherit_id="website.assets_frontend" name="My Sample">
-          <ul>
-            <li t-foreach="objects" t-as="object">
-              <a t-attf-href="#{ root }/objects/#{ object.id }">
-                <t t-esc="object.display_name"/>
-              </a>
-            </li>
-          </ul>
-        </template> -->
-        <template id="index" name="My Sample">
+        <template id="index">
             <t t-call="website.layout">
-                <div class="oe_structure">
-                    <strong>Hola Mundo desde el Template</strong>
+                <div class="container text-center">
+                    <br>
+                    <h1>Nombres y Apellidos: <span t-esc="persona.x_name"></h1>
+                    <h2><span t-esc="persona.x_studio_tipo_de_documento">: <span t-esc="persona.x_studio_documento"></h2>
+                    <h2>Correo Eléctronico: <span t-esc="persona.x_studio_email"></h2>
                 </div>
             </t>
         </template>

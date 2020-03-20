@@ -3,7 +3,7 @@
         <template id="index">
             <t t-call="website.layout">
                 <div class="container text-center">
-                    <br>
+                    <br/>
                     <h1>Nombres y Apellidos: <span t-esc="persona.x_name" /></h1>
                     <h2><span t-esc="persona.x_studio_tipo_de_documento" />: <span t-esc="persona.x_studio_documento" /></h2>
                     <h2>Correo Eléctronico: <span t-esc="persona.x_studio_email" /></h2>

@@ -1,0 +1,488 @@
+<odoo>
+    <data>
+        <template id="form_convenios" name="Formulario de convenios">
+            <t t-call="website.layout">
+            <t t-set="additional_title">Convenios</t>
+            <div id="wrap" class="oe_structure">
+            <section class="pt32 pb24" data-name="Title" style="">
+              <div class="container">
+                <div class="row s_nb_column_fixed">
+                </div>
+              </div>
+            </section>
+            <section class="s_picture pt48 pb24" data-name="Picture" style="">
+              <div id="matricula" class="container">
+                <div class="row s_nb_column_fixed">
+                  <div class="col-lg-12 s_title bg-delta pb0 pt0" style="text-align: center;">
+                    <h1 class="s_title_default" style="text-align: left; ">
+                      <font style="font-size: 24px;">MATRÍCULA PROFESIONAL DE ARQUITECTO</font>
+                    </h1>
+                  </div>
+                  <div class="col-lg-12 pt16 pb0">
+                    <p style="text-align: center;">
+                      <br/>
+                    </p>
+                  </div>
+                </div>
+                <table class="table table-bordered">
+                  <tbody>
+                    <tr>
+                      <td>
+                        <p>
+                          <img class="img-fluid o_we_custom_image" src="/web/image/1636/SERVICIO%20MATRICULA%20ARQ_Mesa%20de%20trabajo%201.jpg" data-original-title="" title="" aria-describedby="tooltip660146"/>
+                          <br/>
+                        </p>
+                      </td>
+                      <td>
+                        <p>
+                          <img class="img-fluid o_we_custom_image" src="/web/image/1637/SERVICIO%20MATRICULA%20ARQ_Mesa%20de%20trabajo%201%20copia.jpg" data-original-title="" title="" aria-describedby="tooltip71041"/>
+                          <br/>
+                        </p>
+                      </td>
+                      <td>
+                        <p>
+                          <img class="img-fluid o_we_custom_image" src="/web/image/1638/MP3.jpg"/>
+                          <br/>
+                        </p>
+                      </td>
+                      <td>
+                        <p>
+                          <img class="img-fluid o_we_custom_image" src="/web/image/1639/SERVICIO%20MATRICULA%20ARQ_Mesa%20de%20trabajo%201%20copia%203.jpg"/>
+                          <br/>
+                        </p>
+                      </td>
+                      <td>
+                        <p>
+                          <img class="img-fluid o_we_custom_image" src="/web/image/1640/SERVICIO%20MATRICULA%20ARQ_Mesa%20de%20trabajo%201%20copia%204.jpg"/>
+                          <br/>
+                        </p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p class="rtejustify" style="margin-right: 0px; margin-bottom: 20px; margin-left: 0px; color: rgb(46, 54, 65); font-size: 1.2em; line-height: 21.6px; text-align: justify; font-family: cabinregular;">Para realizar el trámite lea y acepte los siguientes términos y condiciones de uso del sistema, consulte nuestra&amp;nbsp;<span style="outline-color: initial; outline-width: initial; text-align: center;">Política de Seguridad y Privacidad de la Información</span>.</p>
+                <p class="rtejustify" style="margin-right: 0px; margin-bottom: 20px; margin-left: 0px; color: rgb(46, 54, 65); font-size: 1.2em; line-height: 21.6px; text-align: justify; font-family: cabinregular;"><span style="font-weight: 700;">NOTA:</span>&amp;nbsp;Si usted es&amp;nbsp;<span style="font-weight: 700;">ARQUITECTO CONSTRUCTOR</span>, el trámite de la matrícula profesional debe realizarlo con el COPNIA (Consejo Profesional Nacional de Ingeniería).</p>
+                <div class="row s_nb_column_fixed">
+                  </div>
+              </div>
+              <div id="licencia" class="container">
+                <div class="row s_nb_column_fixed">
+                  <div class="col-lg-12 s_title bg-delta pb0 pt0" style="text-align: center;">
+                    <h1 class="s_title_default" style="text-align: left; ">
+                      <font style="font-size: 24px;">LICENCIA TEMPORAL ESPECIAL</font>
+                    </h1>
+                  </div>
+                </div>
+              </div>
+              <div id="inscripciontt" class="container">
+                <div class="row s_nb_column_fixed">
+                  <div class="col-lg-12 s_title bg-delta pb0 pt0" style="text-align: center;">
+                    <h1 class="s_title_default" style="text-align: left; ">
+                      <font style="font-size: 24px;">CERTIFICADO DE INSCRIPCIÓN PROFESIONAL - PROFESIONAL AUXILIAR DE LA ARQUITECTURA</font>
+                    </h1>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <form action="/website_form/" method="post" class="s_website_form container-fluid mt32 o_fake_not_editable" enctype="multipart/form-data" data-model_name="x_cpnaa_user" data-success_page="" data-name="Form Builder">
+              <div class="container">
+                <div class="row form-group form-field o_website_form_required_custom">
+                  <input type="hidden" id="x_origin_type" name="x_origin_type" value="1"/>
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_user_type_ID">
+                          Tipo de usuario
+                      </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8 pt0">
+                    <select class="form-control o_website_form_input" name="x_user_type_ID" required="false" disabled="true">
+                      <option value="1">PERSONA NATURAL</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group row form-field o_website_form_required o_fake_not_editable">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_name"> Nombre&amp;nbsp;</label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <input t-attf-value="{{ (cliente.x_names) }}" type="text" class="form-control o_website_form_input" name="x_name" required="1"/>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_last_name"> Apellidos </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <input t-attf-value="{{ (cliente.x_last_names) }}" type="text" class="form-control o_website_form_input" name="x_last_name" required=""/>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_document_type_ID"> Tipo de documento </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <select class="form-control o_website_form_input" name="x_document_type_ID" required="false">
+                        <option t-attf-value="{{ (cliente.x_document_type_ID.id) }}" selected="">
+                            <t t-esc="cliente.x_document_type_ID.x_name" />
+                        </option>
+                        <option value="1">
+                            CÉDULA DE CIUDADANÍA
+                        </option>
+                        <option value="2">
+                            CÉDULA DE EXTRANJERÍA
+                        </option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_document"> Número de documento </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <input t-attf-value="{{ (cliente.x_document) }}" type="text" class="form-control o_website_form_input" name="x_document" required=""/>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_expedition_country"> País de expedición </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <select class="form-control o_website_form_input child_place-x_expedition_state" name="x_expedition_country" id="x_expedition_country">
+                        <option value="">Seleccione...</option>
+                        <t t-foreach="request.env['x_cpnaa_country'].search([])" t-as="expedition_country">
+                          <option t-att-value="expedition_country.id">
+                            <t t-esc="expedition_country.x_name"/>
+                          </option>
+                         </t>
+                      </select>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_expedition_state"> Departamento de expedición </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <select class="form-control o_website_form_input child_place-x_expedition_city" name="x_expedition_state" id="x_expedition_state">
+                        <option value="">Seleccione...</option>
+                        <t t-foreach="request.env['x_cpnaa_state'].search([])" t-as="expedition_state">
+                          <option t-att-value="expedition_state.id" style="display: none;" t-att-data-country_id="expedition_state.x_country_ID.id">
+                            <t t-esc="expedition_state.x_name"/>
+                          </option>
+                         </t>
+                      </select>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_expedition_city"> Ciudad de expedición </label>
+                  </div>
+                 <div class="col-lg-7 col-md-8">
+                    <select class="form-control o_website_form_input" name="x_expedition_city" id="x_expedition_city">
+                        <option value="">Seleccione...</option>
+                        <t t-foreach="request.env['x_cpnaa_city'].search([])" t-as="expedition_city">
+                          <option t-att-value="expedition_city.id" style="display: none;" t-att-data-state_id="expedition_city.x_state_ID.id">
+                            <t t-esc="expedition_city.x_name"/>
+                          </option>
+                         </t>
+                      </select>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_document_image"> Imagen del documento </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <input type="file" class="form-control o_website_form_input" name="x_document_image" required=""/>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_email"> Correo electrónico </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <input t-attf-value="{{ (cliente.x_email) }}" type="text" class="form-control o_website_form_input" name="x_email" required=""/>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_gender_ID"> Género </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <select t-attf-value="{{ (cliente.x_gender_ID.id) }}" class="form-control o_website_form_input" name="x_gender_ID" required="false">
+                      <option t-attf-value="{{ (cliente.x_gender_ID.id) }}" selected="">
+                          <t t-esc="cliente.x_gender_ID.x_name" />
+                      </option>
+                      <option value="1">
+                          MASCULINO
+                      </option>
+                      <option value="2">
+                          FEMENINO
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_country_ID"> País </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                      <select class="form-control o_website_form_input child_place-x_state_ID" name="x_country_ID" id="x_country_ID">
+                        <option value="">Seleccione...</option>
+                        <t t-foreach="request.env['x_cpnaa_country'].search([])" t-as="country">
+                          <option t-att-value="country.id">
+                            <t t-esc="country.x_name"/>
+                          </option>
+                         </t>
+                      </select>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_state_ID"> Departamento / Estado </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <select class="form-control o_website_form_input child_place-x_city_ID" name="x_state_ID" id="x_state_ID">
+                        <option value="">Seleccione...</option>
+                        <t t-foreach="request.env['x_cpnaa_state'].search([])" t-as="state">
+                          <option t-att-value="state.id" style="display: none;" t-att-data-country_id="state.x_country_ID.id">
+                            <t t-esc="state.x_name"/>
+                          </option>
+                         </t>
+                      </select>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_city_ID"> Ciudad </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <select class="form-control o_website_form_input" name="x_city_ID" id="x_city_ID">
+                        <option value="">Seleccione...</option>
+                        <t t-foreach="request.env['x_cpnaa_city'].search([])" t-as="city">
+                          <option t-att-value="city.id" style="display: none;" t-att-data-state_id="city.x_state_ID.id">
+                            <t t-esc="city.x_name"/>
+                          </option>
+                         </t>
+                      </select>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_address"> Dirección </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <input type="text" class="form-control o_website_form_input" name="x_address" required=""/>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_celphone"> Número de celular </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <input type="text" class="form-control o_website_form_input" name="x_celphone" required=""/>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_local_phone"> Teléfono </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <input type="text" class="form-control o_website_form_input" name="x_local_phone"/>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_level_ID"> Nivel profesional </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                      <select class="form-control o_website_form_input" name="x_level_ID" id="x_level_ID">
+                        <option value="">Seleccione...</option>
+                        <t t-foreach="request.env['x_cpnaa_level'].search([])" t-as="nivelP">
+                          <option t-att-value="nivelP.id">
+                            <t t-esc="nivelP.x_name"/>
+                          </option>
+                         </t>
+                      </select>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_institution_type_ID"> Tipo de Universidad </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <select class="form-control o_website_form_input" name="x_institution_type_ID" required="false" disabled="true">
+                      <option  t-attf-value="{{ (cliente.x_institution_ID.x_institution_type_ID) }}" >
+                          <t t-esc="cliente.x_institution_ID.x_institution_type_ID.x_name" /></option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_institution_ID"> Universidad </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <select class="form-control o_website_form_input" name="x_institution_ID" required="false" disabled="true">
+                      <option  t-attf-value="{{ (cliente.x_institution_ID) }}" ><t t-esc="cliente.x_institution_ID.x_name" /></option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_institute_career"> Carreras </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                      <select class="form-control o_website_form_input" name="x_institute_career" id="x_institute_career" disabled="">
+                          <option t-attf-value="{{ (cliente.x_career_ID) }}" ><t t-esc="cliente.x_career_ID.x_name" /></option>
+                        </select>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable o_website_form_required_custom">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_grade_date"> Fecha de grado </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <div class="o_website_form_date input-group date" id="datepicker20" data-target-input="nearest">
+                      <input type="date" t-attf-value="{{ (cliente.x_grade_ID.x_date) }}" class="form-control datetimepicker-input o_website_form_input"
+                             data-target="#datepicker20" name="x_grade_date" disabled=""/>
+                      <div t-attf-value="{{ (cliente.x_grade_ID.x_date) }}" class="input-group-append" data-target="#datepicker20" data-toggle="datetimepicker">
+                        <div class="input-group-text">
+                          <i class="fa fa-calendar"/>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_foreign_origin"> ¿Ciudadano Extranjero? </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <input type="checkbox" value="Yes" class="o_website_form_input" name="x_foreign_origin"/>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_website_form_required_custom o_website_form_field_hidden">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label" for="x_foreign_country">
+                          País de residencia en el extranjero
+                      </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                      <select class="form-control o_website_form_input child_place-x_foreign_state" name="x_foreign_country" id="x_foreign_country">
+                        <option value="">Seleccione...</option>
+                        <t t-foreach="request.env['x_cpnaa_country'].search([])" t-as="foreign_country">
+                          <option t-att-value="foreign_country.id">
+                            <t t-esc="foreign_country.x_name"/>
+                          </option>
+                         </t>
+                      </select>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_website_form_required_custom o_website_form_field_hidden">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label" for="x_foreign_state">
+                          Estado de residencia en el extranjero
+                      </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+       
+                    <select class="form-control o_website_form_input child_place-x_foreign_city" name="x_foreign_state" id="x_foreign_state">
+                        <option value="">Seleccione...</option>
+                        <t t-foreach="request.env['x_cpnaa_state'].search([])" t-as="foreign_state">
+                          <option t-att-value="foreign_state.id" style="display: none;" t-att-data-country_id="foreign_state.x_country_ID.id">
+                            <t t-esc="foreign_state.x_name"/>
+                          </option>
+                         </t>
+                      </select>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_website_form_required_custom o_website_form_field_hidden">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label" for="x_foreign_city">
+                          Ciudad de residencia en el extranjero
+                      </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">  
+                    <select class="form-control o_website_form_input" name="x_foreign_city" id="x_foreign_city">
+                        <option value="">Seleccione...</option>
+                        <t t-foreach="request.env['x_cpnaa_city'].search([])" t-as="foreign_city">
+                          <option t-att-value="foreign_city.id" style="display: none;" t-att-data-state_id="foreign_city.x_state_ID.id">
+                            <t t-esc="foreign_city.x_name"/>
+                          </option>
+                         </t>
+                      </select>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable o_website_form_field_hidden">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_foreign_address"> Dirección de residencia en el extranjero </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <input type="text" class="form-control o_website_form_input" name="x_foreign_address" required=""/>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable o_website_form_field_hidden">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_certification_image"> Imagen de diploma apostillado </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <input type="file" class="form-control o_website_form_input" name="x_certification_image" required=""/>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable o_website_form_field_hidden">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_certification_studies_completed"> Certificación académica de estudios realizados </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <input type="file" class="form-control o_website_form_input" name="x_certification_studies_completed" required=""/>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable o_website_form_field_hidden">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_foreign_professional_accreditation"> Acreditación de profesión en el extranjero </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <input type="file" class="form-control o_website_form_input" name="x_foreign_professional_accreditation" required=""/>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable o_website_form_field_hidden">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_professional_experience"> Experiencia profesional acreditada </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <input type="file" class="form-control o_website_form_input" name="x_professional_experience" required=""/>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable o_website_form_field_hidden">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_company_existence_certificate"> Certificado de existencia empresa contratante </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <input type="file" class="form-control o_website_form_input" name="x_company_existence_certificate" required=""/>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable o_website_form_field_hidden">
+                  <div class="col-lg-3 col-md-4">
+                    <label class="col-form-label o_fake_editable" for="x_entity_request"> Solicitud empresa contratante </label>
+                  </div>
+                  <div class="col-lg-7 col-md-8">
+                    <input type="file" class="form-control o_website_form_input" name="x_entity_request" required=""/>
+                  </div>
+                </div>
+                <div class="row form-group form-field o_fake_not_editable o_website_form_required_custom">
+                  <div class="col-lg-10 col-md-12">
+                    <label class="col-form-label o_fake_editable" for="x_elec_autorization"> Autorización uso de medios electrónicos: acepto y autorizo de manera expresa para que el CPNAA, envié notificaciones y demás comunicaciones relacionadas con mi trámite y/o solicitudes a través de técnicas y medios electrónicos, informáticos, telemáticos, mensajes de texto SMS (Incluye correo electrónico y pagina web). </label>
+                    <input type="checkbox" value="Yes" class="o_website_form_input" name="x_elec_autorization" required=""/>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <div class="offset-lg-3 offset-md-4 col-md-8 col-lg-7">
+                    <button class="btn btn-primary btn-lg o_website_form_send">Registrar</button>
+                    <span id="o_website_form_result" class="text-danger ml8"/>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+             </t>
+        </template>
+    </data>
+</odoo>

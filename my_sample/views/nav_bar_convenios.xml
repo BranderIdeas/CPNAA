@@ -1,0 +1,44 @@
+<odoo>
+    <data>        
+        <template id="nav_bar_convenios" name="Lista de convenios">
+            <div class="container center">
+                <h4 class="titulo superior">CONVENIOS - ACCESO UNIVERSIDADES</h4>
+                <h4 id="universidad" t-attf-name="{{ (universidad.id) }}" class="titulo inferior"><t t-esc="universidad.x_name" /></h4>
+                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav mx-auto">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Convenios Vigentes
+                                    <!-- <span class="sr-only">(current)</span> -->
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <t t-foreach="convenios" t-as="conv">
+                                        <a class="dropdown-item" t-attf-href="/convenios/{{ (universidad.id) }}/{{ (conv.id) }}">
+                                            <t t-esc="conv.x_name" />
+                                        </a>
+                                        <t t-foreach="request.env['x_cpnaa_grade'].search([('x_agreement_ID','=',conv.id)])" t-as="grado">
+                                            <a class="dropdown-item" 
+                                               t-attf-href="/convenios/{{ (universidad.id) }}/detalle_grado/{{ (grado.id) }}">
+                                            <span class="ml-4">GRADO: <t t-esc="grado.x_name" /></span></a>
+                                        </t>
+                                    </t>
+                                </div>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Convenios Vencidos
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="#">No hay convenios vencidos</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </template>
+    </data>
+</odoo>

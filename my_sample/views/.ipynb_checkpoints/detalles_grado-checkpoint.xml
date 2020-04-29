@@ -1,0 +1,71 @@
+<odoo>
+    <data>
+        <template id="detalles_grado" name="Inicio de convenios">
+            <t t-call="website.layout">
+                <t t-set="additional_title">Convenios</t>
+                <t t-call="my_sample.nav_bar_convenios" />
+                  <div class="container">
+                    <div class="container col-sm-12 col-md-10 col-lg-8 mt-3 mb-5">
+                            <t t-if="convenio">
+                                <h5 class="titulo superior">Convenio: <t t-esc="convenio.x_name" /></h5>
+                                <h5 t-if="grado" class="titulo medio">
+                                    Fecha Inicio: <t t-esc="convenio.x_start_date" />
+                                     - Fecha Fin: <t t-esc="convenio.x_end_date" />
+                                </h5>
+                                <h5 t-else="" class="titulo inferior">
+                                    Fecha Inicio: <t t-esc="convenio.x_start_date" />
+                                     - Fecha Fin: <t t-esc="convenio.x_end_date" />
+                                </h5>
+                            </t>
+                            <t t-if="grado">
+                                <h5 class="titulo inferior">Fecha de Grado: <t t-esc="grado.x_date" /></h5>
+                            </t>
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <th scope="col">
+                                            <a class="link-cuadro" t-attf-href="/convenios/{{ (universidad.id) }}/grado/{{ (grado.id)  }}">
+                                                CARGUE CSV DE POSIBLES GRADUANDOS
+                                            </a>
+                                            <p>(<t t-esc="len(request.env['x_transient_convenios'].search([('x_grade_ID','=',grado.id)]))" /> registros)</p>
+                                        </th>
+                                        <td scope="col">
+                                            <div t-if="grado.x_phase_1" class="rounded-circle semaforo verde"></div>
+                                            <div t-else="" class="rounded-circle semaforo rojo"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tbody>
+                                    <tr>
+                                        <th scope="col">CONSULTA DE USUARIOS QUE HAN PAGADO</th>
+                                        <td scope="col">
+                                            <div t-if="grado.x_phase_2" class="rounded-circle semaforo verde"></div>
+                                            <div t-else="" class="rounded-circle semaforo rojo"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tbody>
+                                    <tr>
+                                        <th scope="col">CARGUE DE OFICIOS EN PDF LISTADO DEFINITIVO</th>
+                                        <td scope="col">
+                                            <div t-if="grado.x_phase_3" class="rounded-circle semaforo verde"></div>
+                                            <div t-else="" class="rounded-circle semaforo rojo"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tbody>
+                                    <tr>
+                                        <th scope="col">CARGUE DE DIPLOMA DE GRADO EN PDF</th>
+                                        <td scope="col">
+                                            <div t-if="grado.x_phase_4" class="rounded-circle semaforo verde"></div>
+                                            <div t-else="" class="rounded-circle semaforo rojo"></div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                </div>
+             </t>
+        </template>
+    </data>
+</odoo>

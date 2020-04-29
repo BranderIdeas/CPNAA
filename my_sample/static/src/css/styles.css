@@ -1,0 +1,93 @@
+#top{
+    margin-top: 15px !important;
+}
+
+.semaforo{
+    width: 35px;
+    height: 35px;
+    border: 0.5px solid #000;
+}
+
+.rojo{
+    background-color: red;
+}
+
+.verde{
+    background-color: green;
+}
+
+.link-cuadro{
+    color: #383838;
+}
+
+.link-cuadro:hover{
+    color: gray;
+}
+
+.titulo{
+    height: 40px;
+    background-color: #c8112d;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 0px;
+}
+
+.medio{
+    height: 30px !important;
+}
+
+.inferior{
+    margin-top: 0px;
+    margin-bottom: 20px !important;
+    line-height: 1;
+}
+
+.superior{
+    margin-top: 20px;
+    line-height: 2.5;
+}
+
+.modal-lg {
+    max-width: 90% !important;
+}
+
+.table td,
+.table th {
+    padding: .35rem;
+}
+
+.col-nro {
+    width: 1%;
+}
+
+.col-tipo-id-gen {
+    width: 5%;
+}
+
+.col-nom-ape {
+    width: 16%;
+}
+
+.col-id-fecha {
+    width: 10%;
+}
+
+.col-email {
+    width: 16%;
+}
+
+.valido {
+    border: 1px solid green;
+}
+
+.invalido {
+    border: 1px solid red;
+}
+
+.warning {
+    border: 1px solid yellow;
+}
+
+.form-control:disabled {
+    background-color: #E0E0E0 !important;
+}

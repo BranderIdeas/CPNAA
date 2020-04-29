@@ -1,0 +1,48 @@
+<odoo>
+    <data>
+        <template id="inicio_tramite" name="Inicio de Trámite">
+            <t t-call="website.layout">
+                <t t-set="additional_title">Inicio de Trámite</t>
+                <t t-call="my_sample.header_form_matricula"/>
+                    <div class="container offset-lg-4 offset-md-3 col-md-6 col-lg-4">
+                        <section id="forms">
+                            <form class="mt32">
+                                <!-- <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/> -->
+                                <!-- Select Tipo de Documento -->
+                                <div class="row form-group form-field">
+                                    <label class="col-form-label" for="x_document_type_ID"> 
+                                        Tipo de Documento
+                                    </label>
+                                    <select class="form-control o_website_form_input" name="x_document_type_ID" 
+                                            id="doc_type" required="required">
+                                        <option value="1">
+                                            CÉDULA DE CIUDADANÍA
+                                        </option>
+                                        <option value="2">
+                                            CÉDULA DE EXTRANJERÍA
+                                        </option>
+                                        <option value="3">
+                                            PASAPORTE
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="row form-group form-field">
+                                    <label class="col-form-label" for="x_document">
+                                      Número de documento
+                                  </label>
+                                    <input type="text" class="form-control o_website_form_input" name="x_document"
+                                           id="doc" required="required"/>
+                                </div>
+                                <!-- Submit button -->
+                                <div class="form-group row offset-lg-4 offset-md-3 col-md-6 col-lg-4">
+                                    <button id="verificar" class="btn btn-primary btn-lg mb-1">Enviar</button>
+                                    <span id="o_website_form_result"/>
+                                </div>
+                            </form>
+                        </section>
+                    </div>
+                <br/>
+             </t>
+        </template>
+    </data>
+</odoo>

@@ -1,0 +1,113 @@
+<odoo>
+    <data>
+        <template id="convenios_archivo_csv" name="Inicio de convenios">
+            <t t-call="website.layout">
+                <t t-set="additional_title">Convenios</t>
+                <t t-call="my_sample.nav_bar_convenios" />
+                <div class="container">
+                    <div class="container col-sm-12 col-md-10 col-lg-8 mt-3 mb-5">
+                            <t t-if="convenio">
+                                <h5 id="convenio" t-attf-name="{{ (convenio.id) }}" class="titulo superior">Convenio: <t t-esc="convenio.x_name" /></h5>
+                                <h5 t-if="grado" class="titulo medio">
+                                    Fecha Inicio: <t t-esc="convenio.x_start_date" />
+                                     - Fecha Fin: <t t-esc="convenio.x_end_date" />
+                                </h5>
+                                <h5 t-else="" class="titulo inferior">
+                                    Fecha Inicio: <t t-esc="convenio.x_start_date" />
+                                     - Fecha Fin: <t t-esc="convenio.x_end_date" />
+                                </h5>
+                            </t>
+                            <t t-if="grado">
+                                <h5 class="titulo inferior">Fecha de Grado: <t t-esc="grado.x_date" /></h5>
+                                <h5 id="grado" class="invisible"><t t-esc="grado.id" /></h5>
+                            </t>
+                        <small id="help_text" class="text-danger d-flex justify-content-center invisible">Completa todos los campos</small>
+                        <br/>
+                        <section id="form">
+                            <form id="cargar_csv" class="container form-horizontal" enctype="multipart/form-data">
+                                <div class="form-group form-field">
+                                    <div class="form-group row">
+                                        <label for="fecha_grado" class="col-sm-3 col-form-label">Fecha de Grado</label>
+                                        <div class="col-sm-9">
+                                            <input t-if="grado"  type="date" class="form-control" id="fecha_grado"
+                                                   t-attf-value="{{ (grado.x_date) }}"/>
+                                            <input t-else=""  type="date" class="form-control" id="fecha_grado"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="profesion" class="col-sm-3 col-form-label">Profesión</label>
+                                        <div class="col-sm-9">
+                                            <select id="profesion" name="user_id" class="form-control">
+                                                <option t-if="grado" selected=""
+                                                    t-att-value="grado.x_institute_carreer_ID.id">
+                                                    <t t-esc="grado.x_institute_carreer_ID.x_name" />
+                                                </option>
+                                                <option t-else="" value="" selected="">
+                                                    Seleccione...
+                                                </option>
+                                                <t t-foreach="profesiones" t-as="prof">  
+                                                    <option t-att-value="prof.id"> 
+                                                        <t t-esc="prof.x_name" /> 
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="archivo_csv" class="col-sm-3 col-form-label">Archivo CSV</label>
+                                        <div class="col-sm-9">
+                                            <input type="file" class="form-control" id="archivo_csv" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" id="procesar_archivo" class="btn btn-primary">CARGAR Y PROCESAR ARCHIVO</button>
+                                <br/>
+                                <div class="modal fade" id="modal-resultado-csv" tabindex="-1" role="dialog" 
+                                     aria-labelledby="modal-resultado-csvTitle" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5>Resultado del Procesamiento del Archivo</h5>
+                                        </div>
+                                        <div class="container ml-3">
+                                            <h6>A continuación encontrará el resultado del procesamiento del archivo cargado:</h6>
+                                            <ul>
+                                                <li>Los campos en rojo indican error en su contenido, deberá modificarlos para continuar</li>
+                                                <li>Los campos en amarillo indican una advertencia respecto a su contenido</li>
+                                                <li>Los campos en verde indican que su contenido es correcto</li>
+                                            </ul>
+                                        </div>
+                                        <div class="modal-body">
+                                            <table class="table table-responsive">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col" class="col-nro">#</th>
+                                                        <th scope="col" class="col-tipo-id-gen">Tipo Doc</th>
+                                                        <th scope="col" class="col-id-fecha">Num Documento</th>
+                                                        <th scope="col" class="col-nom-ape">Nombres</th>
+                                                        <th scope="col" class="col-nom-ape">Apellidos</th>
+                                                        <th scope="col" class="col-id-fecha">Fecha de Grado</th>
+                                                        <th scope="col" class="col-tipo-id-gen">Genero</th>
+                                                        <th scope="col" class="col-email">Email</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="resultados">
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button id="cerrar_resultados" type="button" class="btn btn-secondary">CERRAR</button>
+                                            <button id="guardar_resultados" type="button" class="btn btn-primary">GUARDAR Y CONTINUAR</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </form>
+                        </section>
+                    </div>
+                </div>
+             </t>
+        </template>
+    </data>
+</odoo>

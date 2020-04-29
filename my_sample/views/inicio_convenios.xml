@@ -1,0 +1,22 @@
+<odoo>
+    <data>
+        <template id="convenios" name="Inicio de convenios">
+            <t t-call="website.layout">
+                <t t-set="additional_title">Convenios</t>
+                <t t-call="my_sample.nav_bar_convenios" />
+                <div class="container  offset-lg-2 offset-md-2 col-md-10 col-lg-8 my-4">
+                    <div class="container">
+                        <h5>
+                            Para ingresar una nueva fecha de grado y cargar el archivo CSV con los posibles graduandos,
+                            selecione el convenio vigente en el menu superior, seguido a esto, ingrese los datos.
+                        </h5>
+                        <h5>
+                            Para ver/modificar un grado existente, Selecione el grado en el menu superior.
+                        </h5>
+                    </div>
+                    <br/>
+                </div>
+             </t>
+        </template>
+    </data>
+</odoo>

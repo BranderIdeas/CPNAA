@@ -1,12 +1,65 @@
 <odoo>
     <data>
-        <template id="index">
+        <template id="assets_frontend" inherit_id="website.assets_frontend" name="my_sample">
+            <xpath expr="." position="inside">
+                <link rel="stylesheet" href="/my_sample/static/src/css/styles.css"/>
+                <script type="text/javascript" src="/my_sample/static/src/js/app.js"></script>
+                <script type="text/javascript" src="/my_sample/static/src/js/swal.js"></script>
+                <script type="text/javascript" src="/my_sample/static/src/js/validaciones.js"></script>
+            </xpath>
+        </template>
+        <template id="ies_inicio" name="Inicio de convenios">
+            <t t-call="website.layout">
+                <t t-set="additional_title">Convenios</t>
+                <div class="container">
+                    <h4 class="titulo">CONVENIOS - ACCESO UNIVERSIDADES</h4>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <div class="container col-sm-12 col-md-10 col-lg-8 mt-3 mb-5">
+                        <section id="forms">
+                            <form class="container-fluid form-horizontal">   
+                                <!-- <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/> -->
+                                <!-- Select Universidades --> 
+                                <div class="form-group form-field"> 
+                                  <div class="col"> 
+                                    <label class="control-label" for="user_id"> 
+                                      Seleccione Universidad
+                                    </label> 
+                                  </div> 
+                                  <div class="col"> 
+                                    <select id="buscar_convenios" name="user_id" class="form-control" >
+                                        <option value="" disabled="disabled" selected="">
+                                          Seleccione...
+                                        </option>
+                                        <t t-foreach="request.env['x_cpnaa_user'].search([('x_user_type_ID','=',3)])" t-as="univ">  
+                                            <option t-att-value="univ.id"> 
+                                                 <t t-esc="univ.x_name" /> 
+                                            </option> 
+                                        </t>
+                                    </select>
+                                  </div> 
+                                </div>
+                            </form>
+                            <small id="message" class="text-danger d-flex justify-content-center invisible">
+                                No hay convenios con esta institución</small>
+                        </section>
+                    </div>
+                    <br/>
+                    <br/>
+                    <br/>
+                </div>
+             </t>
+        </template>
+        <template id="user">
             <t t-call="website.layout">
                 <div class="container text-center">
                     <br/>
-                    <h1>Nombres y Apellidos: <span t-esc="persona.x_name" /></h1>
-                    <h2><span t-esc="persona.x_studio_tipo_de_documento" />: <span t-esc="persona.x_studio_documento" /></h2>
-                    <h2>Correo Eléctronico: <span t-esc="persona.x_studio_email" /></h2>
+                    <h3>Nombres y Apellidos: <span t-esc="persona.x_name"/> <span t-esc="persona.x_last_name"/></h3>
+                    <h4><span t-esc="persona.x_document_type_ID[0].x_name" />: <span t-esc="persona.x_document" /></h4>
+                    <h4>Universidad: <span t-esc="persona.x_institution_ID[0].x_name" /></h4>
+                    <h4>Correo Eléctronico: <span t-esc="persona.x_email" /></h4>
+                    <h5><a t-attf-href="/cliente/{{ slug(persona) }}/tramites">Ver trámites >></a></h5>
                 </div>
             </t>
         </template>

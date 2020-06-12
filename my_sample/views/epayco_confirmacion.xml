@@ -1,0 +1,67 @@
+<odoo>
+    <data>
+        <template id="epayco_confirmacion" name="Confirmación Pago">
+            <t t-call="website.layout">
+                <div id="resumenPago" class="container">
+                    <div class="row justify-content-md-center mt-4 mb-4">
+                        <h1 class="formTitle">
+                            <font>RESUMEN DE LA TRANSACCIÓN</font>
+                        </h1>
+                    </div>
+                    <div class="container mb-5 col-sm-8 col-lg-6 justify-content-md-center">
+                        <div class="formSection">
+                        <table class="table table-striped">
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Fecha</th>
+                                    <td id="fecha" class=""></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Banco</th>
+                                    <td class="" id="banco"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Referencia</th>
+                                    <td id="referencia"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">IP Pública del Usuario</th>
+                                    <td id="ip_publica"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Respuesta</th>
+                                    <td id="respuesta"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Total</th>
+                                    <td class="" id="total"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Motivo</th>
+                                    <td id="motivo"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Recibo</th>
+                                    <td id="recibo"></td>
+                                </tr>
+<!--                                 <tr>
+                                    <th scope="row">Autorización</th>
+                                    <td class="" id="autorizacion"></td>
+                                </tr> -->
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="row col-sm-12 justify-content-md-center my-5">
+                        <div>
+                            <button id="imprimir" type="button" class="btn btn-primary btn-stadium float-right">Imprimir</button>
+                        </div>
+                        <div>
+                            <button id="volver" type="button" class="btn btn-primary btn-stadium ml-3">Finalizar</button>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+    </data>
+</odoo>

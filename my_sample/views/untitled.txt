@@ -1,16 +1,27 @@
 <odoo>
     <data>
-        <template id="convenios" name="Inicio de convenios">
-            <t t-call="website.layout">
-                <t t-set="additional_title">Convenios</t>
-                <t t-call="my_sample.nav_bar_convenios" />
-                <div class="container">
-                    <br/>
-                    <div class="container offset-lg-3 offset-md-3 col-md-9 col-lg-6 my-5">
-                        <h1></h1>
-                    </div>
-                </div>
-             </t>
+        <template id="info_tramites" name="Información Trámites">
+              <table class="table table-bordered">
+                <tbody>
+                    <td>
+                      <p class="text-center">
+                        <img class="img-fluid o_we_custom_image" src="/web/image/4083/Cuadro1.png" data-original-title="" title="" aria-describedby="tooltip660146"/>
+                        <br/>
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <p class="text-center">
+                        <img class="img-fluid o_we_custom_image" src="/web/image/4084/Cuadro%202.png" data-original-title="" title="" aria-describedby="tooltip660146"/>
+                        <br/>
+                        </p>
+                      </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
         </template>
     </data>
 </odoo>

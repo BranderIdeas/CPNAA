@@ -1,48 +1,93 @@
 <odoo>
     <data>
-        <template id="convenios_archivo_csv" name="Inicio de convenios">
+        <template id="convenios_archivo_csv" name="Carga de Archivo CSV / Convenios">
             <t t-call="website.layout">
                 <t t-set="additional_title">Convenios</t>
                 <t t-call="my_sample.nav_bar_convenios" />
                 <div class="container">
-                    <div class="container col-sm-12 col-md-10 col-lg-8 mt-3 mb-5">
-                            <t t-if="convenio">
-                                <h5 id="convenio" t-attf-name="{{ (convenio.id) }}" class="titulo superior">Convenio: <t t-esc="convenio.x_name" /></h5>
-                                <h5 t-if="grado" class="titulo medio">
-                                    Fecha Inicio: <t t-esc="convenio.x_start_date" />
-                                     - Fecha Fin: <t t-esc="convenio.x_end_date" />
-                                </h5>
-                                <h5 t-else="" class="titulo inferior">
-                                    Fecha Inicio: <t t-esc="convenio.x_start_date" />
-                                     - Fecha Fin: <t t-esc="convenio.x_end_date" />
-                                </h5>
-                            </t>
-                            <t t-if="grado">
-                                <h5 class="titulo inferior">Fecha de Grado: <t t-esc="grado.x_date" /></h5>
-                                <h5 id="grado" class="invisible"><t t-esc="grado.id" /></h5>
-                            </t>
+                    <div class="container col-sm-12 col-md-10 col-lg-8 mt-1 mb-5">
+                        <h5 class="titulo superior">Convenio: <t t-esc="convenio.x_name" /></h5>
+                        <h5 class="titulo medio">
+                            Fecha Inicio: <t t-esc="convenio.x_start_date.strftime('%d-%m-%Y')" />
+                             - Fecha Fin: <t t-esc="convenio.x_end_date.strftime('%d-%m-%Y')" />
+                        </h5>
+                        <h5 t-if="grado" class="titulo medio">Fecha de Grado: <t t-esc="grado.x_date.strftime('%d-%m-%Y')" /></h5>
+                        <h5 t-else="" class="titulo medio">Creando Nuevo Grado</h5>
+                        <h5 class="titulo inferior">Cargue CSV de posibles graduandos</h5>
+                        <div class="alert alert-block alert-dark"><strong>Importante!</strong><br/>
+                            <p>En el siguiente enlace podrá descargar un archivo CSV que puede ser tomado como guía para los archivos que puede cargar en
+                            ésta opción del sistema: <a href="https://cpnaa.gov.co/app_cpnaa/convenios/assets/download/formato_cargue_posibles_graduandos_v2.csv">
+                            <strong>Descargar Archivo Guía </strong><i class="fa fa-download"></i></a></p>
+                        </div>
+                        <div>
+                        Utilice el formulario para cargar el archivo CSV de posibles graduandos, consulte las  <strong>recomendaciones</strong> para evitar 
+                        fallas o errores en el proceso de carga de su archivo:
+                        <div style="clear:both; height:15px;"></div>
+                            <div class="accordion" id="recomendaciones">
+                                <div class="accordion-group">
+                                    <div class="accordion-heading">
+                                        <a class="accordion-toggle text-black" data-toggle="collapse" data-parent="#recomendaciones" href="#txtIns">
+                                            <i class="fa fa-exclamation-circle"></i> Recomendaciones
+                                        </a>
+                                    </div>
+                                    <div id="txtIns" class="accordion-body collapse">
+                                        <div class="accordion-inner fondo-gray">
+                                            <ul>
+                                                <li>Debe seleccionar la fecha en la que se realizará la ceremonia de grado</li>
+                                                <li>Debe seleccionar la profesión para la cual se realizarán los grados</li>
+                                                <li>Solamente se admiten archivos con extensión .csv</li>
+                                                <li>Los campos del archivo CSV deben estar separados por punto y coma (;)</li>
+                                                <li>En el archivo CSV solamente debe incluir la información de los graduandos correspondientes a la profesión seleccionada</li>
+                                                <li>Para el campo Tipo_Identificacion los valores válidos son (tenga en cuenta los puntos)
+                                                    <ul>
+                                                        <li>C.C. -> Cédula de Ciudadanía</li>
+                                                        <li>C.E. -> Cédula de Estranjería</li>
+                                                        <li>PA. -> Pasaporte</li>
+                                                    </ul>
+                                                </li>
+                                                <li>Los números de documento no deben contener puntos (.) o comas (,)</li>
+                                                <li>Si el Tipo de Identificación es C.C. o C.E. la Identitificación debe contener solo números</li>
+                                                <li>Solo se aceptan valores alfanuméricos en Identificación para Tipo de Identificación Pasaporte (PA.)</li>
+                                                <li>Nombres y Apellidos deben estar en mayúsculas y no deben incluir acentos</li>
+                                                <li>Valores válidos para Género son F o M</li>
+                                                <li>Si en el proceso se generan errores, el sistema le mostrará un mensaje y listará los errores los errores encontrados,
+                                                    una vez corrija los errores podrá intentar nuevamente el procesamiento.</li>
+                                                <li>Una vez cargado el archivo y procesado, el indicador del cargue en el cuadro de mando cambiará a verde independiente de
+                                                    futuros cargues de información para el mismo convenio.</li>
+                                                <li>La fecha que seleccione como fecha de grado no podrá ser modificada posteriormente</li>
+                                                <li>La columna Email es opcional</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <small id="help_text" class="text-danger d-flex justify-content-center invisible">Completa todos los campos</small>
                         <br/>
                         <section id="form">
-                            <form id="cargar_csv" class="container form-horizontal" enctype="multipart/form-data">
+                            <div id="cargar_csv" class="container form-horizontal" enctype="multipart/form-data">
                                 <div class="form-group form-field">
                                     <div class="form-group row">
                                         <label for="fecha_grado" class="col-sm-3 col-form-label">Fecha de Grado</label>
                                         <div class="col-sm-9">
-                                            <input t-if="grado"  type="date" class="form-control" id="fecha_grado"
-                                                   t-attf-value="{{ (grado.x_date) }}"/>
-                                            <input t-else=""  type="date" class="form-control" id="fecha_grado"/>
+                                            <input t-if="grado" type="date" class="form-control" id="fecha_grado"
+                                                   t-attf-value="{{ (grado.x_date) }}" readonly="1" />
+                                            <input t-else="" type="date" class="form-control" id="fecha_grado"
+                                                   t-attf-min="{{ (datetime.date.today() + datetime.timedelta(days=convenio.x_days_before_degree)) }}" 
+                                                   t-attf-max="{{ (convenio.x_end_date + datetime.timedelta(days=convenio.x_days_after_expiration)) }}"/>
                                         </div>
                                     </div>
                                     <div class="form-group row">
                                         <label for="profesion" class="col-sm-3 col-form-label">Profesión</label>
                                         <div class="col-sm-9">
-                                            <select id="profesion" name="user_id" class="form-control">
-                                                <option t-if="grado" selected=""
-                                                    t-att-value="grado.x_institute_carreer_ID.id">
-                                                    <t t-esc="grado.x_institute_carreer_ID.x_name" />
+                                            <select t-if="grado" id="profesion" name="user_id" class="form-control" readonly="1">
+                                                <option selected=""
+                                                    t-att-value="grado.x_carrera_ID.id">
+                                                    <t t-esc="grado.x_carrera_ID.x_name" />
                                                 </option>
-                                                <option t-else="" value="" selected="">
+                                            </select>
+                                            <select t-else="" id="profesion" name="user_id" class="form-control">
+                                                <option value="" selected="">
                                                     Seleccione...
                                                 </option>
                                                 <t t-foreach="profesiones" t-as="prof">  
@@ -56,12 +101,14 @@
                                     <div class="form-group row">
                                         <label for="archivo_csv" class="col-sm-3 col-form-label">Archivo CSV</label>
                                         <div class="col-sm-9">
-                                            <input type="file" class="form-control" id="archivo_csv" />
+                                            <input type="file" class="form-control" id="archivo_csv" accept=".csv" />
                                         </div>
                                     </div>
                                 </div>
                                 <button type="submit" id="procesar_archivo" class="btn btn-primary">CARGAR Y PROCESAR ARCHIVO</button>
-                                <br/>
+                                <h5 t-if="grado" id="grado" class="invisible" t-attf-name="{{ (grado.id) }}" ></h5>
+                                <h5 id="convenio" class="invisible" t-attf-name="{{ (convenio.id) }}" t-attf-data-fecha-fin="{{ (convenio.x_end_date) }}"
+                                    t-attf-data-dias-vencimiento="{{ (convenio.x_days_after_expiration) }}"></h5>
                                 <div class="modal fade" id="modal-resultado-csv" tabindex="-1" role="dialog" 
                                      aria-labelledby="modal-resultado-csvTitle" aria-hidden="true">
                                 <div class="modal-dialog modal-lg" role="document">
@@ -92,7 +139,6 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody id="resultados">
-
                                                 </tbody>
                                             </table>
                                         </div>
@@ -103,7 +149,7 @@
                                     </div>
                                 </div>
                             </div>
-                            </form>
+                            </div>
                         </section>
                     </div>
                 </div>

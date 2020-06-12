@@ -1,0 +1,47 @@
+<odoo>
+    <data>
+        <template id="header_form_tramite" name="Encabezado Trámites">
+          <section class="s_picture pt48" data-name="Picture">
+            <div class="container">
+              <table class="table table-bordered">
+                <tbody>
+                  <tr>
+                    <td>
+                      <p class="text-center">
+                        <img class="img-fluid o_we_custom_image" src="/web/image/4082/pasos%20CPNAA.png" data-original-title="" title="" aria-describedby="tooltip660146"/>
+                        <br/>
+                      </p>
+                    </td>
+                  </tr>
+                  <t t-if="inicio_tramite">  
+                  <tr>
+                    <td>
+                      <p class="text-center">
+                        <img class="img-fluid o_we_custom_image" src="/web/image/4083/Cuadro1.png" data-original-title="" title="" aria-describedby="tooltip660146"/>
+                        <br/>
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                      <td>
+                        <p class="text-center">
+                        <img class="img-fluid o_we_custom_image" src="/web/image/4084/Cuadro%202.png" data-original-title="" title="" aria-describedby="tooltip660146"/>
+                        <br/>
+                        </p>
+                      </td>
+                  </tr>
+                  </t>
+                </tbody>
+              </table>
+            </div>
+            <div class="row">
+                <h1 class="formTitle">
+                    <font t-if="form == 'inscripciontt'">CERTIFICADO DE INSCRIPCIÓN PROFESIONAL - PROFESIONAL AUXILIAR DE LA ARQUITECTURA</font>
+                    <font t-elif="form == 'licencia'">LICENCIA TEMPORAL ESPECIAL</font>
+                    <font t-else="">MATRÍCULA PROFESIONAL DE ARQUITECTO</font>
+                </h1>
+            </div>
+          </section>
+        </template>
+    </data>
+</odoo>

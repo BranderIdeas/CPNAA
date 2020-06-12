@@ -1,33 +1,47 @@
 <odoo>
     <data>
-        <template id="detalles_grado" name="Inicio de convenios">
+        <template id="detalles_grado" name="Cuadro de Mando / Convenios">
             <t t-call="website.layout">
                 <t t-set="additional_title">Convenios</t>
                 <t t-call="my_sample.nav_bar_convenios" />
                   <div class="container">
-                    <div class="container col-sm-12 col-md-10 col-lg-8 mt-3 mb-5">
+                    <div class="container col-sm-12 col-md-10 col-lg-8 mt-2 mb-5">
                             <t t-if="convenio">
                                 <h5 class="titulo superior">Convenio: <t t-esc="convenio.x_name" /></h5>
                                 <h5 t-if="grado" class="titulo medio">
-                                    Fecha Inicio: <t t-esc="convenio.x_start_date" />
-                                     - Fecha Fin: <t t-esc="convenio.x_end_date" />
-                                </h5>
-                                <h5 t-else="" class="titulo inferior">
-                                    Fecha Inicio: <t t-esc="convenio.x_start_date" />
-                                     - Fecha Fin: <t t-esc="convenio.x_end_date" />
+                                    Fecha Inicio: <t t-esc="convenio.x_start_date.strftime('%d-%m-%Y')" />
+                                     - Fecha Fin: <t t-esc="convenio.x_end_date.strftime('%d-%m-%Y')" />
                                 </h5>
                             </t>
                             <t t-if="grado">
-                                <h5 class="titulo inferior">Fecha de Grado: <t t-esc="grado.x_date" /></h5>
+                                <h5 class="titulo medio">Fecha de Grado: <t t-esc="grado.x_date.strftime('%d-%m-%Y')" /></h5>
                             </t>
-                            <table class="table">
+                            <h5 class="titulo inferior">Cuadro de mando</h5>
+                            <table class="table mt-3">
                                 <tbody>
                                     <tr>
                                         <th scope="col">
-                                            <a class="link-cuadro" t-attf-href="/convenios/{{ (universidad.id) }}/grado/{{ (grado.id)  }}">
-                                                CARGUE CSV DE POSIBLES GRADUANDOS
+                                            <a t-if="grado.x_date - datetime.timedelta(days=convenio.x_days_before_degree) &gt;= datetime.date.today()"
+                                               class="link-cuadro" t-attf-href="/convenios/{{ (universidad.id) }}/gradoCsv/{{ (grado.id)  }}">
+                                                <i class="fa fa-upload"></i> CARGUE CSV DE POSIBLES GRADUANDOS
                                             </a>
-                                            <p>(<t t-esc="len(request.env['x_transient_convenios'].search([('x_grade_ID','=',grado.id)]))" /> registros)</p>
+                                            <a t-else="" class="no-select text-gray" disabled="1">
+                                                <i class="fa fa-upload"></i> CARGUE CSV DE POSIBLES GRADUANDOS
+                                            </a>
+                                            <t t-set="estudiantes_grado" t-value="request.env['x_transient_convenios'].search([('x_grade_ID','=',grado.id)])"/>
+                                            <t t-set="estudiantes_con_pago" 
+                                               t-value="request.env['x_cpnaa_procedure'].search([('x_studio_fecha_de_grado_2','=',grado.x_date),
+                                                        ('x_studio_carrera_1.id','=',grado.x_carrera_ID.id),
+                                                        ('x_cycle_ID.x_order','>',0),('x_origin_type.x_name','=','CONVENIO'),
+                                                        ('x_studio_universidad_5.id','=',grado.x_studio_universidad.id)])"/>
+                                            <p>
+                                                <a t-if="len(estudiantes_grado) == 1" href="#" class="text-black" data-toggle="modal" 
+                                                   data-target="#modal-estudiantes-cargados">
+                                                    <i class="fa fa-external-link"></i> (<t t-esc="len(estudiantes_grado)" /> estudiante)</a>
+                                                <a t-else="" href="#" class="text-black" data-toggle="modal" data-target="#modal-estudiantes-cargados">
+                                                    <i class="fa fa-external-link"></i> (<t t-esc="len(estudiantes_grado)" /> estudiantes)</a>
+                                                Máximo hasta el <t t-esc="(grado.x_date - datetime.timedelta(days=convenio.x_days_before_degree)).strftime('%d-%m-%Y')" />
+                                            </p>
                                         </th>
                                         <td scope="col">
                                             <div t-if="grado.x_phase_1" class="rounded-circle semaforo verde"></div>
@@ -37,7 +51,20 @@
                                 </tbody>
                                 <tbody>
                                     <tr>
-                                        <th scope="col">CONSULTA DE USUARIOS QUE HAN PAGADO</th>
+                                        <th scope="col">
+                                            <i class="fa fa-usd"></i>
+                                            <span class="no-select text-gray">CONSULTA DE USUARIOS QUE HAN PAGADO</span>
+                                            <p>
+                                                <a t-if="len(estudiantes_con_pago) == 1" href="#" class="text-black" data-toggle="modal" 
+                                                   data-target="#modal-estudiantes-con-pago">
+                                                    <i class="fa fa-external-link"></i> (<t t-esc="len(estudiantes_con_pago)" /> estudiante)</a>
+                                                <a t-elif="len(estudiantes_con_pago) == 0" href="#" class="text-black">
+                                                    <i class="fa fa-external-link"></i> (<t t-esc="len(estudiantes_con_pago)" /> estudiantes)</a>
+                                                <a t-else="" href="#" class="text-black" data-toggle="modal" data-target="#modal-estudiantes-con-pago">
+                                                    <i class="fa fa-external-link"></i> (<t t-esc="len(estudiantes_con_pago)" /> estudiantes)</a>
+                                                Máximo hasta el <t t-esc="(grado.x_date - datetime.timedelta(days=convenio.x_days_to_pay)).strftime('%d-%m-%Y')" />
+                                            </p>
+                                        </th>
                                         <td scope="col">
                                             <div t-if="grado.x_phase_2" class="rounded-circle semaforo verde"></div>
                                             <div t-else="" class="rounded-circle semaforo rojo"></div>
@@ -46,7 +73,18 @@
                                 </tbody>
                                 <tbody>
                                     <tr>
-                                        <th scope="col">CARGUE DE OFICIOS EN PDF LISTADO DEFINITIVO</th>
+                                        <th scope="col">
+                                            <a t-if="grado.x_date - datetime.timedelta(days=convenio.x_days_to_upload_pdf) &gt;= datetime.date.today()" 
+                                               class="link-cuadro" t-attf-href="/convenios/{{ (universidad.id) }}/gradoPdf/{{ (grado.id)  }}">
+                                                <i class="fa fa-file-pdf-o"></i> CARGUE DE OFICIOS EN PDF LISTADO DEFINITIVO
+                                            </a>
+                                            <a t-else="" class="no-select text-gray" disabled="1">
+                                                <i class="fa fa-file-pdf-o"></i> CARGUE DE OFICIOS EN PDF LISTADO DEFINITIVO
+                                            </a>
+                                            <p>
+                                                Máximo hasta el <t t-esc="(grado.x_date - datetime.timedelta(days=convenio.x_days_to_upload_pdf)).strftime('%d-%m-%Y')" />
+                                            </p>
+                                        </th>
                                         <td scope="col">
                                             <div t-if="grado.x_phase_3" class="rounded-circle semaforo verde"></div>
                                             <div t-else="" class="rounded-circle semaforo rojo"></div>
@@ -55,7 +93,18 @@
                                 </tbody>
                                 <tbody>
                                     <tr>
-                                        <th scope="col">CARGUE DE DIPLOMA DE GRADO EN PDF</th>
+                                        <th scope="col">
+                                            <a t-if="grado.x_date + datetime.timedelta(days=convenio.x_days_to_upload_diploma) &gt;= datetime.date.today()" 
+                                               class="link-cuadro" t-attf-href="/convenios/{{ (universidad.id) }}/gradoActas/{{ (grado.id)  }}">
+                                                <i class="fa fa-graduation-cap"></i> CARGUE DE DIPLOMA DE GRADO EN PDF
+                                            </a>
+                                            <a t-else="" class="no-select text-gray" disabled="1">
+                                                <i class="fa fa-graduation-cap"></i> CARGUE DE DIPLOMA DE GRADO EN PDF
+                                            </a>
+                                            <p>
+                                                Máximo hasta el <t t-esc="(grado.x_date + datetime.timedelta(days=convenio.x_days_to_upload_diploma)).strftime('%d-%m-%Y')" />
+                                            </p>
+                                        </th>
                                         <td scope="col">
                                             <div t-if="grado.x_phase_4" class="rounded-circle semaforo verde"></div>
                                             <div t-else="" class="rounded-circle semaforo rojo"></div>
@@ -63,6 +112,99 @@
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        <!-- Modal Estudiantes que han pagado -->
+                        <div class="modal fade" id="modal-estudiantes-cargados" tabindex="-1" role="dialog" 
+                             aria-labelledby="modal-estudiantes-cargadosTitle" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header mt-3" style="padding-bottom:0;">
+                                        <h4>ESTUDIANTES CARGADOS DEL GRADO: <t t-esc="grado.x_name" /></h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <table class="table table-responsive table-striped">
+                                            <thead class="bg-primary">
+                                                <tr>
+                                                    <th scope="col" class="col-nro">#</th>
+                                                    <th scope="col" class="col-nom-ape">TIPO DE DOCUMENTO</th>
+                                                    <th scope="col" class="col-id-fecha">DOCUMENTO</th>
+                                                    <th scope="col" class="col-nom-ape">NOMBRES</th>
+                                                    <th scope="col" class="col-nom-ape">APELLIDOS</th>
+                                                    <th scope="col" class="col-nom-ape">GENERO</th>
+                                                    <th scope="col" class="col-email">EMAIL</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-set="i" t-value="0"/>
+                                                <t t-foreach="estudiantes_grado" t-as="estudiante">
+                                                    <t t-set="i" t-value="i+1"/>
+                                                    <tr>
+                                                      <th scope="row"><t t-esc="i" /></th>
+                                                      <td><t t-esc="estudiante.x_document_type_ID.x_name" /></td>
+                                                      <td><t t-esc="estudiante.x_document" /></td>
+                                                      <td><t t-esc="estudiante.x_names" /></td>
+                                                      <td><t t-esc="estudiante.x_last_names" /></td>
+                                                      <td><t t-esc="estudiante.x_gender_ID.x_name" /></td>
+                                                      <td><t t-esc="estudiante.x_email" /></td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button data-dismiss="modal" type="button" class="btn btn-primary">CERRAR</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Modal Estudiantes que han pagado -->
+                        <div class="modal fade" id="modal-estudiantes-con-pago" tabindex="-1" role="dialog" 
+                             aria-labelledby="modal-estudiantes-con-pagoTitle" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header mt-3" style="padding-bottom:0;">
+                                        <h4>ESTUDIANTES QUE HAN PAGADO DEL GRADO: <t t-esc="grado.x_name" /></h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <table id="pagaron" class="table table-responsive table-striped">
+                                            <thead class="bg-primary">
+                                                <tr>
+                                                    <th scope="col" class="col-nro">#</th>
+                                                    <th scope="col" class="col-nom-ape">TIPO DE DOCUMENTO</th>
+                                                    <th scope="col" class="col-id-fecha">DOCUMENTO</th>
+                                                    <th scope="col" class="col-nom-ape">NOMBRES</th>
+                                                    <th scope="col" class="col-nom-ape">APELLIDOS</th>
+                                                    <th scope="col" class="col-nom-ape">FECHA DE GRADO</th>
+                                                    <th scope="col" class="col-email">PROFESIÓN</th>
+                                                    <th scope="col" class="col-nom-ape">TIPO DE PAGO</th>
+                                                    <th scope="col" class="col-email">NÚMERO DE PAGO</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-set="j" t-value="0"/>
+                                                <t t-foreach="estudiantes_con_pago" t-as="estudiante">
+                                                    <t t-set="j" t-value="j+1"/>
+                                                    <tr>
+                                                      <th scope="row"><t t-esc="i" /></th>
+                                                      <td><t t-esc="estudiante.x_studio_tipo_de_documento_1.x_name" /></td>
+                                                      <td><t t-esc="estudiante.x_studio_documento_1" /></td>
+                                                      <td><t t-esc="estudiante.x_studio_nombres" /></td>
+                                                      <td><t t-esc="estudiante.x_studio_apellidos" /></td>
+                                                      <td><t t-esc="estudiante.x_studio_fecha_de_grado_2" /></td>
+                                                      <td><t t-esc="estudiante.x_studio_carrera_1.x_name" /></td>
+                                                      <td><t t-esc="estudiante.x_pay_type" /></td>
+                                                      <td><t t-esc="estudiante.x_consignment_number" /></td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button id="btn_csv_pagaron" type="button" class="btn btn-primary left">EXPORTAR CSV</button>
+                                        <button data-dismiss="modal" type="button" class="btn btn-primary">CERRAR</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                 </div>
              </t>

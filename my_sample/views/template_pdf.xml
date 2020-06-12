@@ -1,0 +1,56 @@
+<odoo>
+    <data>
+        <template id="template_pdf" name="Template PDF graduados definitivos / Convenios">
+            <t t-set="nivel" t-value="grado.x_carrera_ID.x_level_ID.x_name"/>
+            <section id="exportContent" class="invisible" aria-hidden="true">
+                <br/> Bogotá D.C., Colombia<br/><t t-esc="fechaActual" /><br/>
+                <br/>
+                <br/>
+                <br/> Señores
+                <br/>
+                <strong>Consejo Profesional Nacional de Arquitectura y sus profesiones Auxiliares- CPNAA</strong>
+                <br/> Cra. 6 No 26 B 85 Of 401<br/> Tel: 3502700 Ext. 111 - 115<br/> Bogotá
+                <br/>
+                <br/>
+                <br/>
+                <div style="text-align:right">Ref. listado definitivo de reconfirmación de graduandos convenio <t t-esc="convenio.x_agreement_code" /> - 
+                    CPNAA <t t-esc="convenio.x_user_ID.x_name" /> - 
+                    <span t-if="nivel == 'PROFESIONAL'"> Matricula Profesional de Arquitectura </span>
+                    <span t-else="" >  Certificado de Inscripción Profesional  </span>
+                </div>
+                <br/><br/><br/> Respetados Señores:<br/><br/> 
+                <div style="text-align:justify">Adjuntamos listado de confirmación definitivo de los graduandos de la 
+                <t t-esc="convenio.x_user_ID.x_name" /> que se acogieron al convenio No <t t-esc="convenio.x_agreement_code" /> y cumplieron todos los requisitos
+                exigidos por la universidad para recibir su título académico como <t t-esc="grado.x_carrera_ID.x_name" /> el próximo 
+                <t t-esc="grado.x_date.strftime('%d-%m-%Y')" />, con el fin de que sea expedida su 
+                <span t-if="nivel == 'PROFESIONAL'"> Matricula Profesional de Arquitectura </span>
+                <span t-else="" >  Certificado de Inscripción Profesional  </span>.</div><br/>
+                <br/>
+                <br/>
+                <table width="100%">
+                    <tr>
+                        <td style="text-align:center; font-weight:bold" width="20px">No.</td>
+                        <td style="text-align:center; font-weight:bold">Número de Identificación</td>
+                        <td style="text-align:center; font-weight:bold">Nombres</td>
+                        <td style="text-align:center; font-weight:bold">Apellidos</td>
+                        <td style="text-align:center; font-weight:bold" width="80px">Fecha de Grado</td>
+                    </tr>
+                </table>
+                <br/>
+                <br/> Agradezco de antemano su gentil y valiosa atención.
+                <br/>
+                <br/> Cordialmente,
+                <br/>
+                <br/><br/><br/>
+                <strong>NOMBRE COMPLETO</strong><br/> Cargo
+                <br/> Facultad Institución de Educación Superior<br/> Institución de Educación Superior<br/>
+                <br/>
+                <br/>
+                <br/> Proyecto
+                <br/>
+                <strong>NOMBRE COMPLETO</strong><br/> Cargo
+                <br/>
+            </section>
+        </template>
+    </data>
+</odoo>

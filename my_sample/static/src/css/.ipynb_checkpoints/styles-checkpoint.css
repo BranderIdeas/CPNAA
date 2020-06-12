@@ -9,11 +9,11 @@
 }
 
 .rojo{
-    background-color: red;
+    background-color: #ff0000;
 }
 
 .verde{
-    background-color: green;
+    background-color: #28a745;
 }
 
 .link-cuadro{
@@ -21,7 +21,7 @@
 }
 
 .link-cuadro:hover{
-    color: gray;
+    color: #36495e;
 }
 
 .titulo{
@@ -38,12 +38,12 @@
 
 .inferior{
     margin-top: 0px;
-    margin-bottom: 20px !important;
+    margin-bottom: 0px !important;
     line-height: 1;
 }
 
 .superior{
-    margin-top: 20px;
+    margin-top: 0px !important;
     line-height: 2.5;
 }
 
@@ -77,17 +77,188 @@
 }
 
 .valido {
-    border: 1px solid green;
+    border: 1px solid #28a745 !important;
 }
 
 .invalido {
-    border: 1px solid red;
+    border: 1px solid #ff0000 !important;
+}
+
+.fecha-invalid {
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border: 1px solid red !important;
 }
 
 .warning {
-    border: 1px solid yellow;
+    border: 1px solid yellow !important;
 }
 
 .form-control:disabled {
     background-color: #E0E0E0 !important;
+}
+
+.titulo_tramite{
+    font-size: 24px;
+    text-align: left;
+}
+
+.fondo-gray{
+    background-color: #F5F5F5 !important;
+}
+
+.no-select{
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+input[type='file'].btn-file {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+label.file-label {
+    font-size: 16px;
+    font-weight: 300;
+    color: #495057;
+    background-color: #FAFAFA;
+    display: inline-block;
+    transition: all .5s;
+    cursor: pointer;
+    padding: 6px 14px !important;
+    width: 100%;
+    border: 1px solid black;
+    border-radius: 15px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.b-rad-right{
+    border: 1px solid black;
+    border-top-right-radius: 0.6rem;
+    border-bottom-right-radius: 0.6rem;
+}
+
+.btn-stadium{
+    padding: 0.625rem 3rem !important;
+    border-radius: 1.5rem !important;
+}
+
+.hand{
+    cursor: pointer !important;
+}
+
+.texto-verde{
+    color: #28a745 !important;
+}
+
+.texto-gris{
+    color: #495057 !important;
+}
+
+/* .custom-control-input:checked~.custom-control-label::before {
+    background-color: #C8112D;
+    border-color: #C8112D;
+} */
+
+#result_univ, #result_carreras  {
+    position: absolute;
+    width: 200%;
+    max-width: 650px;
+    cursor: pointer;
+    overflow-y: auto;
+    max-height: 400px;
+    box-sizing: border-box;
+    z-index: 1001;
+}
+
+.link-univ:hover, .link-carreras:hover {
+    background-color: #f1f1f1;
+}
+
+#matricula, #licencia, #inscripciontt, #convenio{
+    display: none;
+}
+
+
+/*Personalización de formulario*/
+.row.hiddenFields {
+  display: none;
+}
+.formSection {
+  border: solid 1px #ccc;
+  padding: 40px 20px 0px 20px;
+  margin-bottom: 40px;
+  border-radius: 30px;
+  position: relative;
+}
+h2.sectionName {
+  position: absolute;
+  background-color: white;
+  top: -20px;
+  padding: 10px 20px 0px 20px;
+  font-size: 18px;
+  margin-bottom: 0;
+}
+h2.sectionName:before, h1.formTitle:before {
+  content: '';
+  width: 5px;
+  height: 70%;
+  background-color: red;
+  position: absolute;
+  margin-left: -20px;
+}
+.formSection input, .formSection select {
+  border-radius: 15px;
+  border-color: black;
+  background-color: #fafafa;
+  border-width: 1px;
+}
+h1.formTitle {
+  width: 100%;
+  text-align: center;
+  margin: 30px 0 0px 0px;
+  font-size: 20px;
+  /*background-color: #efefef;*/
+  padding: 5px;
+  position: relative;
+}
+#tramiteForm .inputDisabled{
+  background-color: #CCCCCC;
+  pointer-events:none;
+}
+#tramiteForm input[type="checkbox"] {
+  margin-right: 20px;
+}
+.modal b {
+  font-weight: bold;
+}
+form a:hover {
+  color: #c8112d !important;
+  text-decoration: underline !important;
+}
+#connect p {
+  text-align: center;
+  margin-bottom: 5px;
+}
+span.help-block {
+  font-size: 12px;
+  float: right;
+}
+#preview-doc {
+  color: blue;
+  cursor: pointer;
+  text-decoration: underline;
+  display: none;
+}
+
+iframe.recibo-pdf {
+    width: 100%;
 }

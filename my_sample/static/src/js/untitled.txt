@@ -1,0 +1,17 @@
+odoo.define('website.pagos', function(require) {
+'use strict';
+    
+    console.log('PAGOS')
+    var Class = require('web.Class');
+    var rpc = require('web.rpc');
+        
+    var Pagos = Class.extend({ //data, _this
+        traer_data: function() {
+            console.log('PAGOS......');
+        }
+    })
+    
+    var pagos = new Pagos();
+    pagos.traer_data();
+    
+})

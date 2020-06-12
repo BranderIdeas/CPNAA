@@ -1,65 +1,67 @@
 <odoo>
     <data>
-        <template id="assets_frontend" inherit_id="website.assets_frontend" name="my_sample">
+        <template id="assets_frontend" inherit_id="website.assets_frontend" name="Assets">
             <xpath expr="." position="inside">
                 <link rel="stylesheet" href="/my_sample/static/src/css/styles.css"/>
-                <script type="text/javascript" src="/my_sample/static/src/js/app.js"></script>
                 <script type="text/javascript" src="/my_sample/static/src/js/swal.js"></script>
+                <script type="text/javascript" src="/my_sample/static/src/js/tramites.js"></script>
+                <script type="text/javascript" src="/my_sample/static/src/js/convenios.js"></script>
                 <script type="text/javascript" src="/my_sample/static/src/js/validaciones.js"></script>
+                <script type="text/javascript" src="/my_sample/static/src/js/pagos.js"></script>
+                <script src='/my_sample/static/src/js/scripts/libs/png_support/zlib.js'></script>
+                <script src='/my_sample/static/src/js/scripts/libs/png_support/png.js'></script>
+                <script src="/my_sample/static/src/js/scripts/libs/downloadify/js/swfobject.js"></script>
+                <script src="/my_sample/static/src/js/scripts/libs/downloadify/js/downloadify.min.js"></script>
+                <script src='/my_sample/static/src/js/scripts/libs/deflate.js'></script>
+                <script src="/my_sample/static/src/js/scripts/dist/jspdf.debug.js"></script>
+                <script src="/my_sample/static/src/js/scripts/plugins/addimage.js"></script>
+                <script src="/my_sample/static/src/js/scripts/JsBarcode.all.min.js"></script>
+                <script src="/my_sample/static/src/js/scripts/pdfFunctions.js"></script>
             </xpath>
         </template>
-        <template id="ies_inicio" name="Inicio de convenios">
-            <t t-call="website.layout">
-                <t t-set="additional_title">Convenios</t>
-                <div class="container">
-                    <h4 class="titulo">CONVENIOS - ACCESO UNIVERSIDADES</h4>
-                    <br/>
-                    <br/>
-                    <br/>
-                    <div class="container col-sm-12 col-md-10 col-lg-8 mt-3 mb-5">
-                        <section id="forms">
-                            <form class="container-fluid form-horizontal">   
-                                <!-- <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/> -->
-                                <!-- Select Universidades --> 
-                                <div class="form-group form-field"> 
-                                  <div class="col"> 
-                                    <label class="control-label" for="user_id"> 
-                                      Seleccione Universidad
-                                    </label> 
-                                  </div> 
-                                  <div class="col"> 
-                                    <select id="buscar_convenios" name="user_id" class="form-control" >
-                                        <option value="" disabled="disabled" selected="">
-                                          Seleccione...
-                                        </option>
-                                        <t t-foreach="request.env['x_cpnaa_user'].search([('x_user_type_ID','=',3)])" t-as="univ">  
-                                            <option t-att-value="univ.id"> 
-                                                 <t t-esc="univ.x_name" /> 
-                                            </option> 
-                                        </t>
-                                    </select>
-                                  </div> 
-                                </div>
-                            </form>
-                            <small id="message" class="text-danger d-flex justify-content-center invisible">
-                                No hay convenios con esta institución</small>
-                        </section>
-                    </div>
-                    <br/>
-                    <br/>
-                    <br/>
-                </div>
-             </t>
+        <template id="sample_snippet_id" inherit_id="website.snippets" name="Snippet">
+            <xpath expr="//div[@id='snippet_structure']/div[@class='o_panel_body']" position="inside">
+                <t t-snippet="my_sample.custom_snippet" 
+                   t-thumbnail="https://pbs.twimg.com/profile_images/417049370085707776/SkEGZpKk_400x400.jpeg"/>
+            </xpath>
         </template>
-        <template id="user">
+        <template id="custom_snippet" name="Snippet">
+            <t 
+              t-set="user_id" 
+              t-value="request.env.user.id"
+            />
+            <t 
+              t-set="users" 
+              t-value="request.env['x_cpnaa_user'].search([('x_user_type_ID.x_name','=','IES')], limit=5)"
+            />
+            <section>
+                <div class="container text-center">
+                <br/>
+                    <h1 class="h4">Tu título aquí</h1>
+                    <t t-foreach="users" t-as="user">
+                        <div class="alert alert-primary" role="alert">
+                            UNIVERSIDAD: <t t-esc="user.x_name" />
+                        </div>
+                    </t>
+                </div>
+            </section>
+        </template>
+        <template id="respuesta_pago" name="Respuesta de Pasarela Pago">
             <t t-call="website.layout">
                 <div class="container text-center">
-                    <br/>
-                    <h3>Nombres y Apellidos: <span t-esc="persona.x_name"/> <span t-esc="persona.x_last_name"/></h3>
-                    <h4><span t-esc="persona.x_document_type_ID[0].x_name" />: <span t-esc="persona.x_document" /></h4>
-                    <h4>Universidad: <span t-esc="persona.x_institution_ID[0].x_name" /></h4>
-                    <h4>Correo Eléctronico: <span t-esc="persona.x_email" /></h4>
-                    <h5><a t-attf-href="/cliente/{{ slug(persona) }}/tramites">Ver trámites >></a></h5>
+                        <div class="col-lg-12 s_title pt16 pb16" style="text-align: center;">
+                            <h1 id="titulo_respuesta" class="s_title_default" style="text-align: center;">
+                                <font style="font-size: 24px;">Transacción Finalizada</font>
+                            </h1>
+                            <h1 id="titulo_respuesta" class="s_title_default">
+                                <div style="text-align: left;">
+                                    <span id="fecha_pago" style="font-size: 18px;"><b>Fecha de pago:</b> </span>
+                                </div>
+                                <font style="font-size: 18px;">
+                                    <div id="nro_transaccion" style="text-align: left;"><b>Tu transacción fue aprobada con la referencia de pago:</b> </div>
+                                </font>
+                            </h1>
+                        </div>
                 </div>
             </t>
         </template>

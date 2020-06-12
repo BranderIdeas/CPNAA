@@ -1,38 +1,155 @@
 <odoo>
     <data>
-        <template id="lista_tramites">
+        <template id="lista_tramites" name="Estado del Trámite">
             <t t-call="website.layout">
-            <t t-set="additional_title">Trámites</t>
-            <t t-call="my_sample.header_form_matricula"/>
-                <div class="container text-center">
-                    <h4><b>Trámites de <t t-raw="(persona.x_name)"/> <t t-raw="(persona.x_last_name)"/>
-                        - <t t-raw="(persona.x_document_type_ID[0].x_name)"/> : <t t-raw="(persona.x_document)"/></b></h4>
-                    <table class="table" t-if="len(tramites) > 0">
-                        <thead>
-                            <tr>
-                                <th scope="col">Fecha del tramite:</th>
-                                <th scope="col">Nombre del trámite:</th>
-                                <th scope="col">Ciclo del Servicio:</th>
-                                <th scope="col">Origen</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                              <t t-foreach="tramites" t-as="i">
-                                <tr>
-                                    <td><t t-esc="i.x_req_date"/></td>
-                                    <td><t t-esc="i.x_service_ID[0].x_name"/></td>
-                                    <td><t t-esc="i.x_cycle_ID[0].x_name"/></td>
-                                    <td><t t-esc="i.x_origin_type[0].x_name"/></td>
-                                </tr>
-                            </t>
-                        </tbody>
-                    </table>
-                    <h5 t-else="">
-                        El documento <t t-raw="(persona.x_document_type_ID[0].x_name)"/> : 
-                        <t t-raw="(persona.x_document)"/> esta registrado pero no tiene ningún trámite
-                    </h5>
+                <t t-call="my_sample.header_form_tramite"/>
+                <div class="container mt-5">
+                    <div t-if="len(tramites) > 0">
+                        <div class="container">
+                            <div class="formSection">
+                                <h2 class="sectionName">Información de la solicitud</h2>
+                                <div class="row">
+                                </div>
+                                <div class="row">
+                                    <div class="form-group row col-md-6 form-field">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label" for="x_document_type"> Tipo de Documento </label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control " name="x_document_type" 
+                                                t-attf-value="{{persona.x_document_type_ID[0].x_name}}"  disabled="1"/>
+                                        </div>
+                                    </div>
+                                    <div class="row col-md-6 form-group form-field">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label" for="x_document"> Documento </label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="x_document" 
+                                                t-attf-value="{{persona.x_document}}"  disabled="1"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group row col-md-6 form-field">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label" for="x_name"> Nombres </label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="x_name" 
+                                                t-attf-value="{{persona.x_name}}"  disabled="1"/>
+                                        </div>
+                                    </div>
+                                    <div class="row col-md-6 form-group form-field">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label" for="x_last_name"> Apellidos </label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="x_last_name" 
+                                                t-attf-value="{{persona.x_last_name}}"  disabled="1"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group row col-md-6 form-field" disabled="true">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label" for="x_req_date"> Fecha del Trámite </label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="x_req_date" 
+                                                t-attf-value="{{tramites[0].x_req_date.strftime('%d-%m-%Y')}}" disabled="1"/>
+                                        </div>
+                                    </div>
+                                    <div class="row col-md-6 form-group form-field" disabled="true">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label" for="x_service_name"> Nombre del Trámite </label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="x_service_name" 
+                                                t-attf-value="{{tramites[0].x_service_ID[0].x_name}}" disabled="1"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group row col-md-6 form-field" disabled="true">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label" for="x_studio_universidad"> Universidad </label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="x_studio_universidad" 
+                                                   t-attf-value="{{tramites[0].x_studio_universidad_5.x_name}}" disabled="1"/>
+                                        </div>
+                                    </div>
+                                    <div class="row col-md-6 form-group form-field" disabled="true">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label" for="x_studio_carrera"> Profesión </label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="x_studio_carrera" 
+                                                t-attf-value="{{tramites[0].x_studio_carrera_1.x_name}}" disabled="1"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group row col-md-6 form-field" disabled="true">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label" for="x_studio_fecha_de_grado"> Fecha del Grado </label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="x_studio_fecha_de_grado" 
+                                                t-attf-value="{{tramites[0].x_studio_fecha_de_grado_2.strftime('%d-%m-%Y')}}" disabled="1"/>
+                                        </div>
+                                    </div>
+                                    <div class="row col-md-6 form-group form-field" disabled="true">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label" for="x_cycle_name"> Ciclo del Trámite </label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="x_cycle_name" 
+                                                t-attf-value="{{tramites[0].x_cycle_ID[0].x_name}}" disabled="1"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group row col-md-6 form-field" disabled="true">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label" for="x_pay_type"> Tipo de Pago </label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="x_pay_type"  
+                                                   t-attf-value="{{tramites[0].x_pay_type}}" disabled="1"/>
+                                        </div>
+                                    </div>
+                                    <div class="row col-md-6 form-group form-field" disabled="true">
+                                        <div class="col-md-4">
+                                            <label class="col-form-label" for="x_consignment_number"> Número de Pago </label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" name="x_consignment_number" 
+                                                t-attf-value="{{tramites[0].x_consignment_number}}" disabled="1"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row float-right mb-4">
+                                <button id="btn-atras" class="btn btn-primary btn-lg btn-stadium mr-3">Atras</button>
+                                <td>
+                                <button t-if="tramites[0].x_cycle_ID[0].x_order == 0"
+                                    id="btn-pagar" class="btn btn-primary btn-lg btn-stadium ml-3">Pagar</button>
+                                <button t-else=""
+                                    id="btn-contacto" class="btn btn-primary btn-lg btn-stadium ml-3">Contactar al CPNAA</button>
+                                </td>
+                            </div>
+                        </div>
+                    </div>
+                    <div t-else="">
+                        <h5 class="mb-5">
+                            El documento <t t-raw="(persona.x_document_type_ID[0].x_name)"/> : 
+                            <t t-raw="(persona.x_document)"/> esta registrado pero no tiene ningún trámite
+                        </h5>
+                        <br/>
+                    </div>
                 </div>
-                <br/>
             </t>
         </template>
     </data>

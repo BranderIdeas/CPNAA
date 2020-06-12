@@ -3,43 +3,48 @@
         <template id="inicio_tramite" name="Inicio de Trámite">
             <t t-call="website.layout">
                 <t t-set="additional_title">Inicio de Trámite</t>
-                <t t-call="my_sample.header_form_matricula"/>
-                    <div class="container offset-lg-4 offset-md-3 col-md-6 col-lg-4">
-                        <section id="forms">
-                            <form class="mt32">
-                                <!-- <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/> -->
-                                <!-- Select Tipo de Documento -->
-                                <div class="row form-group form-field">
-                                    <label class="col-form-label" for="x_document_type_ID"> 
-                                        Tipo de Documento
-                                    </label>
-                                    <select class="form-control o_website_form_input" name="x_document_type_ID" 
-                                            id="doc_type" required="required">
-                                        <option value="1">
-                                            CÉDULA DE CIUDADANÍA
-                                        </option>
-                                        <option value="2">
-                                            CÉDULA DE EXTRANJERÍA
-                                        </option>
-                                        <option value="3">
-                                            PASAPORTE
-                                        </option>
-                                    </select>
+                <t t-call="my_sample.header_form_tramite"/>
+                    <div class="container offset-lg-4 offset-md-3 col-md-6 col-lg-4 formSection">
+                            <!-- Select Tipo de Documento -->
+                            <div class="row form-group form-field">
+                                <label class="col-form-label" for="x_document_type_ID"  style="margin: 0px 25px;"> 
+                                    Tipo de Documento
+                                </label>
+                                <select class="form-control o_website_form_input" name="x_document_type_ID" style="margin: 0px 25px;"
+                                        id="doc_type" required="required">
+                                    <option value="1">
+                                        CÉDULA DE CIUDADANÍA
+                                    </option>
+                                    <option value="2">
+                                        CÉDULA DE EXTRANJERÍA
+                                    </option>
+                                    <option value="5">
+                                        PASAPORTE
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="row form-group form-field">
+                                <label class="col-form-label" for="x_document"  style="margin: 0px 25px;">
+                                    Número de documento
+                                </label>
+                                <input type="text" class="form-control o_website_form_input" name="x_document"  style="margin: 0px 25px;"
+                                        id="doc" maxlength="45" required="required"/>
+                            </div>
+                            <div class="form-group row d-flex justify-content-center">
+                                <small id="help_text" class="text-danger invisible" area-hidden="false">Helper-text</small> 
+                            </div>
+                            <div id="msj_matricula" class="invisible mb-3" aria-hidden="true">
+                                <div class="alert alert-primary" role="alert">
+                                    Usted ya posee Matricula Profesional de Arquitecto
                                 </div>
-                                <div class="row form-group form-field">
-                                    <label class="col-form-label" for="x_document">
-                                      Número de documento
-                                  </label>
-                                    <input type="text" class="form-control o_website_form_input" name="x_document"
-                                           id="doc" required="required"/>
+                                <div class="d-flex justify-content-center">
+                                    <a id="btn-cancelar" type="button" class="btn btn-light">Cancelar</a>
+                                    <a href="https://cpnaa.gov.co/" type="button" class="btn btn-light">Contactar con el CPNAA</a>
                                 </div>
-                                <!-- Submit button -->
-                                <div class="form-group row offset-lg-4 offset-md-3 col-md-6 col-lg-4">
-                                    <button id="verificar" class="btn btn-primary btn-lg mb-1">Enviar</button>
-                                    <span id="o_website_form_result"/>
-                                </div>
-                            </form>
-                        </section>
+                            </div>  
+                            <div class="form-group row d-flex justify-content-center">
+                                <button type="button" id="btn_verificar" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
+                            </div>
                     </div>
                 <br/>
              </t>

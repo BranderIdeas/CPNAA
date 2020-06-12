@@ -1,0 +1,109 @@
+<odoo>
+    <data>
+        <template id="convenios_definitivo_pdf" name="Carga PDF de Graduandos / Convenios">
+            <t t-call="website.layout">
+                <t t-set="additional_title">Convenios</t>
+                <t t-call="my_sample.nav_bar_convenios" />
+                <div class="container">
+                    <div class="container col-sm-12 col-md-10 col-lg-8 mt-1 mb-5">
+                        <h5 class="titulo superior">Convenio: <t t-esc="convenio.x_name" /></h5>
+                        <h5 t-if="grado" class="titulo medio">
+                            Fecha Inicio: <t t-esc="convenio.x_start_date.strftime('%d-%m-%Y')" />
+                             - Fecha Fin: <t t-esc="convenio.x_end_date.strftime('%d-%m-%Y')" />
+                        </h5>
+                        <h5 class="titulo medio">Fecha de Grado: <t t-esc="grado.x_date.strftime('%d-%m-%Y')" /></h5>
+                        <h5 class="titulo inferior">Cargue de oficios en PDF listado definitivo</h5>
+                        <div class="alert alert-block alert-dark"><strong>Importante!</strong><br/>
+                            <p>En el siguiente enlace podrá descargar un archivo de Word que puede ser tomado como guía para la generación del PDF que cargará en el sistema:
+                                <a id="getPdf" href="#">
+                            <strong>Descargar Archivo Guía </strong><i class="fa fa-download"></i></a></p>
+                            <p>
+                                Si requiere un listado de los posibles graduandos que han realizado el pago correspondiente, puede descargarlo a través de la opción 
+                                "CONSULTA DE USUARIOS QUE HAN PAGADO" del cuadro de mando de éste convenio.
+                            </p>
+                        </div>
+                        <div>
+                            Utilice el formulario para cargar el archivo PDF de graduados, consulte las recomendaciones para evitar fallas o errores en el 
+                            proceso de carga de su archivo:
+                        <div style="clear:both; height:15px;"></div>
+                            <div class="accordion" id="recomendaciones">
+                                <div class="accordion-group">
+                                    <div class="accordion-heading">
+                                        <a class="accordion-toggle text-black" data-toggle="collapse" data-parent="#recomendaciones" href="#txtIns">
+                                            <i class="fa fa-exclamation-circle"></i> Recomendaciones
+                                        </a>
+                                    </div>
+                                    <div id="txtIns" class="accordion-body collapse">
+                                        <div class="accordion-inner fondo-gray">
+                                            <ul>
+<!--                                                 <li>Debe seleccionar la fecha en la que se realizará la ceremonia de grado</li> -->
+<!--                                                 <li>Debe seleccionar la profesión para la cual se realizarán los grados</li>
+                                                <li>Puede realizar tantos cargues de archivos PDF, como profesiones a graduar</li> -->
+                                                <li>En el archivo PDF solamente debe incluir la información de los graduandos correspondientes a la 
+                                                    profesión y fecha de grado seleccionadas</li>
+                                                <li>Solamente se admiten archivos con extensión .pdf</li>
+                                                <li>El contenido del archivo PDF que cargue debe estar conforme al archivo guía</li>
+                                                <li>El archivo PDF debe estar firmado, por lo que se recomienda imprimir el archivo de word para firmarlo 
+                                                    y luego escanearlo y guardarlo en formato PDF</li>
+                                                <li>Si en el proceso se generan errores, el sistema le mostrará un mensaje en pantalla.</li>
+                                                <li>Una vez cargado el archivo y procesado, el indicador del cargue en el cuadro de mando cambiará a verde 
+                                                    independiente de futuros cargues de información para el mismo convenio.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <small id="help_text" class="text-danger d-flex justify-content-center invisible">Completa todos los campos</small>
+                        <br/>
+                        <section id="form">
+                            <form id="cargar_csv" class="container form-horizontal" enctype="multipart/form-data">
+                                <div class="form-group form-field">
+                                    <div class="form-group row">
+                                        <label for="fecha_grado" class="col-sm-3 col-form-label">Fecha de Grado</label>
+                                        <div class="col-sm-9">
+                                            <input t-if="grado"  type="date" class="form-control" id="fecha_grado"
+                                                   t-attf-value="{{ (grado.x_date) }}" readonly="1" />
+                                            <input t-else=""  type="date" class="form-control" id="fecha_grado"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="profesion" class="col-sm-3 col-form-label">Profesión</label>
+                                        <div class="col-sm-9">
+                                            <select t-if="grado" id="profesion" name="user_id" class="form-control" readonly="1">
+                                                <option selected=""
+                                                    t-att-value="grado.x_carrera_ID.id">
+                                                    <t t-esc="grado.x_carrera_ID.x_name" />
+                                                </option>
+                                            </select>
+                                            <select t-else="" id="profesion" name="user_id" class="form-control">
+                                                <option value="" selected="">
+                                                    Seleccione...
+                                                </option>
+                                                <t t-foreach="profesiones" t-as="prof">  
+                                                    <option t-att-value="prof.id"> 
+                                                        <t t-esc="prof.x_name" /> 
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="pdf_graduandos" class="col-sm-3 col-form-label">Archivo PDF</label>
+                                        <div class="col-sm-9">
+                                            <input type="file" class="form-control" id="pdf_graduandos" accept=".pdf" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" id="btn_pdf_graduandos" class="btn btn-primary">CARGAR ARCHIVO</button>
+                                <h5 t-if="grado" id="grado" class="invisible" t-attf-data-grado-id="{{ (grado.id) }}" ></h5>
+                                <h5 t-if="convenio" id="convenio" class="invisible" t-attf-data-convenio-id="{{ (convenio.id) }}"></h5>
+                            </form>
+                        </section>
+                        <t t-call="my_sample.template_pdf" />
+                    </div>
+                </div>
+             </t>
+        </template>
+    </data>
+</odoo>

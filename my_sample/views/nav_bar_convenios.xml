@@ -1,9 +1,10 @@
 <odoo>
     <data>        
         <template id="nav_bar_convenios" name="Lista de convenios">
-            <div class="container center">
+            <div class="container center mt-3">
                 <h4 class="titulo superior">CONVENIOS - ACCESO UNIVERSIDADES</h4>
-                <h4 id="universidad" t-attf-name="{{ (universidad.id) }}" class="titulo inferior"><t t-esc="universidad.x_name" /></h4>
+                <h4 id="universidad" t-attf-name="{{ (universidad.id) }}" class="titulo inferior">
+                    PANEL UNIVERSIDADES - <t t-esc="universidad.x_name" /></h4>
                 <nav class="navbar navbar-expand-lg navbar-light bg-light">
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="navbar-nav mx-auto">
@@ -11,18 +12,20 @@
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Convenios Vigentes
-                                    <!-- <span class="sr-only">(current)</span> -->
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                                     <t t-foreach="convenios" t-as="conv">
-                                        <a class="dropdown-item" t-attf-href="/convenios/{{ (universidad.id) }}/{{ (conv.id) }}">
-                                            <t t-esc="conv.x_name" />
-                                        </a>
-                                        <t t-foreach="request.env['x_cpnaa_grade'].search([('x_agreement_ID','=',conv.id)])" t-as="grado">
-                                            <a class="dropdown-item" 
-                                               t-attf-href="/convenios/{{ (universidad.id) }}/detalle_grado/{{ (grado.id) }}">
-                                            <span class="ml-4">GRADO: <t t-esc="grado.x_name" /></span></a>
-                                        </t>
+                                        <div t-if="conv.x_end_date &gt;= datetime.date.today()">
+                                            <a class="dropdown-item no-select">
+                                            <t t-esc="conv.x_name" /></a>
+                                            <a class="dropdown-item" t-attf-href="/convenios/{{ (universidad.id) }}/{{ (conv.id) }}">
+                                            <span class="ml-4">NUEVO GRADO</span></a>
+                                            <t t-foreach="request.env['x_cpnaa_grade'].search([('x_agreement_ID','=',conv.id)])" t-as="grado">
+                                                <a class="dropdown-item" 
+                                                   t-attf-href="/convenios/{{ (universidad.id) }}/detalle_grado/{{ (grado.id) }}">
+                                                <span class="ml-4">GRADO: <t t-esc="grado.x_name" /></span></a>
+                                            </t>
+                                        </div>
                                     </t>
                                 </div>
                             </li>
@@ -32,7 +35,21 @@
                                     Convenios Vencidos
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="#">No hay convenios vencidos</a>
+                                    <t t-set="no_hay_vencidos" t-value="True"/>
+                                    <t t-foreach="convenios" t-as="conv">
+                                        <div t-if="conv.x_end_date &lt;= datetime.date.today()">
+                                            <t t-set="no_hay_vencidos" t-value="False"/>
+                                            <a class="dropdown-item no-select">
+                                            <t t-esc="conv.x_name" />
+                                            </a>
+                                            <t t-foreach="request.env['x_cpnaa_grade'].search([('x_agreement_ID','=',conv.id)])" t-as="grado">
+                                                <a class="dropdown-item" 
+                                                   t-attf-href="/convenios/{{ (universidad.id) }}/detalle_grado/{{ (grado.id) }}">
+                                                <span class="ml-4">GRADO: <t t-esc="grado.x_name" /></span></a>
+                                            </t>
+                                        </div>
+                                    </t>
+                                    <a t-if="no_hay_vencidos" class="dropdown-item" href="#">No hay convenios vencidos</a>
                                 </div>
                             </li>
                         </ul>

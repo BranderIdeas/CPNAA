@@ -16,7 +16,8 @@
                                             <label class="col-form-label" for="x_document_type"> Tipo de Documento </label>
                                         </div>
                                         <div class="col-md-8">
-                                            <input type="text" class="form-control " name="x_document_type" 
+                                            <input type="text" class="form-control " name="x_document_type"
+                                                t-attf-data-tipo="{{persona.x_document_type_ID[0].id}}"
                                                 t-attf-value="{{persona.x_document_type_ID[0].x_name}}"  disabled="1"/>
                                         </div>
                                     </div>

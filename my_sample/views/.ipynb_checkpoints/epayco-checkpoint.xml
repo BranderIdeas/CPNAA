@@ -6,7 +6,9 @@
                     <div class="container mb-5 col-sm-8 col-lg-6 justify-content-md-center mt-4">
                         <div class="row mb-4">
                             <h1 class="formTitle">
-                                <font id="titulo"></font>
+                                <font id="titulo">
+                                    SOLICITUD DE <t t-esc="tramite['x_service_ID'][1]" /> - PÁGINA DE PAGOS
+                                </font>
                             </h1>
                         </div>
                         <div class="formSection">
@@ -15,35 +17,23 @@
                                 <tbody>
                                     <tr>
                                         <th scope="row">TIPO DE IDENTIFICACIÓN</th>
-                                        <td id="tipo_doc"></td>
+                                        <td id="tipo_doc" t-attf-data-tipo="{{ tramite['x_studio_tipo_de_documento_1'][0] }}">
+                                            <t t-esc="tramite['x_studio_tipo_de_documento_1'][1]" />
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th scope="row">NÚMERO DE IDENTIFICACIÓN</th>
-                                        <td id="nro_doc"></td>
+                                        <td id="nro_doc"><t t-esc="tramite['x_studio_documento_1']" /></td>
                                     </tr>
                                     <tr>
                                         <th scope="row">SERVICIO</th>
-                                        <td id="servicio"></td>
+                                        <td id="servicio" t-attf-data-tramite="{{ tramite['id'] }}">
+                                            <t t-esc="tramite['x_service_ID'][1]" />
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th scope="row">VALOR</th>
-                                        <td id="valor"></td>
-                                    </tr>
-<!--                                     <tr>
-                                        <th scope="row">NÚMERO DE PAGO</th>
-                                        <td><input id="invoice" type="number" /></td>
-                                    </tr> -->
-                                    <tr class="invisible" aria-hidden="true">
-                                        <th scope="row">DIRECCION</th>
-                                        <td id="direccion"></td>
-                                    </tr>
-                                    <tr class="invisible" aria-hidden="true">
-                                        <th scope="row">NOMBRES Y APELLIDOS</th>
-                                        <td id="nombres"></td>
-                                    </tr>
-                                    <tr class="invisible" aria-hidden="true">
-                                        <th scope="row">TELÉFONO</th>
-                                        <td id="telefono"></td>
+                                        <td id="valor"><t t-esc="tramite['x_rate']" /></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -52,7 +42,7 @@
                                                 Usted NO debe enviar ningún tipo de soporte y/o documentación"</h1>
                             <div class="row col-sm-12 justify-content-md-center my-5">
                                 <div>
-                                    <button id="recibo" type="button" class="btn btn-primary btn-stadium">Imprimir recibo para pago en oficina</button>
+                                    <button id="recibo" type="button" class="btn btn-primary btn-stadium mb-2">Imprimir recibo para pago en oficina</button>
                                 </div>
                                 <div>
                                     <button id="epayco" type="button" class="btn btn-primary btn-stadium ml-3">Pago con tarjeta o PSE</button>

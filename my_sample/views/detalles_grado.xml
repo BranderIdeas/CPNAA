@@ -28,7 +28,7 @@
                                             <a t-else="" class="no-select text-gray" disabled="1">
                                                 <i class="fa fa-upload"></i> CARGUE CSV DE POSIBLES GRADUANDOS
                                             </a>
-                                            <t t-set="estudiantes_grado" t-value="request.env['x_transient_convenios'].search([('x_grade_ID','=',grado.id)])"/>
+                                            <t t-set="estudiantes_grado" t-value="request.env['x_procedure_temp'].search([('x_grado_ID','=',grado.id)])"/>
                                             <t t-set="estudiantes_con_pago" 
                                                t-value="request.env['x_cpnaa_procedure'].search([('x_studio_fecha_de_grado_2','=',grado.x_date),
                                                         ('x_studio_carrera_1.id','=',grado.x_carrera_ID.id),
@@ -140,11 +140,11 @@
                                                     <t t-set="i" t-value="i+1"/>
                                                     <tr>
                                                       <th scope="row"><t t-esc="i" /></th>
-                                                      <td><t t-esc="estudiante.x_document_type_ID.x_name" /></td>
-                                                      <td><t t-esc="estudiante.x_document" /></td>
-                                                      <td><t t-esc="estudiante.x_names" /></td>
-                                                      <td><t t-esc="estudiante.x_last_names" /></td>
-                                                      <td><t t-esc="estudiante.x_gender_ID.x_name" /></td>
+                                                      <td><t t-esc="estudiante.x_tipo_documento_select.x_name" /></td>
+                                                      <td><t t-esc="estudiante.x_documento" /></td>
+                                                      <td><t t-esc="estudiante.x_nombres" /></td>
+                                                      <td><t t-esc="estudiante.x_apellidos" /></td>
+                                                      <td><t t-esc="estudiante.x_genero_ID.x_name" /></td>
                                                       <td><t t-esc="estudiante.x_email" /></td>
                                                     </tr>
                                                 </t>

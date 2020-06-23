@@ -2,21 +2,20 @@ odoo.define('website.tramites', function(require) {
 'use strict';
     
     console.log('TRAMITES')
-    let Class = require('web.Class');
-    let rpc = require('web.rpc');
-    let Validaciones = require('website.validations');
-    let validaciones = new Validaciones();
+    const Class = require('web.Class');
+    const rpc = require('web.rpc');
+    const Validaciones = require('website.validations');
+    const validaciones = new Validaciones();
     
-    let param = location.href.split('/');
-    param = param[param.length - 1];
+    let tramite = $('#tramite').attr('data-tramite');
     let data = {
         doc: '',
         doc_type: '',
-        origen: param
+        origen: tramite
     }
         
-    let Tramites = Class.extend({
-        tramites: function(_this) {
+    const Tramites = Class.extend({
+        validar_tramites: function() {
             let origen = data.origen;
             (!origen) ? origen = '' : origen = `/${data.origen}`;
             return rpc.query({
@@ -39,15 +38,6 @@ odoo.define('website.tramites', function(require) {
                 }
             })
         },
-//         tramite_mostrar: function(origen){
-//             if (origen == 'matricula'){
-//                 return 'MATRÍCULA PROFESIONAL DE ARQUITECTO';
-//             }else if(origen == 'inscripciontt'){
-//                 return 'CERTIFICADO DE INSCRIPCIÓN PROFESIONAL';
-//             }else if(origen == 'licencia'){
-//                 return 'LICENCIA TEMPORAL ESPECIAL';
-//             }
-//         },
         mostrar_helper: function(campo, msg){
             $('#'+campo).addClass('invalido');
             $('#help_text').removeClass('invisible').text(msg);
@@ -128,21 +118,126 @@ odoo.define('website.tramites', function(require) {
             }
             return valido;
         },
+        label_input_file: function(_this) {
+            $("#preview-doc").hide();
+            let idname = $(_this).attr('id');
+            if ($(_this).hasClass('btn-file')) {
+                if($(_this)[0].files[0]){
+
+                  let filename = $(_this).val().split('\\').pop();
+                  let ext = $(_this).val().split('.').pop();
+                  let fileSize = $(_this)[0].files[0].size;
+
+                  if(ext == "pdf" & fileSize <= 500000){
+
+                    $('[for="' + idname + '"]').find('i').removeClass('fa-search').addClass('fa-file-pdf-o');
+                    setTimeout(function(){
+                        $('[for="' + idname + '"]').find('i').removeClass('fa-file-pdf-o').addClass('fa-check');
+                        $('[for="' + idname + '"]').removeClass('texto-gris invalido').addClass('texto-verde');
+                    }, 1200);
+                    $("#preview-doc").show();
+
+                  }else{
+
+                    $(_this).val('');
+                    filename = ' Selecciona tu Archivo';
+                    $('[for="' + idname + '"]').find('i').removeClass('fa-check').addClass('fa-search');
+                    $('[for="' + idname + '"]').removeClass('texto-verde').addClass('texto-gris invalido');
+                    if(ext != "pdf"){
+                      validaciones.alert_error_toast( "Extensión ." +ext +" no permitida." );
+                    }else if (fileSize > 500000){
+                      validaciones.alert_error_toast( "El documento excede el tamaño máximo de 500Kb." );
+                    }
+
+                  }
+
+                  $('[for="' + idname + '"]').find('span').html('  ' + filename);
+
+                } else {
+                    $(_this).val('');
+                    let filename = ' Selecciona tu Archivo';
+                    $('[for="' + idname + '"]').find('i').removeClass('fa-check').addClass('fa-search');
+                    $('[for="' + idname + '"]').removeClass('texto-verde').addClass('texto-gris invalido');
+                    $('[for="' + idname + '"]').find('span').html('  ' + filename);
+                }
+            }
+        },
+        combinar_select: function (_this, prefijo_clase){
+            let elementClass = _this.className.split(" ");
+            let childClass = elementClass[0];
+            let childName = childClass.split(prefijo_clase)[1];
+            let $select = $("select[name='"+childName+"']");
+            $select.find("option:not(:first)").hide();
+            if (childName.split("_").includes("state")){
+              let nb = $select.find("option[data-country_id="+($(_this).val() || 0)+"]").show();
+            } else if (childName.split("_").includes("city")){
+              let nb = $select.find("option[data-state_id="+($(_this).val() || 0)+"]").show();
+            }
+            $select.val("");
+        },
+        enviar_data: function(){
+            $('#btn-registrar').attr('disabled', true);
+            let formSample = document.forms[0];
+            let formData = new FormData();
+            let elems = formSample.elements;
+            for (let i = 0; i < elems.length; i++) {
+                if(elems[i].name === 'x_grade_date'){
+                    elems[i].value = elems[i].value.split('-').reverse().join('-');
+                }
+                if(elems[i].name != ''){
+                    if(elems[i].type === 'file'){
+                        formData.append(elems[i].name, elems[i].files[0]);
+                    } else {
+                        formData.append(elems[i].name, elems[i].value);
+                        if(elems[i].name === 'x_grade_date'){
+                            elems[i].value = elems[i].value.split('-').reverse().join('-');
+                        }
+                    } 
+                }
+
+            }
+            var request = new XMLHttpRequest();
+            request.open("POST", "/create_user");
+            request.send(formData);
+            request.onreadystatechange = function (aEvt) {
+                if (request.readyState == 4) {
+                    if(request.status == 200){
+                        let resp = JSON.parse(request.responseText);
+                        if(resp.data_user){
+                            location.replace(`/pagos/[${resp.data_user.tipo_doc}:${resp.data_user.documento}]`);
+                        }else{
+                            console.log(resp.message);
+                            $('#mssg_result').text(resp.message.substr(40));
+                        }
+                     } else {
+                        console.log(request.message);
+                     }
+                }
+            }
+        },
     });
     
-    let tramites = new Tramites();
+    const tramites = new Tramites();
     
+    // Inicio del trámite boton de enviar
     $('#btn_verificar').click(function(e) {
         if (tramites.validar_campos()) {
-            tramites.tramites(tramites);
+            tramites.validar_tramites();
             $('#btn_verificar').attr('disabled', 'disabled');
         }
     });
+    
+    // Inicio del trámite boton de cancelar
+    $('#btn-cancelar').click(function(e){
+        $('#doc').val('').focus();
+        $('#msj_matricula').addClass('invisible').attr('aria-hidden',true);
+    });
 
+    // Inicio del trámite input número de documento
     $('#doc').on('keyup', function(e) {
-        data.doc = $('#doc').val();
+        data.doc = $('#doc').val().toUpperCase();
         data.doc_type = $('#doc_type').val();
-        $('#doc').val(data.doc.toUpperCase());
+        $('#doc').val(data.doc);
         tramites.validar_campos();
         if(e.key == "Enter"){
             tramites.tramites(tramites);
@@ -150,24 +245,14 @@ odoo.define('website.tramites', function(require) {
         }
     });
     
+    // Inicio del trámite input tipo de documento
     $('#doc_type').change('keyup', function() {
         data.doc = $('#doc').val();
         data.doc_type = $('#doc_type').val();
         tramites.validar_campos();
     });
-            
-    //console.log("Funcion");
-    /*function readURL(input,object) {
-      if (input[0].files && input[0].files[0]) {
-        let reader = new FileReader();
-        reader.onload = function(e) {
-          console.log(e);
-          object.attr('data',  e.target.result);
-        }
-        reader.readAsDataURL(input[0].files[0]);
-      }
-    }*/
-    
+          
+    // Mostrar modal Preview del PDF
     $("#preview-doc").click(function(){ 
         let inputElm = $("#x_document_image");
         let objElm = $("#pdfViewer");
@@ -183,196 +268,64 @@ odoo.define('website.tramites', function(require) {
     });
     
     // Evento de los input files
-    $('input[type=file]').change(function() {
-        $("#preview-doc").hide();
-        if ($(this).hasClass('btn-file')) {
-            if($(this)[0].files[0]){
-            
-          let filename = $(this).val().split('\\').pop();
-          let ext = $( this ).val().split('.').pop();
-          let idname = $(this).attr('id');
-          let fileSize = $(this)[0].files[0].size;
-
-          if(ext == "pdf" & fileSize <= 500000){
-            $('[for="' + idname + '"]').find('i').removeClass('fa-search').addClass('fa-file-pdf-o');
-            setTimeout(function(){
-                $('[for="' + idname + '"]').find('i').removeClass('fa-file-pdf-o').addClass('fa-check');
-                $('[for="' + idname + '"]').removeClass('texto-gris invalido').addClass('texto-verde');
-            }, 1000);
-                $("#preview-doc").show();
-          }else{
-              
-            $( this ).val('');
-            filename = ' Selecciona tu Archivo';
-            $('[for="' + idname + '"]').find('i').removeClass('fa-check').addClass('fa-search');
-            $('[for="' + idname + '"]').removeClass('texto-verde').addClass('texto-gris invalido');
-            if(ext != "pdf"){
-              validaciones.alert_error_toast( "Extensión ." +ext +" no permitida." );
-            }else if (fileSize > 500000){
-              validaciones.alert_error_toast( "El documento excede el tamaño máximo de 500Kb." );
-            }
-          }
-          $('[for="' + idname + '"]').find('span').html('  ' + filename);
-            }else{
-                $( this ).val('');
-                filename = ' Selecciona tu Archivo';
-                $('[for="' + idname + '"]').find('i').removeClass('fa-check').addClass('fa-search');
-                $('[for="' + idname + '"]').removeClass('texto-verde').addClass('texto-gris invalido');
-            }
-        }
-        
-      });
-
-    // Validaciones en formulario de trámites
-    async function validar_form(e){
-        let elem = e.target;
-        console.log(elem);
-        if(elem.classList.contains('o-letters')){
-            let valid = validaciones.validar_solo_letras(elem.value);
-            if(!valid){
-                elem.classList.add('is-invalid');
-                return valid;
-            }else{
-                elem.classList.remove('is-invalid');
-                elem.value = elem.value.toUpperCase();
-            }            
-        } else if (elem.classList.contains('v-celular')){
-            let valid = validaciones.validar_celular(elem.value);
-            if(!valid){
-                elem.classList.add('is-invalid');
-                return valid;
-            }else{
-                elem.classList.remove('is-invalid');
-            }
-        } else if (elem.classList.contains('v-email')){
-            let valid = validaciones.validar_email(elem.value);
-            if(!valid){
-                elem.classList.add('is-invalid');
-            }else{
-                valid = await validaciones.validar_email_unico(elem.value);
-                if(!valid){
-                    elem.classList.add('is-invalid');
-                }else{
-                    elem.classList.remove('is-invalid');
-                }
-            }
-            return valid;
-        } else if (elem.classList.contains('v-address')){
-            let valid = validaciones.validar_direccion(elem.value);
-            if(!valid){
-                elem.classList.add('is-invalid');
-                return valid;
-            }else{
-                elem.classList.remove('is-invalid');
-                elem.value = elem.value.toUpperCase();
-            }
-        } else if (elem.classList.contains('v-alfanum')){
-            
-            let valid = validaciones.validar_alfanum(elem.value, 'el documento Ministerio de Educación')
-            if(!valid){
-                elem.classList.add('is-invalid');
-                return valid;
-            }else{
-                elem.classList.remove('is-invalid');
-                elem.value = elem.value.toUpperCase();
-            }
-        } else if (elem.classList.contains('v-telefono')){
-            if(elem.value.length > 0){
-                let valid = validaciones.validar_telefono(elem.value);
-                if(!valid){
-                    elem.classList.add('is-invalid');
-                    return valid;
-                }else{
-                    elem.classList.remove('is-invalid');
-                    elem.value = elem.value.toUpperCase();
-                }
-            }
-        }
-        
-        if($('#x_document_image')[0].files[0] === undefined){
-            $("label[for='x_document_image']").addClass('invalido');
-            return false;
-        }else{
-            $("label[for='x_document_image']").removeClass('invalido');
-        }
-        if($('#x_institute_career').val() == ''){
-            $('#carreras').addClass('is-invalid');
-            return false;               
-        }else{
-            $('#carreras').removeClass('is-invalid');
-        } 
-        if($('#x_institution_ID').val() == ''){
-            $('#universidades').addClass('is-invalid');
-            return false;
-        }else{
-            $('#universidades').removeClass('is-invalid');
-        }
-        if($('input[name=x_grade_date]').val() == ''){
-            $('input[name=x_grade_date]').addClass('is-invalid');
-            return false;
-        }else{
-            $('input[name=x_grade_date]').removeClass('is-invalid');
-        }
-        if(!$('input[name=x_elec_terminos]').prop('checked')){
-            $('input[name=x_elec_terminos]').addClass('is-invalid');
-            return false;
-        }else{
-            $('input[name=x_elec_terminos]').removeClass('is-invalid');
-        }
-        
-        return true;
-        
-    }
-    
-    $('#tramiteForm').on('submit change', function(e){
-        let form_valido = validar_form(e);
-        console.log(form_valido);
-        if (form_valido){
-            $('#btn-registrar').removeAttr('disabled');
-        }else{
-            $('#btn-registrar').attr('disabled', true);
-        }
-    });
-        
-    $('#btn-cancelar').click(function(e){
-        $('#doc').val('').focus();
-        $('#msj_matricula').addClass('invisible').attr('aria-hidden',true);
+    $('input[type=file]').change(function(){
+        tramites.label_input_file(this);
     });
     
+    // Validaciones de tipo de datos en los input del formulario
+    $('#tramiteForm').on('change', async function(e){
+        let valido = await validaciones.validar_formatos(e);
+        if (valido){
+            console.log('DATOS OK');
+        }else{
+            console.log('HAY DATOS NO VALIDOS');
+        }
+    });
+    
+    // Validación del formulario antes de enviar
+    $('#tramiteForm').submit(async function(e){
+        e.preventDefault();
+        let valido = await validaciones.validar_formulario();
+        if (valido){
+            tramites.enviar_data();
+        }else{
+            console.log('FORMULARIO INVALIDO');
+        }
+    });
+    
+    // Mostrar ocultar los campos de ciudad y departamento
     $('#x_expedition_country').change(function(e){
         let pais_seleccionado = $('select[name="x_expedition_country"] option:selected').text().trim();
         if(pais_seleccionado != 'COLOMBIA'){
-            $('#x_expedition_state').addClass('invisible').attr('aria-hidden',true).removeAttr('required');
-            $('#x_expedition_city').addClass('invisible').attr('aria-hidden',true).removeAttr('required');
-            $('#dpto_otro_pais').removeClass('invisible').attr('aria-hidden',false);
-            $('#ciudad_otro_pais').removeClass('invisible').attr('aria-hidden',false);
+            $('#x_expedition_state').addClass('invisible').attr('aria-hidden',true)
+                .removeAttr('name').removeClass('i_required');
+            $('#x_expedition_city').addClass('invisible').attr('aria-hidden',true)
+                .removeAttr('name').removeClass('i_required');
+            $('#dpto_otro_pais').removeClass('invisible').attr('aria-hidden',false)
+                .attr('name','x_expedition_state').addClass('i_required');
+            $('#ciudad_otro_pais').removeClass('invisible').attr('aria-hidden',false)
+                .attr('name','x_expedition_city').addClass('i_required');
         }else{
-            $('#x_expedition_state').removeClass('invisible').attr('aria-hidden',false).attr('required',true);
-            $('#x_expedition_city').removeClass('invisible').attr('aria-hidden',false).attr('required',true);
-            $('#dpto_otro_pais').addClass('invisible').attr('aria-hidden',true);
-            $('#ciudad_otro_pais').addClass('invisible').attr('aria-hidden',true);
+            $('#x_expedition_state').removeClass('invisible').attr('aria-hidden',false)
+                .attr('name','x_expedition_state').addClass('i_required');
+            $('#x_expedition_city').removeClass('invisible').attr('aria-hidden',false)
+                .attr('name','x_expedition_city').addClass('i_required');
+            $('#dpto_otro_pais').addClass('invisible').attr('aria-hidden',true)
+                .removeClass('i_required').removeAttr('name');
+            $('#ciudad_otro_pais').addClass('invisible').attr('aria-hidden',true)
+                .removeClass('i_required').removeAttr('name');
         }
     });
     
-    $('#universidades').focus(function(e){
-        let inputTipoU = $('#x_institution_type_ID');
-        if(inputTipoU.val() == ''){
-            inputTipoU.addClass('is-invalid');
-            $('#universidades').blur();
-            setTimeout(function(){
-                inputTipoU.removeClass('is-invalid');
-                inputTipoU.focus();
-            }, 1000);
-        }
-    });
-    
+    // Borra el value de la universidad si cambia el tipo de universidad
     $('#x_institution_type_ID').change(function(e){
         if($('#universidades') != undefined && $('#seleccion_univ') != undefined ){
             $('#universidades').val('');
             $('#seleccion_univ').val('');
         }
     });
-        
+    
+    // Borra el value de la carrera si cambia de nivel profesional
     $('#x_level_ID').change(function(e){
         if($('#carreras') != undefined && $('#seleccion_carreras') != undefined ){
             $('#carreras').val('');
@@ -380,6 +333,7 @@ odoo.define('website.tramites', function(require) {
         }
     });
     
+    // Carga las opciones para el autocomplete de las universidades
     $('#universidades').on('keyup paste', async function(e){
         let tipoUniversidad = $('#x_institution_type_ID').val();
         if(e.target.value.length > 1){
@@ -391,18 +345,21 @@ odoo.define('website.tramites', function(require) {
         }
     })
     
+    // Borra la lista de opciones del autocomplete de universidades
     $('#universidades').blur(function(e){
         setTimeout(function(){
             $('#result_univ').html('');
         }, 400);
     })
-        
+    
+    // Borra la lista de opciones del autocomplete de carreras
     $('#carreras').blur(function(e){
         setTimeout(function(){
             $('#result_carreras').html('');
         }, 400);
     })
     
+    // Verifica que ya haya seleccionado un nivel profesional
     $('#carreras').focus(function(e){
         let inputNivelProf = $('#x_level_ID');
         if(inputNivelProf.val() == ''){
@@ -415,6 +372,20 @@ odoo.define('website.tramites', function(require) {
         }
     });
     
+    // Verifica que ya haya seleccionado un tipo de universidad
+    $('#universidades').focus(function(e){
+        let inputTipoU = $('#x_institution_type_ID');
+        if(inputTipoU.val() == ''){
+            inputTipoU.addClass('is-invalid');
+            $('#universidades').blur();
+            setTimeout(function(){
+                inputTipoU.removeClass('is-invalid');
+                inputTipoU.focus();
+            }, 1000);
+        }
+    });
+    
+    // Carga las opciones para el autocomplete de las carreras
     $('#carreras').on('keyup paste', async function(e){
         let nivelProf = $('#x_level_ID').val();
         if(e.target.value.length > 1){
@@ -427,6 +398,7 @@ odoo.define('website.tramites', function(require) {
         }
     })
     
+    // Asigna la selección de la lista del autocomplete al value del formulario
     $('#academica').click(function(e){
         if(e.target.classList.contains('link-univ')){
             $('#universidades').val(e.target.firstElementChild.textContent);
@@ -448,6 +420,7 @@ odoo.define('website.tramites', function(require) {
         }
     })
     
+    // Cambia arquitecto/arquitecta según selección de género
     $('#x_gender_ID').change(function(e){
         // Validamos si es profesional para controlar con el genero
         if($('#x_level_ID').val() == '1'){
@@ -458,147 +431,31 @@ odoo.define('website.tramites', function(require) {
             }
         }
     });
-
     
-    // CODIGO QUE ESTABA EN EL WEBSITE ALEX
-    //
-    // This file is meant to regroup your javascript code. You can either copy/past
-    // any code that should be executed on each page loading or write your own
-    // taking advantage of the Odoo framework to create new behaviors or modify
-    // existing ones. For example, doing this will greet any visitor with a 'Hello,
-    // world !' message in a popup:
-    //
-    /*
-    odoo.define('website.user_custom_code', function (require) {
-    'use strict';
-
-    let Dialog = require('web.Dialog');
-    let publicWidget = require('web.public.widget');
-
-    publicWidget.registry.HelloWorldPopup = publicWidget.Widget.extend({
-        selector: '#wrapwrap',
-
-        start: function () {
-            Dialog.alert(this, "Bienevenido al modulo de Matricula Profesional!");
-            return this._super.apply(this, arguments);
-        },
-    })
-    });
-
-    */
-    /*let fieldList = ['x_foreign_country', 
-                     'x_foreign_state', 
-                     'x_foreign_city', 
-                     'x_foreign_address', 
-                     'x_certification_image', 
-                     'x_certification_studies_completed', 
-                     'x_foreign_professional_accreditation', 
-                     'x_professional_experience', 
-                     'x_company_existence_certificate', 
-                     'x_entity_request'
-                    ];
-
-    function checkForeign(){
-        if ($("input[name='x_foreign_origin']").is(':checked')){
-            fieldList.forEach(function(item){
-                $("[name='"+item+"']").parent().parent().removeClass("o_website_form_field_hidden");
-                $("[name='"+item+"']").attr("required", "required");
-            });
-        }else{
-            fieldList.forEach(function(item){
-                $("[name='"+item+"']").parent().parent().addClass("o_website_form_field_hidden");
-                $("[name='"+item+"']").removeAttr("required");
-            });
+    // Inicializa el popup que muestra la imágen de la ciudad de expedición de la cédula
+    $('a[rel=popover]').popover({
+        html: true,
+        trigger: 'hover',
+        placement: 'bottom',
+        content: function() {
+            return '<img src="' + $(this).data('img') + ' width="100%" />';
         }
-    }
-
-    checkForeign();*/
-
-
-    /*$("input[name='x_foreign_origin']").change(function(){
-        checkForeign();
-    });*/
-
-    //Controlador de paises/ciudades etc
-    $("select[class*=child_place]").change(function(){
-      let elementClass = this.className.split(" ");
-      let childClass = elementClass[0];
-      let childName = childClass.split("child_place-")[1];
-      //console.log(childName);
-      let $select = $("select[name='"+childName+"']");
-      $select.find("option:not(:first)").hide();
-      if (childName.split("_").includes("state")){
-        let nb = $select.find("option[data-country_id="+($(this).val() || 0)+"]").show();
-      } else if (childName.split("_").includes("city")){
-        let nb = $select.find("option[data-state_id="+($(this).val() || 0)+"]").show();
-      }
-      $select.val("");
-    }).change();
-
-
-    //Controlador de IES por tipo
-    let elm;
-    $("select#x_institution_type_ID").change(function(){
-      if($(this).val()==2){
-        $("[name=x_doc_min_educa]").removeClass("inputDisabled");
-        $("[name=x_doc_min_educa]").attr("required",true);
-        $("[name=x_doc_min_educa]").val("");
-      }else{
-        $("[name=x_doc_min_educa]").addClass("inputDisabled");
-        $("[name=x_doc_min_educa]").removeAttr("required");
-        $("[name=x_doc_min_educa]").val("NO APLICA");
-      }
-      let elementClass = this.className.split(" ");
-      let $select = $("select#x_institution_ID");
-      $select.find("option:not(:first)").hide();
-      let nb = $select.find("option[data-x_institution_type_ID="+($(this).val() || 0)+"]").show();
-      $select.val("");
     });
-//     $("select.career-selector").change(function(){
-//       //let elementClass = this.className.split(" ");
-//       let $select = $("select#x_studio_carrera");
-//       $select.find("option:not(:first)").hide();
-//       let nb = $select.find("option[data-x_level_ID="+($("#x_level_ID").val() || 0)+"][data-x_institute_ID="+($("#x_institution_ID").val() || 0)+"]").show();
-//       console.log($("#x_level_ID").val(), $("#x_institution_ID").val());
-//       $select.val("");
-//     });
     
-    if (urlParams.get("form")){
-
-      if ($("select[name=x_document_type_ID]").val() == 1){
-        $("#x_expedition_country").val(1).trigger("change");
-      }else{
-        $("#x_expedition_country").removeClass("inputDisabled")
-      }
-
-      let origin = urlParams.get("form");
-      let contentForm = origin.toLowerCase();
-      if (origin == null){
-        contentForm = "matricula";
-      }
-      if(origin == "matricula"){
-        $("#x_level_ID").val(1).trigger("change");
-      }else{
-        $("#x_level_ID").removeClass("inputDisabled");  
-      }
-      if (origin == "inscripciontt"){
-        //$("input[name=x_foreign_origin]").parent().parent().hide();
-        $("#x_level_ID option[value=1]").remove();
-      }
-      if (origin != "licencia"){
-        $("#foreignInfo").remove();
-        //$("#x_institution_type_ID").val(1).trigger("change");
-        $("#x_institution_type_ID").removeClass("inputDisabled"); 
-      } else {
-        $("#x_institution_type_ID").val(2).trigger("change");
-        $("[name=x_foreign_origin]").prop('checked', true);
-        $("[name=x_foreign_origin]").addClass("inputDisabled"); 
-      }
-      elm = $("#"+contentForm);
-    }else{
-      elm = $("#matricula");
-    }
+    //Controlador de paises/ciudades (Expedición)
+    $("select[class*=child_place]").change(function(){
+        let pais_seleccionado = $('select[name="x_expedition_country"] option:selected').text().trim();
+        if(pais_seleccionado == 'COLOMBIA'){
+          tramites.combinar_select(this, 'child_place-');
+        }
+    }).change();
     
+    //Controlador de paises/ciudades (Residencia)
+    $("select[class*=child-place]").change(function(){
+          tramites.combinar_select(this, 'child-place-');
+    }).change();
+  
+    // Opciones para idioma e inicializar el datepicker
 	$.datepicker.regional['es'] = {
 		closeText: 'Cerrar',
 		prevText: 'Anterior',
@@ -617,16 +474,11 @@ odoo.define('website.tramites', function(require) {
 		yearSuffix: ''
 	};
 	$.datepicker.setDefaults($.datepicker.regional['es']);
-
     $("[name=x_grade_date]").datepicker({
       maxDate: '0',
       dateFormat: "dd-mm-yy",
       changeMonth: true,
       changeYear: true
     });
-    
-
-    $("select[name=x_user_type_ID]").find("option:not(:first)").hide();
-    elm.show();
-        
+            
 })

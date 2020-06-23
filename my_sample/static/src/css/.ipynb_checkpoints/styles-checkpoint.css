@@ -231,7 +231,7 @@ h1.formTitle {
   position: relative;
 }
 #tramiteForm .inputDisabled{
-  background-color: #CCCCCC;
+  background-color: #CCCCCC !important;
   pointer-events:none;
 }
 #tramiteForm input[type="checkbox"] {
@@ -261,4 +261,9 @@ span.help-block {
 
 iframe.recibo-pdf {
     width: 100%;
+}
+
+  /* Popover */
+.popover {
+    border: 0;
 }

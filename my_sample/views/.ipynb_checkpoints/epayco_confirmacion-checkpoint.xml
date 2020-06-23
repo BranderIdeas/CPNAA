@@ -21,10 +21,6 @@
                                     <td class="" id="banco"></td>
                                 </tr>
                                 <tr>
-                                    <th scope="row">Referencia</th>
-                                    <td id="referencia"></td>
-                                </tr>
-                                <tr>
                                     <th scope="row">IP Pública del Usuario</th>
                                     <td id="ip_publica"></td>
                                 </tr>

@@ -1,8 +1,10 @@
     odoo.define('website.convenios', function(require) {
 
     console.log('CONVENIOS')
-    var Class = require('web.Class');
-    var rpc = require('web.rpc');
+    const Class = require('web.Class');
+    const rpc = require('web.rpc');
+    const Validaciones = require('website.validations');
+    const validaciones = new Validaciones();
     const Toast = Swal.mixin({
                 toast: true,
                 showConfirmButton: true,
@@ -16,7 +18,7 @@
                 }
             });
     
-    var Convenios = Class.extend({
+    const Convenios = Class.extend({
         get_pdf: function(){
             let preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'
                            xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>`;
@@ -64,7 +66,6 @@
                         confirmButtonText: 'Cerrar',
                     });
                 } else {
-                    console.log(response);
                     $('#modal-resultado-csv').modal({ keyboard: false, backdrop: 'static' });
                     $('#modal-resultado-csv').modal('show');
                     $('#resultados').html('');
@@ -82,15 +83,17 @@
             let htmlTags = '<tr id="row-'+ cant +'"><th scope="row">' + cant + '</th>';
             
             for (let d in data){
-                let disabled = 'disabled=""';
-                if(data[d].clase == 'invalido'){
-                    disabled = '';
+                let disabled = '';
+                if(d == 'e_fecha_grado'){
+                    disabled = 'disabled="true"';
                 }
                 htmlTags += '<td><input id="'+d+'-'+cant+'" '+ disabled +' value="'+ data[d].valor +
                             '" type="text" class="form-control '+ data[d].clase +'" /></td>';
             }
             htmlTags += '</tr>';
             $('#resultados').append(htmlTags);
+            let row = $('#resultados').find(`#row-${cant}`).find('input')[1];
+            validaciones.validar_en_BD(row.id);
         },
         guardar_registros: function(registros, data, _this) {
             Swal.fire({
@@ -260,8 +263,8 @@
         e.preventDefault();
         convenios.get_pdf();
     })
-    
-    $('#cargar_csv').on("submit", async function(e){
+
+    $('#procesar_archivo').click(async function(e){
         e.preventDefault();
         let esValido = true;
         let archivo_csv = $('#archivo_csv')[0].files[0];

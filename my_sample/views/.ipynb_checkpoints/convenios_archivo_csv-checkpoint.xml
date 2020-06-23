@@ -105,7 +105,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button type="submit" id="procesar_archivo" class="btn btn-primary">CARGAR Y PROCESAR ARCHIVO</button>
+                                <button id="procesar_archivo" class="btn btn-primary">CARGAR Y PROCESAR ARCHIVO</button>
                                 <h5 t-if="grado" id="grado" class="invisible" t-attf-name="{{ (grado.id) }}" ></h5>
                                 <h5 id="convenio" class="invisible" t-attf-name="{{ (convenio.id) }}" t-attf-data-fecha-fin="{{ (convenio.x_end_date) }}"
                                     t-attf-data-dias-vencimiento="{{ (convenio.x_days_after_expiration) }}"></h5>

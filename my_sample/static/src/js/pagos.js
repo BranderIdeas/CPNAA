@@ -58,7 +58,7 @@ odoo.define('website.pagos', function(require) {
                 country: "co",
                 lang: "es",
                 external: false,
-                response: "https://branderideas-cpnaa-developing-984497.dev.odoo.com/pagos/confirmacion",
+                response: "https://branderideas-cpnaa.odoo.com/pagos/confirmacion",
 
                 //Atributos cliente
                 name_billing: `${dataPDF.x_studio_nombres} ${dataPDF.x_studio_apellidos}`,
@@ -150,7 +150,7 @@ odoo.define('website.pagos', function(require) {
         location.replace('https://cpnaa.gov.co/');
     })
     
-    if(location.href.indexOf('https://branderideas-cpnaa-developing-984497.dev.odoo.com/pagos/[') != -1){
+    if(location.href.indexOf('https://branderideas-cpnaa.odoo.com/pagos/[') != -1){
         console.log('PAGOS')
         var pagos = new Pagos();
         pagos.traer_data(pagos);

@@ -87,7 +87,11 @@
 .fecha-invalid {
     border-top-right-radius: 0px;
     border-bottom-right-radius: 0px;
-    border: 1px solid red !important;
+    border: 1.5px solid red !important;
+}
+
+.invalido-form {
+    border: 1.5px solid #ff0000 !important;
 }
 
 .warning {
@@ -233,6 +237,7 @@ h1.formTitle {
 #tramiteForm .inputDisabled{
   background-color: #CCCCCC !important;
   pointer-events:none;
+  user-select: none;
 }
 #tramiteForm input[type="checkbox"] {
   margin-right: 20px;
@@ -263,7 +268,12 @@ iframe.recibo-pdf {
     width: 100%;
 }
 
+.formSection .is-invalid{
+    border: 1.5px solid #ff0000 !important;
+}
+
   /* Popover */
 .popover {
     border: 0;
 }
+

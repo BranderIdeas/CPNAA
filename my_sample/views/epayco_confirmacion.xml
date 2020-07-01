@@ -3,6 +3,7 @@
         <template id="epayco_confirmacion" name="Confirmación Pago">
             <t t-call="website.layout">
                 <div id="resumenPago" class="container">
+                    <div id="logo" class="row justify-content-md-center mt-4 mb-4" aria-hidden="true"></div>
                     <div class="row justify-content-md-center mt-4 mb-4">
                         <h1 class="formTitle">
                             <font>RESUMEN DE LA TRANSACCIÓN</font>
@@ -48,13 +49,13 @@
                         </table>
                         </div>
                     </div>
-                    <div class="row col-sm-12 justify-content-md-center my-5">
-                        <div>
-                            <button id="imprimir" type="button" class="btn btn-primary btn-stadium float-right">Imprimir</button>
-                        </div>
-                        <div>
-                            <button id="volver" type="button" class="btn btn-primary btn-stadium ml-3">Finalizar</button>
-                        </div>
+                </div>
+                <div class="row col-sm-12 justify-content-md-center my-5">
+                    <div>
+                        <button id="imprimir" type="button" class="btn btn-primary btn-stadium float-right">Imprimir</button>
+                    </div>
+                    <div>
+                        <button id="volver" type="button" class="btn btn-primary btn-stadium ml-3">Finalizar</button>
                     </div>
                 </div>
             </t>

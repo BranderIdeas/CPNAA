@@ -133,7 +133,7 @@ odoo.define('website.tramites', function(require) {
                     $('[for="' + idname + '"]').find('i').removeClass('fa-search').addClass('fa-file-pdf-o');
                     setTimeout(function(){
                         $('[for="' + idname + '"]').find('i').removeClass('fa-file-pdf-o').addClass('fa-check');
-                        $('[for="' + idname + '"]').removeClass('texto-gris invalido').addClass('texto-verde');
+                        $('[for="' + idname + '"]').removeClass('texto-gris invalido-form').addClass('texto-verde');
                     }, 1200);
                     $("#preview-doc").show();
 
@@ -142,7 +142,7 @@ odoo.define('website.tramites', function(require) {
                     $(_this).val('');
                     filename = ' Selecciona tu Archivo';
                     $('[for="' + idname + '"]').find('i').removeClass('fa-check').addClass('fa-search');
-                    $('[for="' + idname + '"]').removeClass('texto-verde').addClass('texto-gris invalido');
+                    $('[for="' + idname + '"]').removeClass('texto-verde').addClass('texto-gris invalido-form');
                     if(ext != "pdf"){
                       validaciones.alert_error_toast( "Extensión ." +ext +" no permitida." );
                     }else if (fileSize > 500000){
@@ -157,7 +157,7 @@ odoo.define('website.tramites', function(require) {
                     $(_this).val('');
                     let filename = ' Selecciona tu Archivo';
                     $('[for="' + idname + '"]').find('i').removeClass('fa-check').addClass('fa-search');
-                    $('[for="' + idname + '"]').removeClass('texto-verde').addClass('texto-gris invalido');
+                    $('[for="' + idname + '"]').removeClass('texto-verde').addClass('texto-gris invalido-form');
                     $('[for="' + idname + '"]').find('span').html('  ' + filename);
                 }
             }
@@ -175,8 +175,28 @@ odoo.define('website.tramites', function(require) {
             }
             $select.val("");
         },
+        get_data_edicion: function(){
+            let data = {
+                'tipo_doc': $('[name=x_document_type_ID]').val(),
+                'documento': $('[name=x_document]').val()
+            }
+            return rpc.query({
+                route: '/get_data_edicion',
+                params: {'data': data}
+            }).then(function(response){
+//                 console.log(response);
+                $('#x_expedition_country').val(response.data.x_expedition_country[0]);
+                $('#x_expedition_state').val(response.data.x_expedition_state[0]);
+                $('#x_expedition_city').val(response.data.x_expedition_city[0]);
+                $('#x_country_ID').val(response.data.x_country_ID[0]);
+                $('#x_state_ID').val(response.data.x_state_ID[0]);
+                $('#x_city_ID').val(response.data.x_city_ID[0]);
+                $('#x_foreign_country').val(response.data.x_foreign_country[0]);
+            }).catch(function(err){
+                console.log(err);
+            });
+        },
         enviar_data: function(){
-            $('#btn-registrar').attr('disabled', true);
             let formSample = document.forms[0];
             let formData = new FormData();
             let elems = formSample.elements;
@@ -197,7 +217,11 @@ odoo.define('website.tramites', function(require) {
 
             }
             var request = new XMLHttpRequest();
-            request.open("POST", "/create_user");
+            if(location.href.indexOf('/edicion/') == -1){
+                request.open("POST", "/create_user");
+            }else{
+                request.open("POST", "/update_tramite");            
+            }
             request.send(formData);
             request.onreadystatechange = function (aEvt) {
                 if (request.readyState == 4) {
@@ -205,12 +229,22 @@ odoo.define('website.tramites', function(require) {
                         let resp = JSON.parse(request.responseText);
                         if(resp.data_user){
                             location.replace(`/pagos/[${resp.data_user.tipo_doc}:${resp.data_user.documento}]`);
+                        }else if(resp.id_user){
+                            ocultarSpinner();
+                            $('#div_results').removeClass('offset-md-2 col-md-8').addClass('offset-md-4 col-md-6');
+                            $('#mssg_result').addClass('alert alert-warning').text('Trámite actualizado con exito');
+                            setTimeout(()=>{ 
+                                location.replace(`http://35.222.118.62/`);
+                            },800);
                         }else{
-                            console.log(resp.message);
-                            $('#mssg_result').text(resp.message.substr(40));
+                            ocultarSpinner();
+                            $('#mssg_result').addClass('alert alert-danger').text('Error: '+resp.message.slice(0,80));
+                            $('#btn-registrar').removeAttr('disabled');
                         }
                      } else {
-                        console.log(request.message);
+                            ocultarSpinner();
+                            $('#mssg_result').addClass('alert alert-danger').text('Error: '+resp.message.slice(0,80));
+                            $('#btn-registrar').removeAttr('disabled');
                      }
                 }
             }
@@ -218,7 +252,6 @@ odoo.define('website.tramites', function(require) {
     });
     
     const tramites = new Tramites();
-    
     // Inicio del trámite boton de enviar
     $('#btn_verificar').click(function(e) {
         if (tramites.validar_campos()) {
@@ -240,7 +273,7 @@ odoo.define('website.tramites', function(require) {
         $('#doc').val(data.doc);
         tramites.validar_campos();
         if(e.key == "Enter"){
-            tramites.tramites(tramites);
+            tramites.validar_tramites();
             $('#btn_verificar').attr('disabled', 'disabled');
         }
     });
@@ -272,11 +305,27 @@ odoo.define('website.tramites', function(require) {
         tramites.label_input_file(this);
     });
     
+    //Cargar el documento en el input file
+    if(location.href.indexOf('/edicion/') != -1){
+        tramites.get_data_edicion();
+    }
+    
     // Validaciones de tipo de datos en los input del formulario
     $('#tramiteForm').on('change', async function(e){
         let valido = await validaciones.validar_formatos(e);
         if (valido){
-            console.log('DATOS OK');
+            if($(e.target).is('select')){
+                $(e.target).removeClass('is-invalid');
+            };
+            if(e.target.id == 'universidades'){
+                $('#universidades').removeClass('is-invalid');
+            }
+            if(e.target.id == 'carreras'){
+                $('#carreras').removeClass('is-invalid');
+            }
+            if(e.target.name == 'x_grade_date'){
+                $(e.target).removeClass('is-invalid');
+            }
         }else{
             console.log('HAY DATOS NO VALIDOS');
         }
@@ -285,17 +334,37 @@ odoo.define('website.tramites', function(require) {
     // Validación del formulario antes de enviar
     $('#tramiteForm').submit(async function(e){
         e.preventDefault();
+        $('#btn-registrar').attr('disabled', true);
+        $('#btn-actualizar').attr('disabled', true);
         let valido = await validaciones.validar_formulario();
         if (valido){
+            mostrarSpinner();
             tramites.enviar_data();
         }else{
-            console.log('FORMULARIO INVALIDO');
+            $('#mssg_result').text('').removeClass('alert alert-danger');
+            setTimeout(()=>{
+                ocultarSpinner();
+                $('#mssg_result').addClass('alert alert-danger').text('Por favor, verifica el formulario los campos marcados en rojo son requeridos');
+                $('#btn-registrar').removeAttr('disabled');
+                $('#btn-actualizar').removeAttr('disabled');
+            },400);
         }
     });
     
+    function mostrarSpinner(){
+        $('#div_spinner').attr('aria-hidden', false).removeClass('invisible');
+        $('#div_results').attr('aria-hidden', true).addClass('invisible');
+    }
+    
+        
+    function ocultarSpinner(){
+        $('#div_results').attr('aria-hidden', false).removeClass('invisible');
+        $('#div_spinner').attr('aria-hidden', true).addClass('invisible');
+    }
+
     // Mostrar ocultar los campos de ciudad y departamento
     $('#x_expedition_country').change(function(e){
-        let pais_seleccionado = $('select[name="x_expedition_country"] option:selected').text().trim();
+        let pais_seleccionado = $('#x_expedition_country option:selected').text().trim();
         if(pais_seleccionado != 'COLOMBIA'){
             $('#x_expedition_state').addClass('invisible').attr('aria-hidden',true)
                 .removeAttr('name').removeClass('i_required');
@@ -390,7 +459,6 @@ odoo.define('website.tramites', function(require) {
         let nivelProf = $('#x_level_ID').val();
         if(e.target.value.length > 1){
            let consulta = await tramites.data_autocomplete_carreras(e.target.value, nivelProf);
-           console.log(consulta.carreras);
            $('#result_carreras').html('');
            $.each(consulta.carreras, function(key, value) { 
                $('#result_carreras').append('<li class="list-group-item link-carreras"><span id="'+ value.id +'" class="text-gray carreras">' + value.x_name + '</span></li>');
@@ -423,14 +491,14 @@ odoo.define('website.tramites', function(require) {
     // Cambia arquitecto/arquitecta según selección de género
     $('#x_gender_ID').change(function(e){
         // Validamos si es profesional para controlar con el genero
-        if($('#x_level_ID').val() == '1'){
+        if($('#x_level_ID').val() == '1' && $('#x_gender_ID').val() != ''){
             if($('#x_gender_ID').val() == '1'){
                 $('#x_institute_career').val('109');
             }else{
                 $('#x_institute_career').val('110');
             }
         }
-    });
+    }).change();
     
     // Inicializa el popup que muestra la imágen de la ciudad de expedición de la cédula
     $('a[rel=popover]').popover({
@@ -478,7 +546,8 @@ odoo.define('website.tramites', function(require) {
       maxDate: '0',
       dateFormat: "dd-mm-yy",
       changeMonth: true,
-      changeYear: true
+      changeYear: true,
+      yearRange: '-80:+0'
     });
             
 })

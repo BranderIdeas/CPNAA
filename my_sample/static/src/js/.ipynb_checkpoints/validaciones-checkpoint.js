@@ -1,6 +1,6 @@
 odoo.define('website.validations', function(require) {
     
-    console.log('VALIDATIONS')
+    console.log('VALIDACIONES')
     const Class = require('web.Class');
     const rpc = require('web.rpc');
     
@@ -92,15 +92,12 @@ odoo.define('website.validations', function(require) {
                 return false;
             } else {
                 if (entrada == 'CC' || entrada == 'C.C.') {
-                    console.log('CÉDULA DE CIUDADANÍA');
                     _this.colocar_borde(doc_elem, _this.validar_solo_numeros(num_doc));
                 }
                 if (entrada == 'CE' || entrada == 'C.E.') {
-                    console.log('CÉDULA DE EXTRANJERÍA');
                     _this.colocar_borde(doc_elem, _this.validar_solo_numeros(num_doc));
                 }
                 if (entrada == 'PA' || entrada == 'PA.') {
-                    console.log('PASAPORTE');
                     _this.colocar_borde(doc_elem, _this.validar_alfanum(num_doc, 'pasaporte'));
                 }
                 return true;
@@ -152,10 +149,10 @@ odoo.define('website.validations', function(require) {
             }
         },
         validar_direccion: function (entrada) {
-            const regex = /^[a-zA-Z0-9\-#Ññ ]*$/;
+            const regex = /^[^\/&<>"';%]*$/;
             if (!regex.test(entrada)) {
                 Toast.fire({
-                    title: `<br/>No es válido, solo se permiten letras, números y los caracteres # - <br/><br/> `,
+                    title: `<br/>No es válido, evite los siguientes caracteres ;'\&<>"% <br/><br/> `,
                     icon: 'error',
                     confirmButtonText: 'Ocultar',
                 })
@@ -168,7 +165,7 @@ odoo.define('website.validations', function(require) {
             const regex = /^[0-9a-zA-Z]*$/;
             if (!regex.test(entrada)) {
                 Toast.fire({
-                    title: `<br/>No es válido, solo se permiten números y letras para ${text}.<br/><br/> `,
+                    title: `<br/>No es válido, solo se permiten números y letras para ${text}, no ingreses caracteres especiales.<br/><br/> `,
                     icon: 'error',
                     confirmButtonText: 'Ocultar',
                 })
@@ -206,12 +203,6 @@ odoo.define('website.validations', function(require) {
                 })
                 return false;
             } else {
-                if (entrada == 'M' || entrada == 'm') {
-                    console.log('MASCULINO');
-                }
-                if (entrada == 'F' || entrada == 'f') {
-                    console.log('FEMENINO');
-                }
                 return true;
             }
         },
@@ -234,13 +225,16 @@ odoo.define('website.validations', function(require) {
             }
         },
         validar_email_unico: function(cadena){
+            if(location.href.indexOf('/edicion/') != -1){
+                return true;
+            }
             return rpc.query({
                 route: '/get_email',
                 params: {'cadena': cadena}
             }).then(function(response){
                 if (response.email_exists) {
                     Toast.fire({
-                    title: `<br/>El correo electrónico ingresado ya existe.<br/><br/> `,
+                        title: `<br/>El correo electrónico ingresado ya existe.<br/><br/> `,
                         icon: 'error',
                         confirmButtonText: 'Ocultar',
                     })
@@ -290,7 +284,7 @@ odoo.define('website.validations', function(require) {
                 route: '/validar_documento_bd',
                 params: {'data': data}
             }).then(function(response){
-                console.log(response);
+//                 console.log(response);
                 if(!response.ok){
                     Toast.fire({
                         title: `<br/>${response.error}<br/><br/>`,
@@ -321,16 +315,18 @@ odoo.define('website.validations', function(require) {
                 }            
             } 
             if (elem.classList.contains('v-celular')){
-                let valid = validaciones.validar_celular(elem.value);
+                let valor = elem.value.trim().replace(/\s+/g, '');
+                let valid = validaciones.validar_celular(valor);
                 if(!valid){
                     elem.classList.add('is-invalid');
                     return valid;
                 }else{
                     elem.classList.remove('is-invalid');
+                    elem.value = valor;
                 }
             } 
             if (elem.classList.contains('v-email')){
-                let valor = elem.value.trim().toLowerCase().replace(/\s\s+/g, ' ');
+                let valor = elem.value.trim().toLowerCase().replace(/\s+/g, '');
                 let valid = validaciones.validar_email(valor);
                 if(!valid){
                     elem.classList.add('is-invalid');
@@ -358,14 +354,14 @@ odoo.define('website.validations', function(require) {
                 }
             } 
             if (elem.classList.contains('v-alfanum')){
-
-                let valid = validaciones.validar_alfanum(elem.value, 'el documento Ministerio de Educación')
+                let valor = elem.value.trim().toUpperCase().replace(/\s+/g, '');
+                let valid = validaciones.validar_alfanum(valor, 'el documento Ministerio de Educación');
                 if(!valid){
                     elem.classList.add('is-invalid');
                     return valid;
                 }else{
                     elem.classList.remove('is-invalid');
-                    elem.value = elem.value.trim().toUpperCase();
+                    elem.value = valor;
                 }
             } 
             if (elem.classList.contains('v-telefono')){
@@ -387,6 +383,8 @@ odoo.define('website.validations', function(require) {
         validar_formulario: async function validar_formulario(){
             let formSample = document.forms[0];
             let elems = formSample.elements;
+            let formValido = true;
+            let errores = [];
             for (let i = 0; i < elems.length; i++) {
     //             if(elems[i].name === 'x_grade_date'){
     //                 elems[i].value = elems[i].value.split('-').reverse().join('-');
@@ -395,18 +393,21 @@ odoo.define('website.validations', function(require) {
                     if(elems[i].classList.contains('i_required') && elems[i].type != 'file'){
                         if(elems[i].value == ''){
                             elems[i].classList.add('is-invalid');
-                            elems[i].focus();
+//                             elems[i].focus();
+                            errores.push(elems[i].name);
                             if(elems[i].name == 'x_institution_ID'){
                                 $('#universidades').addClass('is-invalid');
-                                $('#universidades').focus();
-                                return false;
+//                                 $('#universidades').focus();
+                                errores.push(elems[i].name);
+                                formValido= false;
                             }
                             if(elems[i].name == 'x_institute_career'){
                                 $('#carreras').addClass('is-invalid');
-                                $('#carreras').focus();
-                                return false;
+//                                 $('#carreras').focus();
+                                errores.push(elems[i].name);
+                                formValido= false;
                             }
-                            return false;
+                            formValido= false;
                         }else{
                             elems[i].classList.remove('is-invalid');
                             if(elems[i].name == 'x_institution_ID'){
@@ -419,26 +420,29 @@ odoo.define('website.validations', function(require) {
 
                     }else if(elems[i].classList.contains('i_required') && elems[i].type == 'file') {
                         if(elems[i].files[0] == undefined){
-                            $('[for="' + elems[i].name + '"]').addClass('invalido');
-                            $('[for="' + elems[i].name + '"]').focus();
-                            return false;
+                            $('[for="' + elems[i].name + '"]').addClass('invalido-form');
+//                             $('[for="' + elems[i].name + '"]').focus();
+                            errores.push(elems[i].name);
+                            formValido= false;
                         }else{
-                            $('[for="' + elems[i].name + '"]').removeClass('invalido'); 
+                            $('[for="' + elems[i].name + '"]').removeClass('invalido-form'); 
                         }
                     }
                 }
 
             }
             let inputEmail = $('[name="x_email"]');
-            if(inputEmail.val().length > 0){
+            if(inputEmail.val().length > 0 && formValido){
                 let valido = await validaciones.validar_email_unico(inputEmail.val());
                 if(!valido){
                     inputEmail.focus();
+                    errores.push(inputEmail.attr('name'));
+                    inputEmail.addClass('is-invalid');
                 }
-                return valido;
+                formValido= valido;
             }
-
-            return true;
+            console.log(errores);
+            return formValido;
         },
     });
 

@@ -1,4 +1,4 @@
-    odoo.define('website.convenios', function(require) {
+odoo.define('website.convenios', function(require) {
 
     console.log('CONVENIOS')
     const Class = require('web.Class');

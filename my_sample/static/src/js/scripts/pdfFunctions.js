@@ -77,7 +77,7 @@ function drawInvoice(pdf, invoiceData, offset) {
     pdf.text(154, offset + 119, "Pasaporte");
     //SELECCION DE TIPO DE DOCUMENTO
     switch (invoiceData.type_doc) {
-        case 2:
+        case 1:
             pdf.setFontSize(8.0261);
             pdf.setFont("arial", "normal");
             pdf.text(79.5, offset + 119, "X"); //DATA X CEDULA

@@ -51,6 +51,8 @@
                                 <div class="col-md-6">
                                     <input t-if="cliente" t-attf-value="{{ (cliente.x_nombres) }}" type="text" class=" o-letters form-control i_required" 
                                            name="x_name" />
+                                    <input t-elif="user" t-attf-value="{{ (user.x_name) }}" type="text" class="o-letters form-control i_required" 
+                                           name="x_name" maxlength="80" />
                                     <input t-else="" type="text" class="o-letters form-control i_required" name="x_name" maxlength="80" />
                                 </div>
                                 </div>
@@ -60,6 +62,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <input t-if="cliente" t-attf-value="{{ (cliente.x_apellidos) }}" type="text" class=" o-letters form-control i_required" 
+                                           name="x_last_name" />
+                                    <input t-elif="user" t-attf-value="{{ (user.x_last_name) }}" type="text" class=" o-letters form-control i_required" 
                                            name="x_last_name" />
                                     <input t-else="" type="text" class="o-letters form-control i_required" name="x_last_name" maxlength="80" />
                                 </div>
@@ -75,6 +79,9 @@
                                     <option t-if="cliente" t-attf-value="{{ (cliente.x_tipo_documento_select.id) }}" selected="">
                                         <t t-esc="cliente.x_tipo_documento_select.x_name" />
                                     </option>
+                                    <option t-elif="user" t-attf-value="{{ (user.x_document_type_ID.id) }}" selected="">
+                                        <t t-esc="user.x_document_type_ID.x_name" />
+                                    </option>
                                     <option t-else="" t-attf-value="{{ (tipo_doc) }}" selected="">
                                         <t t-esc="request.env['x_cpnaa_document_type'].search([('id','=',tipo_doc)]).x_name" />
                                     </option>
@@ -88,6 +95,8 @@
                                 <div class="col-md-6">
                                     <input t-if="cliente" t-attf-value="{{ (cliente.x_documento) }}" type="text" class="form-control o_website_form_input"
                                            name="x_document" required="true" readonly="true"/>
+                                    <input t-elif="user" t-attf-value="{{ (user.x_document) }}" type="text" class="form-control o_website_form_input" 
+                                           name="x_document" required="true" readonly="true"/>
                                     <input t-else="" t-attf-value="{{ (documento) }}" type="text" class="form-control o_website_form_input" 
                                            name="x_document" required="true" readonly="true"/>
                                 </div>
@@ -100,32 +109,62 @@
                                 </div>
                                 <div class="col-md-6">
                                     <t t-if="cliente">
-                                    <select t-if="(cliente.x_tipo_documento_select.id == 1 or cliente.x_tipo_documento_select.id == 2)"
-                                            class="child_place-x_expedition_state form-control i_required" 
-                                            name="x_expedition_country" id="x_expedition_country" >
-                                        <t t-foreach="request.env['x_cpnaa_country'].search([])" t-as="expedition_country">
-                                            <option t-att-value="expedition_country.id">
-                                                <t t-esc="expedition_country.x_name"/>
+                                        <select t-if="(cliente.x_tipo_documento_select.id == 1 or cliente.x_tipo_documento_select.id == 2)"
+                                                class="child_place-x_expedition_state form-control i_required" 
+                                                name="x_expedition_country" id="x_expedition_country" >
+                                            <t t-foreach="request.env['x_cpnaa_country'].search_read([],order='x_name')" t-as="expedition_country">
+                                                <option t-if="expedition_country['x_name'] != 'COLOMBIA'" t-att-value="expedition_country['id']">
+                                                    <t t-esc="expedition_country['x_name']"/>
+                                                </option>
+                                                <option t-else="" t-att-value="expedition_country['id']" selected="selected">
+                                                    <t t-esc="expedition_country['x_name']"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                        <select t-elif="(cliente.x_tipo_documento_select.id == 5 or cliente.x_document_type_ID.id == 5)"
+                                                class="child_place-x_expedition_state form-control i_required" 
+                                                name="x_expedition_country" id="x_expedition_country">
+                                            <option value="">Seleccione...</option>
+                                            <t t-foreach="request.env['x_cpnaa_country'].search_read([('x_name','!=','COLOMBIA')],order='x_name')" t-as="expedition_country">
+                                            <option t-att-value="expedition_country['id']">
+                                                <t t-esc="expedition_country['x_name']"/>
                                             </option>
-                                        </t>
-                                    </select>
-                                    <select t-elif="(cliente.x_tipo_documento_select.id == 5)"
-                                            class="child_place-x_expedition_state form-control i_required" 
-                                            name="x_expedition_country" id="x_expedition_country">
-                                        <option value="">Seleccione...</option>
-                                        <t t-foreach="request.env['x_cpnaa_country'].search([('x_name','!=','COLOMBIA')])" t-as="expedition_country">
-                                        <option t-att-value="expedition_country.id">
-                                            <t t-esc="expedition_country.x_name"/>
-                                        </option>
-                                        </t>
-                                    </select>
+                                            </t>
+                                        </select>
+                                    </t>
+                                    <t t-if="user">
+                                        <select t-if="(user.x_document_type_ID.id == 1 or user.x_document_type_ID.id == 2)"
+                                                class="child_place-x_expedition_state form-control i_required" 
+                                                name="x_expedition_country" id="x_expedition_country" >
+                                            <t t-foreach="request.env['x_cpnaa_country'].search_read([],order='x_name')" t-as="expedition_country">
+                                                <option t-if="expedition_country['x_name'] != 'COLOMBIA'" t-att-value="expedition_country['id']">
+                                                    <t t-esc="expedition_country['x_name']"/>
+                                                </option>
+                                                <option t-else="" t-att-value="expedition_country['id']" selected="selected">
+                                                    <t t-esc="expedition_country['x_name']"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                        <select t-elif="(user.x_document_type_ID.id == 5 or user.x_document_type_ID.id == 5)"
+                                                class="child_place-x_expedition_state form-control i_required" 
+                                                name="x_expedition_country" id="x_expedition_country">
+                                            <option value="">Seleccione...</option>
+                                            <t t-foreach="request.env['x_cpnaa_country'].search_read([('x_name','!=','COLOMBIA')],order='x_name')" t-as="expedition_country">
+                                            <option t-att-value="expedition_country['id']">
+                                                <t t-esc="expedition_country['x_name']"/>
+                                            </option>
+                                            </t>
+                                        </select>
                                     </t>
                                     <select t-if="(tipo_doc == '1' or tipo_doc == '2')" 
                                             class="child_place-x_expedition_state form-control i_required" 
                                             name="x_expedition_country" id="x_expedition_country">
-                                        <t t-foreach="request.env['x_cpnaa_country'].search([])" t-as="expedition_country">
-                                        <option t-att-value="expedition_country.id">
-                                            <t t-esc="expedition_country.x_name"/>
+                                        <t t-foreach="request.env['x_cpnaa_country'].search_read([],order='x_name')" t-as="expedition_country">
+                                        <option t-if="expedition_country['x_name'] != 'COLOMBIA'" t-att-value="expedition_country['id']">
+                                            <t t-esc="expedition_country['x_name']"/>
+                                        </option>
+                                        <option t-else="" t-att-value="expedition_country['id']" selected="selected">
+                                            <t t-esc="expedition_country['x_name']"/>
                                         </option>
                                         </t>
                                     </select>
@@ -133,9 +172,9 @@
                                             class="child_place-x_expedition_state form-control i_required" 
                                             name="x_expedition_country" id="x_expedition_country">
                                         <option value="">Seleccione...</option>
-                                        <t t-foreach="request.env['x_cpnaa_country'].search([('x_name','!=','COLOMBIA')])" t-as="expedition_country">
-                                        <option t-att-value="expedition_country.id">
-                                            <t t-esc="expedition_country.x_name"/>
+                                        <t t-foreach="request.env['x_cpnaa_country'].search_read([('x_name','!=','COLOMBIA')],order='x_name')" t-as="expedition_country">
+                                        <option t-att-value="expedition_country['id']">
+                                            <t t-esc="expedition_country['x_name']"/>
                                         </option>
                                         </t>
                                     </select>
@@ -147,28 +186,50 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div t-if="cliente">
-                                    <select t-if="(cliente.x_tipo_documento_select.id == 1 or cliente.x_tipo_documento_select.id == 2)" 
-                                            class="child_place-x_expedition_city form-control i_required"
-                                            name="x_expedition_state" id="x_expedition_state">
-                                        <option value="">Seleccione...</option>
-                                        <t t-foreach="request.env['x_cpnaa_state'].search([])" t-as="expedition_state">
-                                        <option t-att-value="expedition_state.id" style="display: none;" t-att-data-country_id="expedition_state.x_country_ID.id">
-                                            <t t-esc="expedition_state.x_name"/>
-                                        </option>
+                                        <select t-if="(cliente.x_tipo_documento_select.id == 1 or cliente.x_tipo_documento_select.id == 2 or
+                                                       user.x_document_type_ID.id == 1 or user.x_document_type_ID.id == 2)" 
+                                                class="child_place-x_expedition_city form-control i_required"
+                                                name="x_expedition_state" id="x_expedition_state">
+                                            <option value="">Seleccione...</option>
+                                            <t t-foreach="request.env['x_cpnaa_state'].search([],order='x_name')" t-as="expedition_state">
+                                            <option t-att-value="expedition_state.id" style="display: none;" t-att-data-country_id="expedition_state.x_country_ID.id">
+                                                <t t-esc="expedition_state.x_name"/>
+                                            </option>
+                                            </t>
+                                        </select>
+                                        <select id="dpto_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
+                                            <option value="555" selected="true"> NO APLICA </option>
+                                        </select>
+                                        <select t-if="(cliente.x_tipo_documento_select.id == 5)" 
+                                                class="form-control inputDisabled i_required">
+                                            <option value="555" selected="true"> NO APLICA </option>
+                                        </select>
+                                    </div>
+                                    <div t-if="user">
+                                        <t t-if="(user.x_document_type_ID.id == 1 or user.x_document_type_ID.id == 2)">
+                                            <select class="child_place-x_expedition_city form-control i_required"
+                                                    name="x_expedition_state" id="x_expedition_state">
+                                                <option value="">Seleccione...</option>
+                                                <t t-foreach="request.env['x_cpnaa_state'].search([],order='x_name')" t-as="expedition_state">
+                                                <option t-att-value="expedition_state.id" style="display: none;" t-att-data-country_id="expedition_state.x_country_ID.id">
+                                                    <t t-esc="expedition_state.x_name"/>
+                                                </option>
+                                                </t>
+                                            </select>
+                                            <select id="dpto_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
+                                                <option value="555" selected="true"> NO APLICA </option>
+                                            </select>
                                         </t>
-                                    </select>
-                                    <select id="dpto_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
-                                        <option value="555" selected="true"> NO APLICA </option>
-                                    </select>
-                                    <select t-if="(tipo_doc == '5')" class="form-control inputDisabled i_required">
-                                        <option value="555" selected="true"> NO APLICA </option>
-                                    </select>
+                                        <select t-if="(user.x_document_type_ID.id == 5)" 
+                                                class="form-control inputDisabled i_required">
+                                            <option value="555" selected="true"> NO APLICA </option>
+                                        </select>
                                     </div>
                                     <div t-if="(tipo_doc == '1' or tipo_doc == '2')">
                                         <select class="child_place-x_expedition_city form-control i_required"
                                                 name="x_expedition_state" id="x_expedition_state">
                                             <option value="">Seleccione...</option>
-                                            <t t-foreach="request.env['x_cpnaa_state'].search([])" t-as="expedition_state">
+                                            <t t-foreach="request.env['x_cpnaa_state'].search([],order='x_name')" t-as="expedition_state">
                                             <option t-att-value="expedition_state.id" style="display: none;" t-att-data-country_id="expedition_state.x_country_ID.id">
                                                 <t t-esc="expedition_state.x_name"/>
                                             </option>
@@ -198,7 +259,7 @@
                                         <select class="form-control i_required"
                                                 name="x_expedition_city" id="x_expedition_city">
                                             <option value="">Seleccione...</option>
-                                            <t t-foreach="request.env['x_cpnaa_city'].search([])" t-as="expedition_city">
+                                            <t t-foreach="request.env['x_cpnaa_city'].search([],order='x_name')" t-as="expedition_city">
                                                 <option t-att-value="expedition_city.id" style="display: none;" t-att-data-state_id="expedition_city.x_state_ID.id">
                                                 <t t-esc="expedition_city.x_name"/>
                                                 </option>
@@ -208,8 +269,28 @@
                                             <option value="5309" selected="true"> NO APLICA </option>
                                         </select>
                                         </div>
-                                        <select t-if="(cliente.x_tipo_documento_select.id == 5)" name="x_expedition_city"
-                                                class="form-control inputDisabled i_required">
+                                        <select t-if="(cliente.x_tipo_documento_select.id == 5)" 
+                                                name="x_expedition_city" class="form-control inputDisabled i_required">
+                                            <option value="5309" selected="true"> NO APLICA </option>
+                                        </select>
+                                    </div>
+                                    <div t-if="user">
+                                        <div t-if="(user.x_document_type_ID.id  == 1 or user.x_document_type_ID.id  == 2)">
+                                        <select class="form-control i_required"
+                                                name="x_expedition_city" id="x_expedition_city">
+                                            <option value="">Seleccione...</option>
+                                            <t t-foreach="request.env['x_cpnaa_city'].search([],order='x_name')" t-as="expedition_city">
+                                                <option t-att-value="expedition_city.id" style="display: none;" t-att-data-state_id="expedition_city.x_state_ID.id">
+                                                <t t-esc="expedition_city.x_name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                        <select id="ciudad_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
+                                            <option value="5309" selected="true"> NO APLICA </option>
+                                        </select>
+                                        </div>
+                                        <select t-if="(user.x_document_type_ID.id == 5)" 
+                                                name="x_expedition_city" class="form-control inputDisabled i_required">
                                             <option value="5309" selected="true"> NO APLICA </option>
                                         </select>
                                     </div>
@@ -217,7 +298,7 @@
                                         <select class="form-control i_required"
                                                 name="x_expedition_city" id="x_expedition_city">
                                             <option value="">Seleccione...</option>
-                                            <t t-foreach="request.env['x_cpnaa_city'].search([])" t-as="expedition_city">
+                                            <t t-foreach="request.env['x_cpnaa_city'].search([],order='x_name')" t-as="expedition_city">
                                                 <option t-att-value="expedition_city.id" style="display: none;" t-att-data-state_id="expedition_city.x_state_ID.id">
                                                 <t t-esc="expedition_city.x_name"/>
                                                 </option>
@@ -254,16 +335,34 @@
                                     <label class="col-form-label o_fake_editable" for="x_gender_ID"> Género </label>
                                 </div>
                                 <div class="col-md-6">
-                                    <select t-if="cliente" t-attf-value="{{ (cliente.x_genero_ID.id) }}" class="form-control i_required inputDisabled" 
+                                    <select t-if="cliente" t-attf-value="{{ (cliente.x_genero_ID.id) }}" class="form-control i_required" 
                                             name="x_gender_ID" id="x_gender_ID" >
-                                      <option t-attf-value="{{ (cliente.x_genero_ID.id) }}" selected="">
-                                          <t t-esc="cliente.x_genero_ID.x_name" />
-                                      </option>
+                                        <t t-foreach="request.env['x_cpnaa_gender'].search([])" t-as="gender">
+                                            <option t-if="gender.x_name != cliente.x_genero_ID.x_name" t-att-value="gender.id">
+                                                <t t-esc="gender.x_name"/>
+                                            </option>
+                                            <option t-else="" t-att-value="gender.id" selected="true">
+                                                <t t-esc="gender.x_name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                    <select t-elif="user" class="form-control i_required" name="x_gender_ID" id="x_gender_ID">
+                                        <t t-foreach="request.env['x_cpnaa_gender'].search([])" t-as="gender">
+                                            <option t-if="gender.x_name != user.x_gender_ID.x_name" t-att-value="gender.id">
+                                                <t t-esc="gender.x_name"/>
+                                            </option>
+                                            <option t-else="" t-att-value="gender.id" selected="true">
+                                                <t t-esc="gender.x_name"/>
+                                            </option>
+                                        </t>
                                     </select>
                                     <select t-else="" class="form-control i_required" name="x_gender_ID" id="x_gender_ID">
                                         <option value="">Seleccione...</option>
-                                        <option value="1">MASCULINO</option>
-                                        <option value="2">FEMENINO</option>
+                                        <t t-foreach="request.env['x_cpnaa_gender'].search([])" t-as="gender">
+                                            <option t-att-value="gender.id">
+                                                <t t-esc="gender.x_name"/>
+                                            </option>
+                                        </t>
                                     </select>
                                 </div>
                                 </div>
@@ -291,12 +390,12 @@
                                 </div>
                                 <div class="col-md-6">
                                     <select class="child-place-x_city_ID form-control i_required" name="x_state_ID" id="x_state_ID">
-                                    <option value="">Seleccione...</option>
-                                    <t t-foreach="request.env['x_cpnaa_state'].search([])" t-as="state">
-                                        <option t-att-value="state.id" style="display: none;" t-att-data-country_id="state.x_country_ID.id">
-                                        <t t-esc="state.x_name"/>
-                                        </option>
-                                    </t>
+                                        <option value="">Seleccione...</option>
+                                        <t t-foreach="request.env['x_cpnaa_state'].search([],order='x_name')" t-as="state">
+                                            <option t-att-value="state.id" style="display: none;" t-att-data-country_id="state.x_country_ID.id">
+                                            <t t-esc="state.x_name"/>
+                                            </option>
+                                        </t>
                                     </select>
                                 </div>
                                 </div>
@@ -308,12 +407,12 @@
                                 </div>
                                 <div class="col-md-6">
                                     <select class="form-control i_required" name="x_city_ID" id="x_city_ID">
-                                    <option value="">Seleccione...</option>
-                                    <t t-foreach="request.env['x_cpnaa_city'].search([])" t-as="city">
-                                        <option t-att-value="city.id" style="display: none;" t-att-data-state_id="city.x_state_ID.id">
-                                        <t t-esc="city.x_name"/>
-                                        </option>
-                                    </t>
+                                        <option value="">Seleccione...</option>
+                                        <t t-foreach="request.env['x_cpnaa_city'].search([],order='x_name')" t-as="city">
+                                            <option t-att-value="city.id" style="display: none;" t-att-data-state_id="city.x_state_ID.id">
+                                            <t t-esc="city.x_name"/>
+                                            </option>
+                                        </t>
                                     </select>
                                 </div>
                                 </div>
@@ -322,7 +421,9 @@
                                     <label class="col-form-label o_fake_editable" for="x_address"> Dirección de residencia </label>
                                 </div>
                                 <div class="col-md-6">
-                                    <input type="text" class="v-address form-control i_required" name="x_address" maxlength="100"/>
+                                    <input t-if="user" type="text" class="v-address form-control i_required" 
+                                           t-att-value="user.x_address" name="x_address" maxlength="100"/>
+                                    <input t-else="" type="text" class="v-address form-control i_required" name="x_address" maxlength="100"/>
                                 </div>
                                 </div> 
                             </div>
@@ -334,6 +435,8 @@
                                 <div class="col-md-6">
                                     <input t-if="cliente" t-attf-value="{{ (cliente.x_email.lower()) }}" type="text" minlength="5" maxlength="50" 
                                            class="v-email form-control i_required" name="x_email"/>
+                                    <input t-elif="user" t-attf-value="{{ (user.x_email.lower()) }}" type="text" minlength="5" maxlength="50" 
+                                           class="v-email form-control i_required" name="x_email"/>
                                     <input t-else="" type="text" class="v-email form-control i_required" minlength="5" maxlength="50" 
                                            name="x_email"/>
                                 </div>
@@ -343,7 +446,10 @@
                                     <label class="col-form-label o_fake_editable" for="x_celphone"> Número de celular </label>
                                 </div>
                                 <div class="col-md-6">
-                                    <input type="text" class="v-celular form-control i_required" name="x_celphone"  minlength="10" maxlength="11"/>
+                                    <input t-if="user" t-attf-value="{{ (user.x_celphone) }}" type="text" 
+                                           class="v-celular form-control i_required" name="x_celphone"  minlength="10" maxlength="11"/>
+                                    <input t-else="" type="text" class="v-celular form-control i_required" 
+                                           name="x_celphone"  minlength="10" maxlength="11"/>
                                 </div>
                                 </div>
                             </div>
@@ -353,7 +459,10 @@
                                     <label class="col-form-label o_fake_editable" for="x_local_phone"> Teléfono </label>
                                 </div>
                                 <div class="col-md-6">
-                                    <input type="text" class="v-telefono form-control" minlength="7" maxlength="30" name="x_local_phone"/>
+                                    <input t-if="user" t-attf-value="{{ (user.x_local_phone) }}" type="text"
+                                           class="v-telefono form-control" minlength="7" maxlength="30" name="x_local_phone"/>
+                                    <input t-else="" type="text" class="v-telefono form-control" 
+                                           minlength="7" maxlength="30" name="x_local_phone"/>
                                 </div>
                                 </div>
                             </div>
@@ -376,6 +485,16 @@
                                         <option t-attf-value="{{ (request.env['x_cpnaa_level'].search([('x_name','=','PROFESIONAL')]).id) }}">
                                             PROFESIONAL
                                         </option>
+                                    </select>
+                                    <select t-elif="(user and form == 'inscripciontt')" class="form-control i_required" name="x_level_ID" id="x_level_ID"> 
+                                        <t t-foreach="request.env['x_cpnaa_level'].search([('x_name','!=','PROFESIONAL')])" t-as="nivelP">
+                                            <option t-if="nivelP.id != user.x_level_ID.id" t-att-value="nivelP.id">
+                                                <t t-esc="nivelP.x_name"/>
+                                            </option>
+                                            <option t-else="" t-att-value="nivelP.id" selected="true">
+                                                <t t-esc="nivelP.x_name"/>
+                                            </option>
+                                        </t>
                                     </select>
                                     <select t-else="" class="form-control i_required" name="x_level_ID" id="x_level_ID"> 
                                         <option value="">Seleccione...</option>
@@ -405,6 +524,17 @@
                                         </option>
                                         </t>
                                     </select>
+                                    <select t-elif="user and form != 'licencia'" class="form-control i_required" name="x_institution_type_ID" 
+                                            id="x_institution_type_ID">
+                                        <t t-foreach="request.env['x_cpnaa_institution_type'].search([])" t-as="tipo_universidad">
+                                            <option t-if="tipo_universidad.id != user.x_institution_type_ID.id" t-att-value="tipo_universidad.id">
+                                                <t t-esc="tipo_universidad.x_name"/>
+                                            </option>
+                                            <option t-else="" t-att-value="tipo_universidad.id" selected="true">
+                                                <t t-esc="tipo_universidad.x_name"/>
+                                            </option>
+                                        </t>
+                                    </select>
                                     <select t-else="" class="form-control i_required" name="x_institution_type_ID" id="x_institution_type_ID" >
                                         <option value="">Seleccione...</option>
                                         <t t-foreach="request.env['x_cpnaa_institution_type'].search([])" t-as="tipo_universidad">
@@ -423,16 +553,21 @@
                                     </div>
                                     <div class="col-md-6">
                                         <select t-if="cliente" class="form-control i_required inputDisabled" name="x_institution_ID">
-                                            <option t-attf-value="{{ (cliente.x_universidad_select.id) }}">
-                                                <t t-esc="cliente.x_universidad_select.x_name" />
+                                            <option t-attf-value="{{ (cliente.x_universidad_select.id) }}" value="" selected="true">
+                                                    <t t-esc="cliente.x_universidad_select.x_name"/>
                                             </option>
                                         </select>
                                         <div t-else="" id="autocomplete_universidades">
-                                            <input type="text" id="universidades" placeholder="Buscar..." class="form-control"/>
+                                            <input t-if="user" type="text" id="universidades" placeholder="Buscar..." class="form-control"
+                                                   t-attf-value="{{ (user.x_institution_ID.x_name) }}"/>
+                                            <input t-else="" type="text" id="universidades" placeholder="Buscar..." class="form-control"/>
                                             <ul class="list-group" id="result_univ"></ul>
                                             <select class="form-control invisible i_required"
                                                     aria-hidden="true" name="x_institution_ID" id="x_institution_ID">
-                                                <option id="seleccion_univ" value="" selected="true">UNIVERSIDAD</option>
+                                                <option t-if="user" id="seleccion_univ" t-attf-value="{{ (user.x_institution_ID.id) }}" selected="true">
+                                                    <t t-esc="user.x_institution_ID.x_name"/>
+                                                </option>
+                                                <option t-else="" id="seleccion_univ" value="" selected="true">UNIVERSIDAD</option>
                                             </select>
                                         </div>
                                     </div>
@@ -443,9 +578,11 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div id="fecha_grado" class="o_website_form_date input-group">
-                                        <input t-if="cliente" class="form-control inputDisabled i_required" name="x_grade_date" disabled="true"
-                                           t-attf-value="{{ (cliente.x_fecha_de_grado.strftime('%d-%m-%Y')) }}" readonly="true"/>
-                                        <input t-else="" type="text" class="form-control i_required hand" name="x_grade_date" readonly="true"/>
+                                            <input t-if="cliente" class="form-control inputDisabled i_required" name="x_grade_date" disabled="true"
+                                               t-attf-value="{{ (cliente.x_fecha_de_grado.strftime('%d-%m-%Y')) }}" readonly="true"/>
+                                            <input t-elif="user" class="form-control i_required hand" name="x_grade_date"
+                                               t-attf-value="{{ (user.x_grade_date.strftime('%d-%m-%Y')) }}" readonly="true"/>
+                                            <input t-else="" type="text" class="form-control i_required hand" name="x_grade_date" readonly="true"/>
                                             <div class="input-group-append">
                                                 <div class="input-group-text b-rad-right">
                                                 <i class="fa fa-calendar"/>
@@ -461,12 +598,20 @@
                                     <label class="col-form-label o_fake_editable" for="x_institute_career"> Carreras </label>
                                 </div>
                                 <div class="col-md-6 o_website_form_required_custom">
-                                    <select t-if="cliente" class="form-control i_required inputDisabled" name="x_institute_career" 
+                                    <select t-if="cliente and form != 'matricula'" class="form-control i_required inputDisabled" name="x_institute_career" 
                                             id="x_institute_career">
                                         <option t-attf-value="{{ (request.env['x_cpnaa_career'].search([('x_name','=',cliente.x_carrera_select.x_name)])[0].id) }}"
                                                 selected="">
                                             <t t-esc="cliente.x_carrera_select.x_name" />
                                         </option>
+                                    </select>
+                                    <select t-if="cliente and form == 'matricula'" class="form-control i_required inputDisabled" name="x_institute_career" 
+                                            id="x_institute_career">
+                                        <t t-foreach="request.env['x_cpnaa_career'].search([('x_level_ID.x_name','=','PROFESIONAL')])" t-as="career">
+                                            <option t-att-value="career.id">
+                                                <t t-esc="career.x_name"/>
+                                            </option>
+                                        </t>
                                     </select>
                                     <select t-elif="(form == 'licencia' or form == 'matricula')" class="form-control i_required inputDisabled" 
                                             name="x_institute_career" id="x_institute_career">
@@ -477,11 +622,16 @@
                                         </t>
                                     </select>
                                     <div t-else="" id="autocomplete_carreras">
-                                    <input type="text" id="carreras" placeholder="Buscar..." class="form-control"/>
+                                            <input t-if="user" type="text" id="carreras" placeholder="Buscar..." class="form-control"
+                                                   t-attf-value="{{ (user.x_institute_career.x_name) }}"/>
+                                            <input t-else="" type="text" id="carreras" placeholder="Buscar..." class="form-control"/>
                                     <ul class="list-group" id="result_carreras"></ul>
                                     <select class="form-control i_required invisible"
                                             aria-hidden="true" name="x_institute_career" id="x_institute_career">
-                                        <option id="seleccion_carreras" value="" selected="true">CARRERA</option>
+                                        <option t-if="user" id="seleccion_carreras" t-attf-value="{{ (user.x_institute_career.id) }}" selected="true">
+                                            <t t-esc="user.x_institute_career.x_name"/>
+                                        </option>
+                                        <option t-else="" id="seleccion_carreras" value="" selected="true">CARRERA</option>
                                     </select>
                                     </div>
                                 </div>
@@ -495,6 +645,13 @@
                                                class="v-alfanum form-control i_required" name="x_doc_min_educa"/>
                                         <input t-if="(tipo_doc == '1') or cliente" type="text" value="NO APLICA" maxlength="20"
                                                class="v-alfanum form-control" name="x_doc_min_educa" readonly="1"/>
+                                        <t t-if="user">
+                                            <input t-if="(user.x_document_type_ID.id == 2 or user.x_document_type_ID.id == 5)" type="text" maxlength="20" 
+                                                   class="v-alfanum form-control i_required" name="x_doc_min_educa"
+                                                   t-attf-value="{{ (user.x_doc_min_educa) }}"/>
+                                            <input t-if="(user.x_document_type_ID.id == 1)" type="text" value="NO APLICA" maxlength="20"
+                                                   class="v-alfanum form-control" name="x_doc_min_educa" readonly="1"/>
+                                        </t>
                                     </div>
                                 </div>
                             </div>
@@ -507,7 +664,13 @@
                                             <div class="col-md-6">
                                                 <label class="col-form-label o_fake_editable" for="x_foreign_origin"> ¿Ciudadano Extranjero? </label>
                                             </div>
-                                            <div class="col-md-6">
+                                            <div t-if="user" class="col-md-6">
+                                                <input t-if="(user.x_document_type_ID.id == 2 or user.x_document_type_ID.id == 5)" type="checkbox" value="Yes" 
+                                                       class="o_website_form_input inputDisabled" name="x_foreign_origin" checked="true" readonly="true"/>
+                                                <input t-else="" type="checkbox" value="No" 
+                                                       class="o_website_form_input inputDisabled" name="x_foreign_origin" readonly="true"/>
+                                            </div>
+                                            <div t-else="" class="col-md-6">
                                                 <input t-if="(tipo_doc == '2' or tipo_doc == '5')" type="checkbox" value="Yes" 
                                                        class="o_website_form_input inputDisabled" name="x_foreign_origin" checked="true" readonly="true"/>
                                                 <input t-else="" type="checkbox" value="No" 
@@ -523,7 +686,7 @@
                                             <div class="col-md-6">
                                                 <select class="form-control i_required" name="x_foreign_country" id="x_foreign_country">
                                                     <option value="">Seleccione...</option>
-                                                    <t t-foreach="request.env['x_cpnaa_country'].search([('x_name','!=','COLOMBIA')])" t-as="foreign_country">
+                                                    <t t-foreach="request.env['x_cpnaa_country'].search([('x_name','!=','COLOMBIA')],order='x_name')" t-as="foreign_country">
                                                     <option t-att-value="foreign_country.id">
                                                         <t t-esc="foreign_country.x_name"/>
                                                     </option>
@@ -560,7 +723,9 @@
                                             <label class="col-form-label o_fake_editable" for="x_foreign_address"> Dirección de residencia en el extranjero </label>
                                         </div>
                                         <div class="col-md-6">
-                                            <input type="text" class="v-address form-control i_required" name="x_foreign_address"/>
+                                            <input t-if="user" type="text" class="v-address form-control i_required" 
+                                                   t-attf-value="{{ (user.x_foreign_address) }}" name="x_foreign_address"/>
+                                            <input t-else="" type="text" class="v-address form-control i_required" name="x_foreign_address"/>
                                         </div>
                                         </div>
                                         <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
@@ -651,7 +816,7 @@
                                 </div>
                             </div>
                                 <div class="formInfo">
-                                    <div class="row">
+                                    <div t-if="not user" class="row">
                                         <div class="row form-group form-field o_fake_not_editable o_website_form_required_custom">
                                             <div class="col-md-12">
                                                 <label class="col-form-label o_fake_editable" for="x_elec_autorization"> 
@@ -666,24 +831,21 @@
                                             </div>
                                         </div>
                                     </div>
-                                <div class="row">
-                                    <div class="offset-md-3 col-md-6">
-                                        <span id="mssg_result" class="text-danger ml10"/>
+                                <div class="row mt-3">
+                                    <div id="div_results" class="offset-md-2 col-md-8">
+                                        <span id="mssg_result" role="alert"/>
                                     </div>
-                                    <div class="offset-md-10 col-md-2">
-                                        <button id="btn-registrar" type="submit" class="btn btn-primary btn-lg btn-stadium">Registrar</button>
+                                    <div id="div_spinner" class="offset-md-5 col-md-5" aria-hidden="true">
+                                        <div class="spinner-border text-primary" role="status">
+                                          <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button t-if="user" id="btn-actualizar" class="btn btn-primary btn-lg btn-stadium">Actualizar</button>
+                                        <button t-else="" id="btn-registrar" class="btn btn-primary btn-lg btn-stadium">Registrar</button>
                                     </div>
                                 </div>
                                 <div class="offset-md-10 col-md-2"><br></br></div>
-<!--                                 <div class="row">
-                                    <div class="offset-md-3 col-md-6">
-                                        <span id="helper-text" class="text-danger ml10"/>
-                                    </div>
-                                    <div class="offset-md-10 col-md-2">
-                                        <button id="btn-registrar" class="btn btn-info btn-lg">Registrar</button>
-                                    </div>
-                                </div>
-                                <div class="offset-md-10 col-md-2"><br></br></div> -->
                             </div>
                             </div>
                         </form>
@@ -737,25 +899,25 @@
                             </div>
                         </div>
                         </div>
-                                <div class="modal fade" id="viewerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog modal-xl" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h1 class="modal-title formTitle">Previsualización de archivo</h1>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="container">
-                                                    <div class="row">
-                                                        <iframe id="pdfViewer" class="col-md-12" src="#" height="500"></iframe>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
+                        <div class="modal fade" id="viewerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-xl" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title formTitle">Previsualización de archivo</h1>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="container">
+                                            <div class="row">
+                                                <iframe id="pdfViewer" class="col-md-12" src="#" height="500"></iframe>
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
+                                    </div>
                                 </div>
+                            </div>
+                        </div>
                     </section>
                 </div>
             </t>

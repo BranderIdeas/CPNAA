@@ -132,10 +132,26 @@
                                     </div>
                                 </div>
                             </div>
+                            <div t-if="rechazo">
+                                <div class="row justify-content-md-center">
+                                    <span id="mssg_result" class="alert alert-danger" role="alert">
+                                        Tu trámite fue devuelto por <t t-esc="rechazo['x_refuse_ID'][1]" />, 
+                                        le invitamos a que actualice su registro.
+                                        <br/>
+                                        Observaciones:  <t t-esc="rechazo['x_observation']" />
+                                        <br/>
+                                        * Recuerde cargar de nuevo todos los archivos que le solicita el formulario para completar su trámite
+                                    </span>
+                                </div>
+                            </div>
                             <div class="row float-right mb-4">
                                 <button id="btn-atras" class="btn btn-primary btn-lg btn-stadium mr-3">Atras</button>
                                 <td>
-                                <button t-if="tramites[0].x_cycle_ID[0].x_order == 0"
+                                <a t-if="rechazo" class="btn btn-primary btn-lg btn-stadium ml-3"
+                                   t-attf-href="/tramite/{{form}}/edicion/[{{persona.x_document_type_ID[0].id}}:{{persona.x_document}}]" >
+                                    Actualizar Registro
+                                </a>
+                                <button t-elif="tramites[0].x_cycle_ID[0].x_order == 0"
                                     id="btn-pagar" class="btn btn-primary btn-lg btn-stadium ml-3">Pagar</button>
                                 <button t-else=""
                                     id="btn-contacto" class="btn btn-primary btn-lg btn-stadium ml-3">Contactar al CPNAA</button>

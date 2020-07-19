@@ -66,40 +66,57 @@
                         <br/>
                         <section id="form">
                             <div id="cargar_csv" class="container form-horizontal" enctype="multipart/form-data">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                 <div class="form-group form-field">
-                                    <div class="form-group row">
-                                        <label for="fecha_grado" class="col-sm-3 col-form-label">Fecha de Grado</label>
+                                    <div class="row form-group form-field o_fake_not_editable">
+                                        <div class="col-sm-3">
+                                            <label class="col-form-label o_fake_editable" for="x_grade_date"> Fecha de grado </label>
+                                        </div>
                                         <div class="col-sm-9">
-                                            <input t-if="grado" type="date" class="form-control" id="fecha_grado"
-                                                   t-attf-value="{{ (grado.x_date) }}" readonly="1" />
-                                            <input t-else="" type="date" class="form-control" id="fecha_grado"
-                                                   t-attf-min="{{ (datetime.date.today() + datetime.timedelta(days=convenio.x_days_before_degree)) }}" 
-                                                   t-attf-max="{{ (convenio.x_end_date + datetime.timedelta(days=convenio.x_days_after_expiration)) }}"/>
+                                            <div class="o_website_form_date input-group">
+                                                <input t-if="grado" class="form-control inputDisabled" name="fecha_grado" disabled="true"
+                                                   t-attf-value="{{ (grado.x_date.strftime('%d-%m-%Y')) }}" readonly="true"/>
+                                                <input t-else="" type="text" class="form-control hand" name="fecha_grado" readonly="true"
+                                            t-attf-data-min="{{ (datetime.date.today() + datetime.timedelta(days=convenio.x_days_before_degree)).strftime('%d-%m-%Y') }}" 
+                                            t-attf-data-max="{{ (convenio.x_end_date + datetime.timedelta(days=convenio.x_days_after_expiration)).strftime('%d-%m-%Y') }}"/>
+                                                <div class="input-group-append">
+                                                    <div class="input-group-text">
+                                                    <i class="fa fa-calendar"/>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="form-group row">
                                         <label for="profesion" class="col-sm-3 col-form-label">Profesión</label>
+                                        <t t-set="arquitecto_id" t-value="request.env['x_cpnaa_career'].search([('x_name','=','ARQUITECTO')]).id"/>
+                                        <t t-set="arquitecta_id" t-value="request.env['x_cpnaa_career'].search([('x_name','=','ARQUITECTA')]).id"/>
                                         <div class="col-sm-9">
                                             <select t-if="grado" id="profesion" name="user_id" class="form-control" readonly="1">
-                                                <option selected=""
-                                                    t-att-value="grado.x_carrera_ID.id">
-                                                    <t t-esc="grado.x_carrera_ID.x_name" />
+                                                <option t-if="grado.x_carrera_ID.id == arquitecto_id" t-att-value="arquitecto_id" selected="">
+                                                     ARQUITECTO/ARQUITECTA
+                                                </option>
+                                                <option t-else="" t-att-value="grado.x_carrera_ID.id" selected="">
+                                                   <t t-esc="grado.x_carrera_ID.x_name" />
                                                 </option>
                                             </select>
                                             <select t-else="" id="profesion" name="user_id" class="form-control">
                                                 <option value="" selected="">
                                                     Seleccione...
                                                 </option>
-                                                <t t-foreach="profesiones" t-as="prof">  
-                                                    <option t-att-value="prof.id"> 
-                                                        <t t-esc="prof.x_name" /> 
+                                                <t t-foreach="profesiones" t-as="prof">
+                                                    <option t-if="prof.id == arquitecto_id" t-att-value="prof.id"> 
+                                                        ARQUITECTO/ARQUITECTA
+                                                    </option>
+                                                    <option t-if="prof.id != arquitecta_id and prof.id != arquitecto_id" t-att-value="prof.id"> 
+                                                        <t t-esc="prof.x_name" />
                                                     </option>
                                                 </t>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="form-group row">
-                                        <label for="archivo_csv" class="col-sm-3 col-form-label">Archivo CSV</label>
+                                        <label for="archivo_csv" class="col-sm-3 col-form-label">Lista Graduandos (CSV)</label>
                                         <div class="col-sm-9">
                                             <input type="file" class="form-control" id="archivo_csv" accept=".csv" />
                                         </div>

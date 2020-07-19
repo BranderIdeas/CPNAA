@@ -257,21 +257,21 @@ span.help-block {
   font-size: 12px;
   float: right;
 }
-#preview-doc {
+.preview-pdf {
   color: blue;
   cursor: pointer;
   text-decoration: underline;
   display: none;
 }
-
 iframe.recibo-pdf {
     width: 100%;
 }
-
 .formSection .is-invalid{
     border: 1.5px solid #ff0000 !important;
 }
-
+.w80{
+    width: 80% !important;
+}
   /* Popover */
 .popover {
     border: 0;

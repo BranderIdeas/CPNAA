@@ -29,11 +29,13 @@ odoo.define('website.pagos', function(require) {
                 route: '/tramite_fase_inicial',
                 params: {'data': dataTramite}
             }).then(function(response){
-                console.log(response);
+//                 console.log(response);
                 if(response.ok){
                     dataPDF.tramite = response.tramite;
                     dataPDF.corte = response.corte;
                     dataPDF.grado = response.grado;
+                    $('#recibo').removeAttr('disabled');
+                    $('#epayco').removeAttr('disabled');
                 }else{
                     location.replace('/cliente/tramite/matricula');
                 }
@@ -106,6 +108,9 @@ odoo.define('website.pagos', function(require) {
         fecha.getMonth()+1 < 10 ? mes = `0${fecha.getMonth()+1}` : mes = `${fecha.getMonth()+1}`;
         fecha.getDate() < 10 ? dia = `0${fecha.getDate()}` : dia = `${fecha.getDate()}`;
         let fecha_imp = [`${fecha.getFullYear()}`, mes, dia];
+        let lugar_expedicion = dataPDF.tramite.x_studio_pas_de_expedicin_1[1] == 'COLOMBIA' 
+                             ? dataPDF.tramite.x_studio_ciudad_de_expedicin[1]
+                             : dataPDF.tramite.x_studio_pas_de_expedicin_1[1];
         
         let invoiceData = {
             invoice: "000000016"+dataPDF.tramite.id,
@@ -114,7 +119,7 @@ odoo.define('website.pagos', function(require) {
             type_doc: dataPDF.tramite.x_studio_tipo_de_documento_1[0],
             procedure: dataPDF.tramite.x_service_ID[1],
             num_doc: dataPDF.tramite.x_studio_documento_1,
-            exp_doc: dataPDF.tramite.x_studio_ciudad_de_expedicin[1],
+            exp_doc: lugar_expedicion,
             address: dataPDF.tramite.x_studio_direccin,
             city: dataPDF.tramite.x_studio_ciudad_1[1],
             department: dataPDF.tramite.x_studio_departamento_estado[1],
@@ -164,16 +169,15 @@ odoo.define('website.pagos', function(require) {
         }
         location.replace('/cliente/tramite/'+tramite);
     })
-        
-    $('#btn-contacto').click(()=>{
-        location.replace('https://cpnaa.gov.co/');
-    })
-    
+
     if(location.href.indexOf('https://branderideas-cpnaa-developing-984497.dev.odoo.com/pagos/[') != -1){
         console.log('PAGOS')
         var pagos = new Pagos();
         pagos.traer_data(pagos);
         $('#epayco').click(pagos.iniciar_pago);
+        $('#download_recibo').click(()=>{
+            pagos.downloadPDF();
+        })
     }
     
     let pathURLConfirmation = location.href.indexOf('pagos/confirmacion?ref_payco=');
@@ -222,9 +226,9 @@ odoo.define('website.pagos', function(require) {
                     datosTramite['monto_pago'] = transaction.data.x_amount;
                     datosTramite['tipo_pago'] = transaction.data.x_type_payment;
                     datosTramite['id_tramite'] = transaction.data.x_extra1;
-                    console.log(datosTramite);    
+//                     console.log(datosTramite);    
                     rpc.query({
-                        route: '/tramite_fase1',
+                        route: '/tramite_fase_verificacion',
                         params: {'data': datosTramite}
                     }).then(function(response){
                         if(response){

@@ -87,21 +87,23 @@ odoo.define('website.convenios', function(require) {
                 if(d == 'e_fecha_grado'){
                     disabled = 'disabled="true"';
                 }
-                htmlTags += '<td><input id="'+d+'-'+cant+'" '+ disabled +' value="'+ data[d].valor +
+                htmlTags += '<td><input id="'+d+'-'+cant+'" '+ disabled +' value="'+ data[d].valor.trim() +
                             '" type="text" class="form-control '+ data[d].clase +'" /></td>';
             }
             htmlTags += '</tr>';
             $('#resultados').append(htmlTags);
             let row = $('#resultados').find(`#row-${cant}`).find('input')[1];
-            validaciones.validar_en_BD(row.id);
+            validaciones.validar_en_BD(row.id, validaciones);
         },
         guardar_registros: function(registros, data, _this) {
             Swal.fire({
                 toast: true,
-                title: `${registros.length} Registros enviados`,
-                showConfirmButton: true,
+                title: `¿Enviar ${registros.length} registros?`,
+                showCancelButton: true,
                 showLoaderOnConfirm: true,
-                  preConfirm: (response) => {
+                confirmButtonText: 'Confirmar',
+                cancelButtonText: 'Cancelar',
+                preConfirm: (response) => {
                     return rpc.query({
                         route: '/guardar_registros',
                         params: {'registros': registros, 'data': data}
@@ -110,12 +112,12 @@ odoo.define('website.convenios', function(require) {
                           throw new Error(response.error)
                         }
                         return response
-                        }).catch(error => {
-                            Swal.showValidationMessage(
-                              `Error: ${error.message}`
-                            )
-                        })
-                  },
+                    }).catch(error => {
+                        Swal.showValidationMessage(
+                          `Error: ${error.message.data.message}`
+                        )
+                    })
+                },
             }).then((result) => {
                 if (result.value) {
                     Toast.fire({
@@ -136,10 +138,14 @@ odoo.define('website.convenios', function(require) {
             });
         },
         mostrar_helper: function(campo){
-            $('#'+campo).addClass('invalido');
+            let elem = $('#'+campo);
+            if(campo == 'fecha_grado'){
+                elem = $('[name=fecha_grado]');
+            }
+            elem.addClass('invalido');
             $('#help_text').removeClass('invisible');
             setTimeout(()=>{ 
-                $('#'+campo).removeClass('invalido');
+                elem.removeClass('invalido');
                 $('#help_text').addClass('invisible');
             },1500);
         },
@@ -263,13 +269,24 @@ odoo.define('website.convenios', function(require) {
         e.preventDefault();
         convenios.get_pdf();
     })
+    
+    // Datos para el datepicker
+    let minDate= $("[name=fecha_grado]").data('min');
+    let maxDate= $("[name=fecha_grado]").data('max');
+    $("[name=fecha_grado]").datepicker({
+        minDate: minDate,
+        maxDate: maxDate,
+        dateFormat: "dd-mm-yy",
+        changeMonth: true,
+        changeYear: true,
+    });
 
     $('#procesar_archivo').click(async function(e){
         e.preventDefault();
         let esValido = true;
         let archivo_csv = $('#archivo_csv')[0].files[0];
-        let grado = $('#profesion').val();
-        let fecha_grado = $('#fecha_grado').val();
+        let profesion = $('#profesion').val();
+        let fecha_grado = $('[name=fecha_grado]').val();
         if(fecha_grado == ''){
             convenios.mostrar_helper('fecha_grado');
             esValido = false;
@@ -304,7 +321,7 @@ odoo.define('website.convenios', function(require) {
         let convenio = parseInt($('#convenio').attr('name'));
         let profesion = parseInt($('#profesion').val());
         let universidad = parseInt($('#universidad').attr('name'));
-        let fecha = $('#fecha_grado').val();
+        let fecha = $('[name=fecha_grado]').val().split('-').reverse().join('-');
         if(location.href.indexOf('grado')!=-1){
             grado = parseInt($('#grado').attr('name'));
         }

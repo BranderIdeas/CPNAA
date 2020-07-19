@@ -269,12 +269,18 @@ odoo.define('website.validations', function(require) {
                 confirmButtonText: 'Ocultar',
             })
         },
-        validar_en_BD: function(elem_id){
+        quitarAcentos: function(cadena){
+            const acentos = {'á':'a','é':'e','í':'i','ó':'o','ú':'u','Á':'A','É':'E','Í':'I','Ó':'O','Ú':'U'};
+            return cadena.split('').map( letra => acentos[letra] || letra).join('').toString();	
+        },
+        validar_en_BD: function(elem_id, _this){
 
             let nro_reg = elem_id.charAt(elem_id.length - 1);
             let input_tipo = $('#a_document_type-'+nro_reg);
             let input_nro_doc = $('#b_document-'+nro_reg);
             let profesion_id = $('#profesion').val();
+            
+            if(_this.es_invalido(input_tipo) || _this.es_invalido(input_nro_doc)) { return }
             
             let tipo_doc = input_tipo.val();
             let numero_doc = input_nro_doc.val();
@@ -299,8 +305,15 @@ odoo.define('website.validations', function(require) {
                 }
             })
         },
-        validar_duplicados: function validar_duplicados(){
+        validar_duplicados: function(){
             console.log('ok');
+        },
+        es_invalido: function(elem){
+            if(elem.hasClass('invalido')){
+                return true;
+            }else{
+                return false;
+            }
         },
         validar_formatos: async function validar_formatos(e){
             let elem = e.target;
@@ -449,16 +462,16 @@ odoo.define('website.validations', function(require) {
     const validaciones = new Validaciones();
     
     $('#resultados').change((e) => {
-        let entrada = e.target.value.trim().toUpperCase().replace(/\s\s+/g, ' ');
+        let entrada = validaciones.quitarAcentos(e.target.value.trim().toUpperCase().replace(/\s\s+/g, ' '));
         let elem_id = e.target.id;
         let tipo = elem_id.split('-')[0];
         tipo = tipo.substring(2);
         validaciones.validar_input_resultados(entrada, tipo, elem_id, validaciones);
         if(elem_id.indexOf('email') != -1 && entrada.length < 1){ $('#'+elem_id).val('N/A') };
         if(elem_id.indexOf('document') != -1){
-            validaciones.validar_en_BD(elem_id);
+            validaciones.validar_en_BD(elem_id, validaciones);
         };
-        $('#'+elem_id).val($('#'+elem_id).val().trim().toUpperCase().replace(/\s\s+/g, ' '));
+        $('#'+elem_id).val(entrada);
     });
     
     return Validaciones; // ~ Exports class

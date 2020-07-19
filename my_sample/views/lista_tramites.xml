@@ -118,7 +118,7 @@
                                         </div>
                                         <div class="col-md-8">
                                             <input type="text" class="form-control" name="x_pay_type"  
-                                                   t-attf-value="{{tramites[0].x_pay_type}}" disabled="1"/>
+                                                 t-attf-value="{{tramites[0].x_pay_type}}" disabled="1"/>
                                         </div>
                                     </div>
                                     <div class="row col-md-6 form-group form-field" disabled="true">
@@ -135,12 +135,12 @@
                             <div t-if="rechazo">
                                 <div class="row justify-content-md-center">
                                     <span id="mssg_result" class="alert alert-danger" role="alert">
-                                        Tu trámite fue devuelto por <t t-esc="rechazo['x_refuse_ID'][1]" />, 
+                                        Su trámite fue devuelto por <t t-esc="rechazo['x_refuse_ID'][1]" />, 
                                         le invitamos a que actualice su registro.
                                         <br/>
                                         Observaciones:  <t t-esc="rechazo['x_observation']" />
                                         <br/>
-                                        * Recuerde cargar de nuevo todos los archivos que le solicita el formulario para completar su trámite
+                                        * Recuerde cargar nuevamente todos los archivos que le solicita el formulario para completar su trámite
                                     </span>
                                 </div>
                             </div>
@@ -153,8 +153,8 @@
                                 </a>
                                 <button t-elif="tramites[0].x_cycle_ID[0].x_order == 0"
                                     id="btn-pagar" class="btn btn-primary btn-lg btn-stadium ml-3">Pagar</button>
-                                <button t-else=""
-                                    id="btn-contacto" class="btn btn-primary btn-lg btn-stadium ml-3">Contactar al CPNAA</button>
+                                <a t-else="" href="http://35.222.118.62/calendario-de-matriculas-d65/"
+                                   class="btn btn-primary btn-lg btn-stadium ml-3">Su solicitud esta en trámite</a>
                                 </td>
                             </div>
                         </div>

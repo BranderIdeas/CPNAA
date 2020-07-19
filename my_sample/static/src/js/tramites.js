@@ -11,6 +11,8 @@ odoo.define('website.tramites', function(require) {
     let data = {
         doc: '',
         doc_type: '',
+        nombres: '',
+        apellidos: '',
         origen: tramite
     }
         
@@ -20,21 +22,64 @@ odoo.define('website.tramites', function(require) {
             (!origen) ? origen = '' : origen = `/${data.origen}`;
             return rpc.query({
                 route: '/validar_tramites',
-                params: {'x_document': data.doc.toUpperCase(), 'x_document_type_ID': data.doc_type}
+                params: {'data': data}
             }).then(function(response){
-                localStorage.setItem('dataTramite', JSON.stringify(data));
+                console.log(response);
                 if(response.convenio){
                     $(location).attr('href','/tramite/convenios/'+ response.id);
-                } else {
-                    if(response.id){
-                        if (response.matricula){
-                            $('#msj_matricula').removeClass('invisible').attr('aria-hidden',false);
-                        } else {
-                            $(location).attr('href','/cliente/'+ response.id +'/tramites');
-                        }
-                    }else{
-                        $(location).attr('href','/tramite' + origen+'/['+data.doc_type+':'+data.doc+']');
+                } else if(response.id){
+                    if (response.matricula){
+                        $('#msj_matricula').removeClass('invisible').attr('aria-hidden',false);
+                    } else {
+                        $(location).attr('href','/cliente/'+ response.id +'/tramites');
                     }
+                }
+                else {
+                    $(location).attr('href','/tramite' + origen+'/['+data.doc_type+':'+data.doc+']');
+                }
+            })
+        },
+        validar_convenios: function() {
+            let div_msj = $('#msj_nombre');
+            if($('#x_names').val() == ''){
+                div_msj = $('#msj_documento');
+            }
+            div_msj.find('div').text('');
+            div_msj.addClass('invisible').attr('aria-hidden',true);
+            console.log(data);
+            return rpc.query({
+                route: '/validar_estudiante',
+                params: {'data': data}
+            }).then(function(response){
+                console.log(response);
+                if (!response.graduandos){
+                    div_msj.removeClass('invisible').attr('aria-hidden',false);
+                    div_msj.find('div').text(
+                        `Usted no se encuentra registrado por Convenio, si ya intentó la búsqueda por documento 
+                         y nombre por favor comuníquese con la universidad ó con el CPNAA al siguiente correo 
+                         electrónico: convenios@cpnaa.gov.co o al número telefónico (1)3502700 ext 111-115 en Bogotá`);
+                } else if (response.graduandos.length == 1){
+                    if (response.graduandos[0].id_user_tramite){
+                        $(location).attr('href','/cliente/'+ response.graduandos[0].id_user_tramite +'/tramites');
+                    } else if(!response.graduandos[0].id_grado){
+                        let fecha = response.graduandos[0].fecha_maxima.split('-').reverse().join('-');
+                        div_msj.removeClass('invisible').attr('aria-hidden',false);
+                        div_msj.find('div').text(
+                            `Usted ya no puede ingresar por esta opción, la fecha maxima para pagar el trámite por convenio era hasta el ${fecha}`);
+                    } else if (response.graduandos[0].id_grado){
+                        $(location).attr('href','/tramite/convenios/'+ response.graduandos[0].graduando.id);
+                    }
+                } else if (response.graduandos.length > 1){
+                    div_msj.removeClass('invisible').attr('aria-hidden',false);
+                    let texto = '';
+                    response.graduandos.forEach((grad)=>{
+                        texto += `GRADUANDO: </br>
+                                  ${grad.graduando.x_tipo_documento_select[1]}: ${grad.graduando.x_documento} </br> 
+                                  ${grad.graduando.x_nombres} ${grad.graduando.x_apellidos} </br> 
+                                  ${grad.graduando.x_service_ID[1]} </br>
+                                  ${grad.graduando.x_universidad} </br></br>`;
+                    })
+                    div_msj.find('div').html(texto);
                 }
             })
         },
@@ -113,20 +158,48 @@ odoo.define('website.tramites', function(require) {
 
             if (valido) {
                 $('#btn_verificar').removeAttr('disabled');
+                $('#btn_verificar_convenios').removeAttr('disabled');
             } else {
                 $('#btn_verificar').attr('disabled', 'disabled');
+                $('#btn_verificar_convenios').attr('disabled', 'disabled');
             }
             return valido;
         },
-        label_input_file: function(_this) {
-            $("#preview-doc").hide();
-            let idname = $(_this).attr('id');
-            if ($(_this).hasClass('btn-file')) {
-                if($(_this)[0].files[0]){
+        validar_campos_nombres: function(e, _this){
+            data.nombres = $('#x_names').val().length < 1 ? '' 
+                : validaciones.quitarAcentos($('#x_names').val().toUpperCase().replace(/\s\s+/g, ' '));
+            data.apellidos = $('#x_lastnames').val().length < 1 ? ''
+                : validaciones.quitarAcentos($('#x_lastnames').val().toUpperCase().replace(/\s\s+/g, ' '));
+            $('#x_names').val(data.nombres);
+            $('#x_lastnames').val(data.apellidos);
+            if(data.nombres.length > 1 && data.apellidos.length > 1){
+                $('#btn_verificar_nombres').removeAttr('disabled');
+                if(e.key == "Enter" || e.type == "click"){
+                    console.log(e.target.name);
+                    $('#btn_verificar_nombres').attr('disabled', 'disabled');
+                    data.nombres = data.nombres.trim();
+                    data.apellidos = data.apellidos.trim();
+                    data.doc = '';
+                    data.doc_type = '';
+                    $('#doc').val('');
+                    $('#doc_type').val('');
+                    $('#x_names').val(data.nombres);
+                    $('#x_lastnames').val(data.apellidos);
+                    _this.validar_convenios();
+                }
+            }else{
+                $('#btn_verificar_nombres').attr('disabled', 'disabled');
+            }
+        },
+        label_input_file: function(elem) {
+            $("#preview-"+elem.id).hide();
+            let idname = $(elem).attr('id');
+            if ($(elem).hasClass('btn-file')) {
+                if($(elem)[0].files[0]){
 
-                  let filename = $(_this).val().split('\\').pop();
-                  let ext = $(_this).val().split('.').pop();
-                  let fileSize = $(_this)[0].files[0].size;
+                  let filename = $(elem).val().split('\\').pop();
+                  let ext = $(elem).val().split('.').pop();
+                  let fileSize = $(elem)[0].files[0].size;
 
                   if(ext == "pdf" & fileSize <= 500000){
 
@@ -135,11 +208,25 @@ odoo.define('website.tramites', function(require) {
                         $('[for="' + idname + '"]').find('i').removeClass('fa-file-pdf-o').addClass('fa-check');
                         $('[for="' + idname + '"]').removeClass('texto-gris invalido-form').addClass('texto-verde');
                     }, 1200);
-                    $("#preview-doc").show();
+                    $("#preview-"+elem.id).show();
+                    // Mostrar modal Preview del PDF
+                    $("#preview-"+elem.id).click(function(){ 
+                        let inputElm = $("#"+elem.id);
+                        let objElm = $("#pdfViewer");
+                        $('#viewerModal').on('show.bs.modal', function (e) {
+                            let reader = new FileReader();
+                            reader.onload = function(e) {
+                                console.log(e);
+                                objElm.attr('src', e.target.result);
+                            }
+                            reader.readAsDataURL(inputElm[0].files[0]);
+                        });
+                        $("#viewerModal").modal('show');
+                    });
 
                   }else{
 
-                    $(_this).val('');
+                    $(elem).val('');
                     filename = ' Selecciona tu Archivo';
                     $('[for="' + idname + '"]').find('i').removeClass('fa-check').addClass('fa-search');
                     $('[for="' + idname + '"]').removeClass('texto-verde').addClass('texto-gris invalido-form');
@@ -154,7 +241,7 @@ odoo.define('website.tramites', function(require) {
                   $('[for="' + idname + '"]').find('span').html('  ' + filename);
 
                 } else {
-                    $(_this).val('');
+                    $(elem).val('');
                     let filename = ' Selecciona tu Archivo';
                     $('[for="' + idname + '"]').find('i').removeClass('fa-check').addClass('fa-search');
                     $('[for="' + idname + '"]').removeClass('texto-verde').addClass('texto-gris invalido-form');
@@ -252,6 +339,7 @@ odoo.define('website.tramites', function(require) {
     });
     
     const tramites = new Tramites();
+    
     // Inicio del trámite boton de enviar
     $('#btn_verificar').click(function(e) {
         if (tramites.validar_campos()) {
@@ -268,36 +356,63 @@ odoo.define('website.tramites', function(require) {
 
     // Inicio del trámite input número de documento
     $('#doc').on('keyup', function(e) {
+        e.preventDefault();
         data.doc = $('#doc').val().toUpperCase();
         data.doc_type = $('#doc_type').val();
         $('#doc').val(data.doc);
         tramites.validar_campos();
-        if(e.key == "Enter"){
-            tramites.validar_tramites();
-            $('#btn_verificar').attr('disabled', 'disabled');
+        if(e.key == "Enter" && tramites.validar_campos()){
+            if(location.href.indexOf('/convenios/tramite') == -1){
+                tramites.validar_tramites();
+                $('#btn_verificar').attr('disabled', 'disabled');
+            } else {
+                $('#x_names').val('');
+                $('#x_lastnames').val('');
+                data.nombres = '';
+                data.apellidos = '';
+                tramites.validar_convenios();
+            }
         }
     });
     
     // Inicio del trámite input tipo de documento
-    $('#doc_type').change('keyup', function() {
+    $('#doc_type').change(function(e) {
         data.doc = $('#doc').val();
         data.doc_type = $('#doc_type').val();
         tramites.validar_campos();
     });
-          
-    // Mostrar modal Preview del PDF
-    $("#preview-doc").click(function(){ 
-        let inputElm = $("#x_document_image");
-        let objElm = $("#pdfViewer");
-        $('#viewerModal').on('show.bs.modal', function (e) {
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                console.log(e);
-                objElm.attr('src', e.target.result);
-            }
-            reader.readAsDataURL(inputElm[0].files[0]);
-        });
-        $("#viewerModal").modal('show');
+        
+    // Inicio de trámite convenios input nombres
+    $('#x_names').on('keyup', function(e) {
+        e.preventDefault();
+        tramites.validar_campos_nombres(e, tramites);
+    });
+            
+    // Inicio de trámite convenios input apellidos
+    $('#x_lastnames').on('keyup', function(e) {
+        e.preventDefault();
+        tramites.validar_campos_nombres(e, tramites);
+    });
+    
+    // Inicio del trámite por convenio boton de enviar por nombres
+    $('#btn_verificar_nombres').click(function(e) {
+        $('#doc').val('');
+        $('#doc_type').val('');
+        data.doc = '';
+        data.doc_type = '';
+        tramites.validar_campos_nombres(e, tramites);
+    });
+        
+    // Inicio del trámite por convenios boton de enviar por documento
+    $('#btn_verificar_convenios').click(function(e) {
+        if (tramites.validar_campos()) {
+            $('#x_names').val('');
+            $('#x_lastnames').val('');
+            data.nombres = '';
+            data.apellidos = '';
+            tramites.validar_convenios();
+            $('#btn_verificar_convenios').attr('disabled', 'disabled');
+        }
     });
     
     // Evento de los input files

@@ -14,8 +14,10 @@
                                     Convenios Vigentes
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <t t-set="no_hay_vigentes" t-value="True"/>
                                     <t t-foreach="convenios" t-as="conv">
                                         <div t-if="conv.x_end_date &gt;= datetime.date.today()">
+                                            <t t-set="no_hay_vigentes" t-value="False"/>
                                             <a class="dropdown-item no-select">
                                             <t t-esc="conv.x_name" /></a>
                                             <a class="dropdown-item" t-attf-href="/convenios/{{ (universidad.id) }}/{{ (conv.id) }}">
@@ -27,6 +29,7 @@
                                             </t>
                                         </div>
                                     </t>
+                                    <a t-if="no_hay_vigentes" class="dropdown-item" href="#">No hay convenios vigentes</a>
                                 </div>
                             </li>
                             <li class="nav-item dropdown">

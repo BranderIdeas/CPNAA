@@ -30,10 +30,8 @@
                                             </a>
                                             <t t-set="estudiantes_grado" t-value="request.env['x_procedure_temp'].search([('x_grado_ID','=',grado.id)])"/>
                                             <t t-set="estudiantes_con_pago" 
-                                               t-value="request.env['x_cpnaa_procedure'].search([('x_studio_fecha_de_grado_2','=',grado.x_date),
-                                                        ('x_studio_carrera_1.id','=',grado.x_carrera_ID.id),
-                                                        ('x_cycle_ID.x_order','>',0),('x_origin_type.x_name','=','CONVENIO'),
-                                                        ('x_studio_universidad_5.id','=',grado.x_studio_universidad.id)])"/>
+                                               t-value="request.env['x_cpnaa_procedure'].search([('x_grade_ID.id','=',grado.id),
+                                                        ('x_cycle_ID.x_order','>',0),('x_origin_type.x_name','=','CONVENIO')])"/>
                                             <p>
                                                 <a t-if="len(estudiantes_grado) == 1" href="#" class="text-black" data-toggle="modal" 
                                                    data-target="#modal-estudiantes-cargados">

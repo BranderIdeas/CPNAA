@@ -186,8 +186,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div t-if="cliente">
-                                        <select t-if="(cliente.x_tipo_documento_select.id == 1 or cliente.x_tipo_documento_select.id == 2 or
-                                                       user.x_document_type_ID.id == 1 or user.x_document_type_ID.id == 2)" 
+                                        <select t-if="(cliente.x_tipo_documento_select.id == 1 or cliente.x_tipo_documento_select.id == 2)" 
                                                 class="child_place-x_expedition_city form-control i_required"
                                                 name="x_expedition_state" id="x_expedition_state">
                                             <option value="">Seleccione...</option>
@@ -197,10 +196,11 @@
                                             </option>
                                             </t>
                                         </select>
-                                        <select id="dpto_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
+                                        <select t-if="(cliente.x_tipo_documento_select.id != 5)" name="x_expedition_state"
+                                                id="dpto_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
                                             <option value="555" selected="true"> NO APLICA </option>
                                         </select>
-                                        <select t-if="(cliente.x_tipo_documento_select.id == 5)" 
+                                        <select t-if="(cliente.x_tipo_documento_select.id == 5)" name="x_expedition_state"
                                                 class="form-control inputDisabled i_required">
                                             <option value="555" selected="true"> NO APLICA </option>
                                         </select>
@@ -323,7 +323,7 @@
                                         <span> Seleccionar archivo</span>
                                     </label>
                                     <span class="help-block">Tamaño máximo 500Kb, formato PDF</span>
-                                    <span class="help-block" id="preview-doc">Previsualizar</span>
+                                    <span class="help-block preview-pdf" id="preview-x_document_image">Previsualizar</span>
                                     <input type="file" class="form-control i_required btn-file" name="x_document_image" 
                                            id="x_document_image" accept="application/pdf"/>
                                 </div>
@@ -364,6 +364,21 @@
                                             </option>
                                         </t>
                                     </select>
+                                </div>
+                                </div>
+                                <div t-if="(form == 'matricula' or form == 'inscripciontt') and not cliente" 
+                                     class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
+                                <div class="col-md-6">
+                                    <label class="col-form-label o_fake_editable"> Imagen del diploma </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="x_diploma_image" class="file-label"><i class="fa fa-search"></i>
+                                        <span> Seleccionar archivo</span>
+                                    </label>
+                                    <span class="help-block">Tamaño máximo 500Kb, formato PDF</span>
+                                    <span class="help-block preview-pdf" id="preview-x_diploma_image">Previsualizar</span>
+                                    <input type="file" class="form-control i_required btn-file" name="x_diploma_image" 
+                                           id="x_diploma_image" accept="application/pdf"/>
                                 </div>
                                 </div>
                             </div>
@@ -613,7 +628,7 @@
                                             </option>
                                         </t>
                                     </select>
-                                    <select t-elif="(form == 'licencia' or form == 'matricula')" class="form-control i_required inputDisabled" 
+                                    <select t-if="(form == 'licencia' or form == 'matricula') and not cliente" class="form-control i_required inputDisabled" 
                                             name="x_institute_career" id="x_institute_career">
                                         <t t-foreach="request.env['x_cpnaa_career'].search([('x_level_ID.x_name','=','PROFESIONAL')])" t-as="career">
                                             <option t-att-value="career.id">
@@ -621,18 +636,18 @@
                                             </option>
                                         </t>
                                     </select>
-                                    <div t-else="" id="autocomplete_carreras">
-                                            <input t-if="user" type="text" id="carreras" placeholder="Buscar..." class="form-control"
-                                                   t-attf-value="{{ (user.x_institute_career.x_name) }}"/>
-                                            <input t-else="" type="text" id="carreras" placeholder="Buscar..." class="form-control"/>
-                                    <ul class="list-group" id="result_carreras"></ul>
-                                    <select class="form-control i_required invisible"
-                                            aria-hidden="true" name="x_institute_career" id="x_institute_career">
-                                        <option t-if="user" id="seleccion_carreras" t-attf-value="{{ (user.x_institute_career.id) }}" selected="true">
-                                            <t t-esc="user.x_institute_career.x_name"/>
-                                        </option>
-                                        <option t-else="" id="seleccion_carreras" value="" selected="true">CARRERA</option>
-                                    </select>
+                                    <div t-if="(form == 'inscripciontt' and not cliente)" id="autocomplete_carreras">
+                                        <input t-if="user" type="text" id="carreras" placeholder="Buscar..." class="form-control"
+                                               t-attf-value="{{ (user.x_institute_career.x_name) }}"/>
+                                        <input t-else="" type="text" id="carreras" placeholder="Buscar..." class="form-control"/>
+                                        <ul class="list-group" id="result_carreras"></ul>
+                                        <select class="form-control i_required invisible"
+                                                aria-hidden="true" name="x_institute_career" id="x_institute_career">
+                                            <option t-if="user" id="seleccion_carreras" t-attf-value="{{ (user.x_institute_career.id) }}" selected="true">
+                                                <t t-esc="user.x_institute_career.x_name"/>
+                                            </option>
+                                            <option t-else="" id="seleccion_carreras" value="" selected="true">CARRERA</option>
+                                        </select>
                                     </div>
                                 </div>
                                 </div>
@@ -737,6 +752,7 @@
                                                 <span> Seleccionar archivo</span>
                                             </label>
                                             <span class="help-block">Tamaño máximo 500Kb, formato PDF</span>
+                                            <span class="help-block preview-pdf" id="preview-x_certification_image">Previsualizar</span>
                                             <input type="file" class="form-control i_required btn-file" name="x_certification_image" 
                                                    id="x_certification_image" accept="application/pdf"/>
                                         </div>
@@ -752,6 +768,7 @@
                                                 <span> Seleccionar archivo</span>
                                             </label>
                                             <span class="help-block">Tamaño máximo 500Kb, formato PDF</span>
+                                            <span class="help-block preview-pdf" id="preview-x_certification_studies_completed">Previsualizar</span>
                                             <input type="file" class="form-control i_required btn-file" name="x_certification_studies_completed" 
                                                    id="x_certification_studies_completed" accept="application/pdf"/>
                                         </div>
@@ -765,6 +782,7 @@
                                                 <span> Seleccionar archivo</span>
                                             </label>
                                             <span class="help-block">Tamaño máximo 500Kb, formato PDF</span>
+                                            <span class="help-block preview-pdf" id="preview-x_foreign_professional_accreditation">Previsualizar</span>
                                             <input type="file" class="form-control i_required btn-file" name="x_foreign_professional_accreditation" 
                                                    id="x_foreign_professional_accreditation" accept="application/pdf"/>
                                         </div>
@@ -780,6 +798,7 @@
                                                 <span> Seleccionar archivo</span>
                                             </label>
                                             <span class="help-block">Tamaño máximo 500Kb, formato PDF</span>
+                                            <span class="help-block preview-pdf" id="preview-x_professional_experience">Previsualizar</span>
                                             <input type="file" class="form-control i_required btn-file" name="x_professional_experience" 
                                                    id="x_professional_experience" accept="application/pdf"/>
                                         </div>
@@ -793,6 +812,7 @@
                                                 <span> Seleccionar archivo</span>
                                             </label>
                                             <span class="help-block">Tamaño máximo 500Kb, formato PDF</span>
+                                            <span class="help-block preview-pdf" id="preview-x_company_existence_certificate">Previsualizar</span>
                                             <input type="file" class="form-control i_required btn-file" name="x_company_existence_certificate" 
                                                    id="x_company_existence_certificate" accept="application/pdf"/>
                                         </div>
@@ -808,6 +828,7 @@
                                                 <span> Seleccionar archivo</span>
                                             </label>
                                             <span class="help-block">Tamaño máximo 500Kb, formato PDF</span>
+                                            <span class="help-block preview-pdf" id="preview-x_entity_request">Previsualizar</span>
                                             <input type="file" class="form-control i_required btn-file" name="x_entity_request" 
                                                    id="x_entity_request" accept="application/pdf"/>
                                         </div>

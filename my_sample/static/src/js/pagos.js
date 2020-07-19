@@ -6,6 +6,11 @@ odoo.define('website.pagos', function(require) {
     
     var dataPDF = {};
     
+    let urlHome = "https://branderideas-cpnaa.odoo.com" :
+    if(location.href.indexOf(urlHome) === -1 ){
+        urlHome = "https://branderideas-cpnaa-developing-984497.dev.odoo.com/";
+    }
+    
     // Configuración de las alertas
     const Toast = Swal.mixin({
         toast: true,
@@ -63,7 +68,7 @@ odoo.define('website.pagos', function(require) {
                 country: "co",
                 lang: "es",
                 external: false,
-                response: "https://branderideas-cpnaa-developing-984497.dev.odoo.com/pagos/confirmacion",
+                response: `${urlHome}/pagos/confirmacion`,
 
                 //Atributos cliente
                 name_billing: `${dataPDF.tramite.x_studio_nombres} ${dataPDF.tramite.x_studio_apellidos}`,
@@ -170,7 +175,7 @@ odoo.define('website.pagos', function(require) {
         location.replace('/cliente/tramite/'+tramite);
     })
 
-    if(location.href.indexOf('https://branderideas-cpnaa-developing-984497.dev.odoo.com/pagos/[') != -1){
+    if(location.href.indexOf(`${urlHome}/pagos`) != -1){
         console.log('PAGOS')
         var pagos = new Pagos();
         pagos.traer_data(pagos);

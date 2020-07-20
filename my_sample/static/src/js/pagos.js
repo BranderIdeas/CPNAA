@@ -5,8 +5,7 @@ odoo.define('website.pagos', function(require) {
     var rpc = require('web.rpc');
     
     var dataPDF = {};
-    
-    let urlHome = "https://branderideas-cpnaa.odoo.com" :
+    let urlHome = "https://branderideas-cpnaa.odoo.com";
     if(location.href.indexOf(urlHome) === -1 ){
         urlHome = "https://branderideas-cpnaa-developing-984497.dev.odoo.com/";
     }
@@ -42,7 +41,7 @@ odoo.define('website.pagos', function(require) {
                     $('#recibo').removeAttr('disabled');
                     $('#epayco').removeAttr('disabled');
                 }else{
-                    location.replace('/cliente/tramite/matricula');
+                    location.replace('http://35.222.118.62');
                 }
             })
         },

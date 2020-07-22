@@ -507,7 +507,14 @@ odoo.define('website.tramites', function(require) {
             $('#universidades').val('');
             $('#seleccion_univ').val('');
         }
-    });
+        if($('#x_institution_type_ID').val() == 1){
+            $('[name="x_doc_min_educa"]').val('NO APLICA');
+            $('[name="x_doc_min_educa"]').addClass('inputDisabled');
+        } else {
+            $('[name="x_doc_min_educa"]').val('');
+            $('[name="x_doc_min_educa"]').removeClass('inputDisabled');
+        }
+    }).change();
     
     // Borra el value de la carrera si cambia de nivel profesional
     $('#x_level_ID').change(function(e){

@@ -5,9 +5,9 @@ odoo.define('website.pagos', function(require) {
     var rpc = require('web.rpc');
     
     var dataPDF = {};
-    let urlHome = "https://branderideas-cpnaa.odoo.com";
-    if(location.href.indexOf(urlHome) === -1 ){
-        urlHome = "https://branderideas-cpnaa-developing-984497.dev.odoo.com";
+    let urlBase = "https://branderideas-cpnaa.odoo.com";
+    if(location.href.indexOf(urlBase) === -1 ){
+        urlBase = "https://branderideas-cpnaa-developing-984497.dev.odoo.com";
     }
     
     // Configuración de las alertas
@@ -67,7 +67,7 @@ odoo.define('website.pagos', function(require) {
                 country: "co",
                 lang: "es",
                 external: false,
-                response: `${urlHome}/pagos/confirmacion`,
+                response: `${urlBase}/pagos/confirmacion`,
 
                 //Atributos cliente
                 name_billing: `${dataPDF.tramite.x_studio_nombres} ${dataPDF.tramite.x_studio_apellidos}`,
@@ -174,7 +174,7 @@ odoo.define('website.pagos', function(require) {
         location.replace('/cliente/tramite/'+tramite);
     })
 
-    if(location.href.indexOf(`${urlHome}/pagos/[`) != -1){
+    if(location.href.indexOf(`${urlBase}/pagos/[`) != -1){
         console.log('PAGOS')
         var pagos = new Pagos();
         pagos.traer_data(pagos);

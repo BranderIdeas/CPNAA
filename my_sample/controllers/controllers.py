@@ -321,7 +321,7 @@ class MySample(http.Controller):
         user = http.request.env['x_cpnaa_user'].sudo().browse(tramite.x_user_ID.id)
         if user and len(rechazos)>0:
             if not rechazos[len(rechazos)-1]['x_corrected']:
-                return http.request.render('my_sample.formulario_tramites', {'form': form, 'user': user})
+                return http.request.render('my_sample.formulario_tramites', {'form': form, 'user': user, 'origen': tramite.x_origin_type.id})
             else:
                 return http.request.redirect('/cliente/tramite/'+form)
         else:

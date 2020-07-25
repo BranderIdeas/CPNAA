@@ -272,8 +272,9 @@ iframe.recibo-pdf {
 .w80{
     width: 80% !important;
 }
-  /* Popover */
 .popover {
     border: 0;
 }
-
+.blanco{
+    background-color: #fafafa !important;
+}

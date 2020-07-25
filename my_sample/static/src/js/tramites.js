@@ -201,7 +201,7 @@ odoo.define('website.tramites', function(require) {
                   let ext = $(elem).val().split('.').pop();
                   let fileSize = $(elem)[0].files[0].size;
 
-                  if(ext == "pdf" & fileSize <= 500000){
+                  if(ext == "pdf" & fileSize <= 819200){
 
                     $('[for="' + idname + '"]').find('i').removeClass('fa-search').addClass('fa-file-pdf-o');
                     setTimeout(function(){
@@ -232,8 +232,8 @@ odoo.define('website.tramites', function(require) {
                     $('[for="' + idname + '"]').removeClass('texto-verde').addClass('texto-gris invalido-form');
                     if(ext != "pdf"){
                       validaciones.alert_error_toast( "Extensión ." +ext +" no permitida." );
-                    }else if (fileSize > 500000){
-                      validaciones.alert_error_toast( "El documento excede el tamaño máximo de 500Kb." );
+                    }else if (fileSize > 819200){
+                      validaciones.alert_error_toast( "El documento excede el tamaño máximo de 800Kb." );
                     }
 
                   }
@@ -303,37 +303,44 @@ odoo.define('website.tramites', function(require) {
                 }
 
             }
-            var request = new XMLHttpRequest();
-            if(location.href.indexOf('/edicion/') == -1){
-                request.open("POST", "/create_user");
-            }else{
-                request.open("POST", "/update_tramite");            
-            }
-            request.send(formData);
-            request.onreadystatechange = function (aEvt) {
-                if (request.readyState == 4) {
-                    if(request.status == 200){
-                        let resp = JSON.parse(request.responseText);
-                        if(resp.data_user){
-                            location.replace(`/pagos/[${resp.data_user.tipo_doc}:${resp.data_user.documento}]`);
-                        }else if(resp.id_user){
-                            ocultarSpinner();
-                            $('#div_results').removeClass('offset-md-2 col-md-8').addClass('offset-md-4 col-md-6');
-                            $('#mssg_result').addClass('alert alert-warning').text('Trámite actualizado con exito');
-                            setTimeout(()=>{ 
-                                location.replace(`http://35.222.118.62/`);
-                            },800);
-                        }else{
-                            ocultarSpinner();
-                            $('#mssg_result').addClass('alert alert-danger').text('Error: '+resp.message.slice(0,80));
-                            $('#btn-registrar').removeAttr('disabled');
-                        }
-                     } else {
-                            ocultarSpinner();
-                            $('#mssg_result').addClass('alert alert-danger').text('Error: '+resp.message.slice(0,80));
-                            $('#btn-registrar').removeAttr('disabled');
-                     }
+            try {
+                const request = new XMLHttpRequest();
+                if(location.href.indexOf('/edicion/') == -1){
+                    request.open("POST", "/create_user");
+                }else{
+                    request.open("POST", "/update_tramite");            
                 }
+                request.send(formData);
+                request.onreadystatechange = function (aEvt) {
+                    if (request.readyState == 4) {
+                        if(request.status == 200){
+                            let resp = JSON.parse(request.responseText);
+                            if(resp.data_user){
+                                location.replace(`/pagos/[${resp.data_user.tipo_doc}:${resp.data_user.documento}]`);
+                            }else if(resp.id_user){
+                                ocultarSpinner();
+                                $('#div_results').removeClass('offset-md-2 col-md-8').addClass('offset-md-4 col-md-6');
+                                $('#mssg_result').addClass('alert alert-warning').text('Trámite actualizado con exito');
+                                setTimeout(()=>{ 
+                                    location.replace(`http://34.70.101.32/`);
+                                },800);
+                            }else{
+                                ocultarSpinner();
+                                $('#mssg_result').addClass('alert alert-danger').text('Error: '+resp.message.slice(0,80));
+                                $('#btn-registrar').removeAttr('disabled');
+                            }
+                         } else {
+                                ocultarSpinner();
+                                console.log('ERROR: '+request.status + request.statusText);
+                                $('#mssg_result').addClass('alert alert-danger').text('No hemos podido completar la solicitud en este momento, inténtelo nuevamente');
+                         }
+                    }
+                }
+            } catch (err){
+                ocultarSpinner();
+                $('#mssg_result').addClass('alert alert-danger').text('Error: No se pudo guardar el registro, intente de nuevo al recargar la página');
+                $('#btn-registrar').removeAttr('disabled');
+                console.warn(err);
             }
         },
     });
@@ -502,20 +509,26 @@ odoo.define('website.tramites', function(require) {
     });
     
     // Borra el value de la universidad si cambia el tipo de universidad
+    let tipo_univ = $('#x_institution_type_ID').val();
+    console.log('TIPO: '+tipo_univ);
     $('#x_institution_type_ID').change(function(e){
         if($('#universidades') != undefined && $('#seleccion_univ') != undefined ){
-            $('#universidades').val('');
-            $('#seleccion_univ').val('');
+            if(tipo_univ != $('#x_institution_type_ID').val() ){
+                $('#universidades').val('');
+                $('#seleccion_univ').val('');
+            }
         }
         if($('#x_institution_type_ID').val() == 1){
-            $('[name="x_doc_min_educa"]').val('NO APLICA');
-            $('[name="x_doc_min_educa"]').addClass('inputDisabled');
+            $('#doc_min_pdf').addClass('invisible').attr('aria-hidden',true)
+                .find('input').removeAttr('name');
+            $('#doc_min_na').removeClass('invisible').attr('aria-hidden',false);
         } else {
-            $('[name="x_doc_min_educa"]').val('');
-            $('[name="x_doc_min_educa"]').removeClass('inputDisabled');
+            $('#doc_min_na').addClass('invisible').attr('aria-hidden',true);
+            $('#doc_min_pdf').removeClass('invisible').attr('aria-hidden',false)
+                .find('input').attr('name','x_min_convalidation');
         }
     }).change();
-    
+
     // Borra el value de la carrera si cambia de nivel profesional
     $('#x_level_ID').change(function(e){
         if($('#carreras') != undefined && $('#seleccion_carreras') != undefined ){

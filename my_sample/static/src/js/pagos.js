@@ -41,7 +41,7 @@ odoo.define('website.pagos', function(require) {
                     $('#recibo').removeAttr('disabled');
                     $('#epayco').removeAttr('disabled');
                 }else{
-                    location.replace('http://35.222.118.62');
+                    location.replace('http://34.70.101.32');
                 }
             })
         },
@@ -83,6 +83,24 @@ odoo.define('website.pagos', function(require) {
             console.log(dataTran);
             handler.open(dataTran)
         },
+        buscar_numero_recibo: async function() {
+            let corte = dataPDF.corte ? dataPDF.corte.x_name : false;
+            let numero_recibo = 0;
+            let data = {
+                'id_tramite': dataPDF.tramite.id,
+                'corte': corte,
+            };
+            await rpc.query({
+                route: '/recibo_pago',
+                params: {'data': data}
+            }).then(function(response){
+                if(response.ok){
+                    console.log(response);
+                    numero_recibo = response.numero_recibo
+                }
+            })
+            return numero_recibo;
+        },
         downloadPDF: function() {
             const linkSource = $('#pdfFrame').attr('src');
             const downloadLink = document.createElement("a");
@@ -93,9 +111,10 @@ odoo.define('website.pagos', function(require) {
             downloadLink.click();
         },
     })
-    
-    $('#recibo').click(()=>{
+
+    $('#recibo').click(async ()=>{
         
+        let num_recibo = await pagos.buscar_numero_recibo();
         let mes = '';
         let dia = '';
         let re = /[a-zA-Z]/g;
@@ -115,9 +134,11 @@ odoo.define('website.pagos', function(require) {
         let lugar_expedicion = dataPDF.tramite.x_studio_pas_de_expedicin_1[1] == 'COLOMBIA' 
                              ? dataPDF.tramite.x_studio_ciudad_de_expedicin[1]
                              : dataPDF.tramite.x_studio_pas_de_expedicin_1[1];
-        
+        while (num_recibo.length < 12) {
+            num_recibo = '0' + num_recibo;
+        }
         let invoiceData = {
-            invoice: "000000016"+dataPDF.tramite.id,
+            invoice: num_recibo,
             firstname: dataPDF.tramite.x_studio_nombres,
             lastname: dataPDF.tramite.x_studio_apellidos,
             type_doc: dataPDF.tramite.x_studio_tipo_de_documento_1[0],
@@ -201,7 +222,7 @@ odoo.define('website.pagos', function(require) {
         })
 
         $('#volver').click(()=>{
-            location.replace('http://35.222.118.62/');
+            location.replace('http://34.70.101.32/');
         })
     
         const urlHead = "https://secure.epayco.co/validation/v1/reference/";

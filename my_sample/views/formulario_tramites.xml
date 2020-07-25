@@ -46,7 +46,7 @@
                                 <div class="form-group row col-md-6 form-field o_website_form_required o_fake_not_editable">
                                 <!-- <div t-attf-class="form-group #{error.get('x_name') and 'o_has_error' or ''} col-md-6"> -->
                                 <div class="col-md-6">
-                                    <label class="col-form-label o_fake_editable" for="x_name"> Nombre </label>
+                                    <label class="col-form-label o_fake_editable" for="x_name"> Nombres </label>
                                 </div>
                                 <div class="col-md-6">
                                     <input t-if="cliente" t-attf-value="{{ (cliente.x_nombres) }}" type="text" class=" o-letters form-control i_required" 
@@ -322,7 +322,7 @@
                                     <label for="x_document_image" class="file-label"><i class="fa fa-search"></i>
                                         <span> Seleccionar archivo</span>
                                     </label>
-                                    <span class="help-block">Tamaño máximo 500Kb, formato PDF</span>
+                                    <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
                                     <span class="help-block preview-pdf" id="preview-x_document_image">Previsualizar</span>
                                     <input type="file" class="form-control i_required btn-file" name="x_document_image" 
                                            id="x_document_image" accept="application/pdf"/>
@@ -369,13 +369,13 @@
                                 <div t-if="(form == 'matricula' or form == 'inscripciontt') and origen != 2" 
                                      class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
                                     <div class="col-md-6">
-                                        <label class="col-form-label o_fake_editable"> Imagen del diploma </label>
+                                        <label class="col-form-label o_fake_editable"> Diploma </label>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="x_diploma_image" class="file-label"><i class="fa fa-search"></i>
                                             <span> Seleccionar archivo</span>
                                         </label>
-                                        <span class="help-block">Tamaño máximo 500Kb, formato PDF</span>
+                                        <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
                                         <span class="help-block preview-pdf" id="preview-x_diploma_image">Previsualizar</span>
                                         <input type="file" class="form-control i_required btn-file" name="x_diploma_image" 
                                                id="x_diploma_image" accept="application/pdf"/>
@@ -611,11 +611,11 @@
                                         <div id="fecha_grado" class="o_website_form_date input-group">
                                             <input t-if="cliente" class="form-control inputDisabled i_required" name="x_grade_date" disabled="true"
                                                t-attf-value="{{ (cliente.x_fecha_de_grado.strftime('%d-%m-%Y')) }}" readonly="true"/>
-                                            <input t-elif="user and origen == 1" class="form-control i_required hand" name="x_grade_date"
+                                            <input t-elif="user and origen == 1" class="form-control i_required hand blanco" name="x_grade_date"
                                                t-attf-value="{{ (user.x_grade_date.strftime('%d-%m-%Y')) }}" readonly="true"/>
                                             <input t-elif="user and origen == 2" class="form-control i_required inputDisabled" name="x_grade_date" disabled="true"
                                                t-attf-value="{{ (user.x_grade_date.strftime('%d-%m-%Y')) }}" readonly="true"/>                                            
-                                            <input t-else="" type="text" class="form-control i_required hand" name="x_grade_date" readonly="true"/>
+                                            <input t-else="" type="text" class="form-control i_required hand blanco" name="x_grade_date" readonly="true"/>
                                             <div class="input-group-append">
                                                 <div class="input-group-text b-rad-right">
                                                 <i class="fa fa-calendar"/>
@@ -668,20 +668,24 @@
                                     </div>
                                 </div>
                                 </div>
-                                <div class="row col-md-6 form-group form-field o_fake_not_editable">
+                                <div t-if="origen == 1" class="row col-md-6 form-group form-field o_fake_not_editable">
                                     <div class="col-md-6">
-                                        <label class="col-form-label o_fake_editable" for="x_doc_min_educa">
+                                        <label class="col-form-label o_fake_editable" for="doc_min_educa">
                                             Convalidación de título Ministerio de Educación Nacional
                                         </label>
                                     </div>
-                                    <div class="col-md-6">
-                                        <input t-if="not user and origen == 1" type="text" maxlength="20" 
-                                            class="v-alfanum form-control i_required" name="x_doc_min_educa"/>
-                                        <input t-if="user and origen == 1" type="text" maxlength="20" 
-                                            class="v-alfanum form-control i_required" name="x_doc_min_educa"
-                                            t-attf-value="{{ (user.x_doc_min_educa) }}"/>
-                                        <input t-if="origen == 2" type="text" value="NO APLICA" maxlength="20"
-                                            class="v-alfanum form-control" name="x_doc_min_educa" readonly="1"/>                                        
+                                    <div id="doc_min_pdf" class="col-md-6" aria-hidden="false">
+                                        <label for="x_min_convalidation" class="file-label"><i class="fa fa-search"></i>
+                                            <span> Seleccionar archivo</span>
+                                        </label>
+                                        <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
+                                        <span class="help-block preview-pdf" id="preview-x_min_convalidation">Previsualizar</span>
+                                        <input type="file" class="form-control i_required btn-file" name="x_min_convalidation" 
+                                               id="x_min_convalidation" accept="application/pdf"/>
+                                    </div>
+                                    <div id="doc_min_na" class="col-md-6 invisible" aria-hidden="true">
+                                        <input type="text" value="NO APLICA" maxlength="20"
+                                            class="v-alfanum form-control" readonly="1"/>                                        
                                     </div>
                                 </div>
                             </div>
@@ -766,7 +770,7 @@
                                             <label for="x_certification_image" class="file-label"><i class="fa fa-search"></i>
                                                 <span> Seleccionar archivo</span>
                                             </label>
-                                            <span class="help-block">Tamaño máximo 500Kb, formato PDF</span>
+                                            <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
                                             <span class="help-block preview-pdf" id="preview-x_certification_image">Previsualizar</span>
                                             <input type="file" class="form-control i_required btn-file" name="x_certification_image" 
                                                    id="x_certification_image" accept="application/pdf"/>
@@ -782,7 +786,7 @@
                                             <label for="x_foreign_professional_accreditation" class="file-label"><i class="fa fa-search"></i>
                                                 <span> Seleccionar archivo</span>
                                             </label>
-                                            <span class="help-block">Tamaño máximo 500Kb, formato PDF</span>
+                                            <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
                                             <span class="help-block preview-pdf" id="preview-x_foreign_professional_accreditation">Previsualizar</span>
                                             <input type="file" class="form-control i_required btn-file" name="x_foreign_professional_accreditation" 
                                                    id="x_foreign_professional_accreditation" accept="application/pdf"/>
@@ -796,7 +800,7 @@
                                             <label for="x_professional_experience" class="file-label"><i class="fa fa-search"></i>
                                                 <span> Seleccionar archivo</span>
                                             </label>
-                                            <span class="help-block">Tamaño máximo 500Kb, formato PDF</span>
+                                            <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
                                             <span class="help-block preview-pdf" id="preview-x_professional_experience">Previsualizar</span>
                                             <input type="file" class="form-control i_required btn-file" name="x_professional_experience" 
                                                    id="x_professional_experience" accept="application/pdf"/>
@@ -812,7 +816,7 @@
                                             <label for="x_entity_request" class="file-label"><i class="fa fa-search"></i>
                                                 <span> Seleccionar archivo</span>
                                             </label>
-                                            <span class="help-block">Tamaño máximo 500Kb, formato PDF</span>
+                                            <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
                                             <span class="help-block preview-pdf" id="preview-x_entity_request">Previsualizar</span>
                                             <input type="file" class="form-control i_required btn-file" name="x_entity_request" 
                                                    id="x_entity_request" accept="application/pdf"/>
@@ -826,7 +830,7 @@
                                             <label for="x_company_existence_certificate" class="file-label"><i class="fa fa-search"></i>
                                                 <span> Seleccionar archivo</span>
                                             </label>
-                                            <span class="help-block">Tamaño máximo 500Kb, formato PDF</span>
+                                            <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
                                             <span class="help-block preview-pdf" id="preview-x_company_existence_certificate">Previsualizar</span>
                                             <input type="file" class="form-control i_required btn-file" name="x_company_existence_certificate" 
                                                    id="x_company_existence_certificate" accept="application/pdf"/>
@@ -928,7 +932,7 @@
                                     <div class="modal-body">
                                         <div class="container">
                                             <div class="row">
-                                                <iframe id="pdfViewer" class="col-md-12" src="#" height="500"></iframe>
+                                                <iframe id="pdfViewer" class="col-md-12" src="#" height="800"></iframe>
                                             </div>
                                         </div>
                                     </div>

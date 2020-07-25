@@ -30,7 +30,7 @@ function drawInvoice(pdf, invoiceData, offset) {
     pdf.text(
         45,
         offset + 45.29,
-        `RECIBO DE PAGO No. ${Number(invoiceData.invoice)}`
+        `RECIBO DE PAGO No. ${invoiceData.invoice}`
     );
 
     pdf.setDrawColor(255, 0, 0);

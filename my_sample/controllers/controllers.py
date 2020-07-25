@@ -123,6 +123,23 @@ class MySample(http.Controller):
     @http.route('/pagos/confirmacion', auth='public', website=True)
     def epayco_confirmacion(self):
         return  http.request.render('my_sample.epayco_confirmacion', {})
+            
+    @http.route('/recibo_pago', type="json", auth='public', website=True)
+    def recibo_pago(self, **kw):
+        data = kw.get('data')
+        _logger.info(data)
+        tramite = http.request.env['x_cpnaa_procedure'].search([('id','=',int(data['id_tramite']))])
+        numero_recibo = tramite.x_voucher_number
+        if not data['corte']:
+            return  {'ok': True, 'numero_recibo': str(numero_recibo)}
+        if not numero_recibo or data['corte'] != tramite.x_origin_name:
+            consecutivo = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Consecutivo Recibo de Pago')])
+            numero_recibo = int(consecutivo.x_value) + 1
+            http.request.env['x_cpnaa_parameter'].browse(consecutivo.id).sudo().write({'x_value':str(numero_recibo)})
+            http.request.env['x_cpnaa_procedure'].browse(tramite.id).sudo().write({'x_voucher_number': numero_recibo})
+        elif tramite.x_origin_type.id == 1 and data['corte'] == tramite.x_origin_name:
+            return  {'ok': True, 'numero_recibo': str(numero_recibo)}
+        return  {'ok': True, 'numero_recibo': str(numero_recibo)}
     
     @http.route('/tramite_fase_inicial', type="json", auth='public', website=True)
     def tramite_fase_inicial(self, **kw):
@@ -227,7 +244,7 @@ class MySample(http.Controller):
             else:
                 grado = False
         matricula = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1','=',int(data['doc_type'])),('x_studio_documento_1','=',data['doc']),
-                                                                         ('x_cycle_ID.x_order','=',5), ('x_service_ID.x_name','like','MATRÍCULA')])
+                                                                  ('x_cycle_ID.x_order','=',5), ('x_service_ID.x_name','ilike','MATR')])
         if len(user) > 1:
             user = user[0]
         if len(graduando) > 1:

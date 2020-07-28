@@ -844,12 +844,12 @@
                                         <div class="row form-group form-field o_fake_not_editable o_website_form_required_custom">
                                             <div class="col-md-12">
                                                 <label class="col-form-label o_fake_editable" for="x_elec_autorization"> 
-                                                <input type="checkbox" value="Yes" class="o_website_form_input" name="x_elec_autorization"/>Autorización uso de medios electrónicos: acepto y autorizo de manera expresa para que el CPNAA, envié notificaciones y demás comunicaciones relacionadas con mi trámite y/o solicitudes a través de técnicas y medios electrónicos, informáticos, telemáticos, mensajes de texto SMS (Incluye correo electrónico y pagina web).
+                                                <input type="checkbox" value="Yes" class="o_website_form_input" name="x_elec_autorization" id="x_elec_autorization"/>Autorización uso de medios electrónicos: acepto y autorizo de manera expresa para que el CPNAA, envié notificaciones y demás comunicaciones relacionadas con mi trámite y/o solicitudes a través de técnicas y medios electrónicos, informáticos, telemáticos, mensajes de texto SMS (Incluye correo electrónico y pagina web).
                                                 </label>
                                             </div>
                                             <div class="col-md-12">
                                                 <label class="col-form-label o_fake_editable" for="x_elec_terminos">
-                                                <input type="checkbox" value="Yes" class="o_website_form_input" required="true"/>
+                                                <input type="checkbox" value="Yes" class="o_website_form_input" required="true" id="x_elec_terminos"/>
                                                 Manifiesto y acepto que conozco los términos y condiciones de la <!--<a href="javascript:window.open('https://branderideas-cpnaa-developing-984497.dev.odoo.com/politica-de-proteccion-de-datos-personales', '', 'width=720,height=540');">--><a href="#" data-toggle="modal" data-target="#policyModal">política de protección de datos</a>, uso y tratamiento de datos personales. Y autorizo el uso de mis datos personales para recibir notificaciones sobre los trámites relacionados con las actividades misionales adelantadas por la entidad.
                                                 </label>
                                             </div>

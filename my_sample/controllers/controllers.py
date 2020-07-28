@@ -130,15 +130,16 @@ class MySample(http.Controller):
         _logger.info(data)
         tramite = http.request.env['x_cpnaa_procedure'].search([('id','=',int(data['id_tramite']))])
         numero_recibo = tramite.x_voucher_number
-        if not data['corte']:
-            return  {'ok': True, 'numero_recibo': str(numero_recibo)}
-        if not numero_recibo or data['corte'] != tramite.x_origin_name:
+        if (not data['corte'] and numero_recibo) and (data['corte'] == tramite.x_origin_name and numero_recibo):
+            pass
+        elif not numero_recibo or (data['corte'] and data['corte'] != tramite.x_origin_name):
             consecutivo = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Consecutivo Recibo de Pago')])
             numero_recibo = int(consecutivo.x_value) + 1
+            update = {'x_voucher_number': numero_recibo}
+            if data['corte']:
+                update = {'x_voucher_number': numero_recibo,'x_origin_name': data['corte']}
             http.request.env['x_cpnaa_parameter'].browse(consecutivo.id).sudo().write({'x_value':str(numero_recibo)})
-            http.request.env['x_cpnaa_procedure'].browse(tramite.id).sudo().write({'x_voucher_number': numero_recibo})
-        elif tramite.x_origin_type.id == 1 and data['corte'] == tramite.x_origin_name:
-            return  {'ok': True, 'numero_recibo': str(numero_recibo)}
+            http.request.env['x_cpnaa_procedure'].browse(tramite.id).sudo().write(update)
         return  {'ok': True, 'numero_recibo': str(numero_recibo)}
     
     @http.route('/tramite_fase_inicial', type="json", auth='public', website=True)
@@ -190,29 +191,30 @@ class MySample(http.Controller):
         format = '%Y-%m-%d %H:%M:%S' # The format 
         datetime_str = datetime.strptime(data['fecha_pago'], format)
         datetime_str = datetime_str + timedelta(hours=5)
+        _logger.info(data['id_tramite'])
         try:
-            tramite = http.request.env['x_cpnaa_procedure'].sudo().search_read([('id','=',data['id_tramite']),('x_cycle_ID.x_order','=',0)])[0]
-            ciclo_ID = http.request.env["x_cpnaa_cycle"].sudo().search(["&",("x_service_ID.id","=",tramite["x_service_ID"][0]),("x_order","=",1)])
+            tramite = http.request.env['x_cpnaa_procedure'].sudo().search_read([('id','=',data['id_tramite']),('x_cycle_ID.x_order','=',0)])
+            ciclo_ID = http.request.env["x_cpnaa_cycle"].sudo().search(["&",("x_service_ID.id","=",tramite[0]["x_service_ID"][0]),("x_order","=",1)])
             update = {'x_cycle_ID': ciclo_ID.id,'x_radicacion_date': datetime_str, 'x_pay_datetime': datetime_str, 'x_pay_type': data['tipo_pago'], 
                       'x_consignment_number': data['numero_pago'], 'x_bank': data['banco'], 'x_consignment_price': data['monto_pago']}
             mailthread = {
-                'email_from': tramite['x_full_name'],
+                'email_from': tramite[0]['x_full_name'],
                 'subject': 'Trámite recibido en fase de verificación',
                 'model': 'x_cpnaa_procedure',
                 'subtype_id': 2,
-                'body': 'Trámite de cliente '+tramite['x_full_name']+' realizo el pago y ha sido recibido en fase de verificación',
-                'author_id': http.request.env['res.partner'].search([('email','=',tramite['x_studio_correo_electrnico'])]).id,
+                'body': 'Trámite de cliente '+tramite[0]['x_full_name']+' realizo el pago y ha sido recibido en fase de verificación',
+                'author_id': http.request.env['res.partner'].search([('email','=',tramite[0]['x_studio_correo_electrnico'])])[0].id,
                 'message_type': 'notification',
-                'res_id': tramite['id']
+                'res_id': tramite[0]['id']
             }
-            http.request.env['x_cpnaa_procedure'].browse(tramite['id']).sudo().write(update)
+            http.request.env['x_cpnaa_procedure'].browse(tramite[0]['id']).sudo().write(update)
             http.request.env['mail.message'].sudo().create(mailthread)
             if len(tramite)>0:
                 return {'ok': True, 'message': 'Trámite actualizado con exito'}
             else:
                 return {'ok': True, 'message': 'No se encontro ningún trámite para actualizar'}
         except:
-            return {'ok': False, 'error': 'Ha ocurrido un error'}
+            return {'ok': False, 'error': 'Ha ocurrido un error en la solicitud'}
         
     @http.route('/cliente/<model("x_cpnaa_user"):persona>', auth='public', website=True)
     def buscar_persona(self, persona):
@@ -268,30 +270,34 @@ class MySample(http.Controller):
         if doc_type == '':
             graduandos = http.request.env['x_procedure_temp'].sudo().search_read([('x_nombres','=',data['nombres']),
                                                                             ('x_apellidos','=',data['apellidos']),
+                                                                            ('x_grado_ID','!=',False),
                                                                             ('x_origin_type','=','CONVENIO')])
         else:
             doc_type = int(data['doc_type'])
             graduandos = http.request.env['x_procedure_temp'].sudo().search_read([('x_tipo_documento_select','=',doc_type),
-                                                                            ('x_documento','=',data['doc']),('x_origin_type','=','CONVENIO')])
-        for graduando in graduandos:
-            grado = http.request.env['x_cpnaa_grade'].sudo().browse(graduando['x_grado_ID'][0])
-            id_grado = grado.id
-            if grado:
-                fecha_maxima = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
-                if fecha_maxima >= hoy:
-                    _logger.info(fecha_maxima)
-                else:
-                    id_grado = False
-                tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',graduando['x_tipo_documento_select'][0]),
-                                                                           ('x_studio_documento_1','=',graduando['x_documento']),
-                                                                           ('x_cycle_ID.x_order','<','5')])
-                definitivo = {
-                    'graduando': graduando,
-                    'id_user_tramite': tramite.x_user_ID.id,
-                    'id_grado': id_grado,
-                    'fecha_maxima': fecha_maxima
-                }
-                definitivos.append(definitivo)
+                                                                                  ('x_grado_ID','!=',False),
+                                                                                  ('x_documento','=',data['doc']),
+                                                                                  ('x_origin_type','=','CONVENIO')])
+        if (len(graduandos) > 0):
+            for graduando in graduandos:
+                grado = http.request.env['x_cpnaa_grade'].sudo().browse(graduando['x_grado_ID'][0])
+                id_grado = grado.id
+                if grado:
+                    fecha_maxima = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
+                    if fecha_maxima >= hoy:
+                        _logger.info(fecha_maxima)
+                    else:
+                        id_grado = False
+                    tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',graduando['x_tipo_documento_select'][0]),
+                                                                               ('x_studio_documento_1','=',graduando['x_documento']),
+                                                                               ('x_cycle_ID.x_order','<','5')])
+                    definitivo = {
+                        'graduando': graduando,
+                        'id_user_tramite': tramite.x_user_ID.id,
+                        'id_grado': id_grado,
+                        'fecha_maxima': fecha_maxima
+                    }
+                    definitivos.append(definitivo)
         if (graduandos):
             return { 'ok': True, 'graduandos': definitivos }
         else:
@@ -390,15 +396,26 @@ class MySample(http.Controller):
         tipo_universidad = kw.get('tipo_universidad')
         return {'universidades': http.request.env['x_cpnaa_user'].sudo().search_read([('x_user_type_ID.id','=',3),('x_institution_type_ID.id', '=', tipo_universidad),
                                                                                ('x_name', 'ilike', cadena)],['id','x_name'], limit=6)}
-        
+    
     @http.route('/get_carreras', type="json", auth='public', website=True)
     def get_carreras(self, **kw):
         _logger.info(kw)
         cadena = kw.get('cadena')
         nivel_profesional = kw.get('nivel_profesional')
+        id_genero = kw.get('id_genero')
+        nombre_carrera = 'x_name'
+        _logger.info(id_genero)
+        if id_genero == '2':
+            nombre_carrera = 'x_female_name'
         return {'carreras': http.request.env['x_cpnaa_career'].sudo().search_read([('x_level_ID.id','=',nivel_profesional),
-                                                                                       ('x_name', 'ilike', cadena)],
-                                                                                       ['id','x_name'], limit=6)}
+                                                                                       (nombre_carrera, 'ilike', cadena)],
+                                                                                       ['id',nombre_carrera], limit=6)}
+    
+    @http.route('/get_carrera_genero', type="json", auth='public', website=True)
+    def get_carrera_genero(self, **kw):
+        campo = kw.get('campo')
+        id_carrera = kw.get('id_carrera')
+        return {'carrera': http.request.env['x_cpnaa_career'].sudo().search_read([('id','=',id_carrera)],[campo])}
         
     """   RUTAS DE CONVENIOS  """
 

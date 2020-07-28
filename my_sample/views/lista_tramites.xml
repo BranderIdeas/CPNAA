@@ -153,7 +153,7 @@
                                 </a>
                                 <button t-elif="tramites[0].x_cycle_ID[0].x_order == 0"
                                     id="btn-pagar" class="btn btn-primary btn-lg btn-stadium ml-3">Pagar</button>
-                                <a t-else="" href="http://35.222.118.62/calendario-de-matriculas-d65/"
+                                <a t-else="" href="http://34.70.101.32/calendario-de-matriculas-d65/"
                                    class="btn btn-primary btn-lg btn-stadium ml-3">Su solicitud esta en trámite</a>
                                 </td>
                             </div>

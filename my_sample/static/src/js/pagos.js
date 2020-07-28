@@ -256,8 +256,10 @@ odoo.define('website.pagos', function(require) {
                         route: '/tramite_fase_verificacion',
                         params: {'data': datosTramite}
                     }).then(function(response){
-                        if(response){
-                            console.log('Todo OK')
+                        if(response.ok){
+                            console.log(response.message)
+                        }else{
+                            console.log(response.error)
                         }
                     }).catch(function(e){
                         console.error('Ha ocurrido un error: '+e)

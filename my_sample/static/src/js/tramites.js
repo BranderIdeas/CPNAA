@@ -24,7 +24,6 @@ odoo.define('website.tramites', function(require) {
                 route: '/validar_tramites',
                 params: {'data': data}
             }).then(function(response){
-                console.log(response);
                 if(response.convenio){
                     $(location).attr('href','/tramite/convenios/'+ response.id);
                 } else if(response.id){
@@ -46,12 +45,10 @@ odoo.define('website.tramites', function(require) {
             }
             div_msj.find('div').text('');
             div_msj.addClass('invisible').attr('aria-hidden',true);
-            console.log(data);
             return rpc.query({
                 route: '/validar_estudiante',
                 params: {'data': data}
             }).then(function(response){
-                console.log(response);
                 if (!response.graduandos){
                     div_msj.removeClass('invisible').attr('aria-hidden',false);
                     div_msj.find('div').text(
@@ -101,12 +98,23 @@ odoo.define('website.tramites', function(require) {
                 console.log(err);
             });
         },
-        data_autocomplete_carreras: function(cadena, nivel_prof){
+        data_autocomplete_carreras: function(cadena, nivel_prof, genero){
             return rpc.query({
                 route: '/get_carreras',
-                params: {'cadena': cadena, 'nivel_profesional':nivel_prof}
+                params: {'cadena': cadena, 'nivel_profesional':nivel_prof, 'id_genero':genero}
             }).then(function(response){
                 return response;
+            }).catch(function(err){
+                console.log(err);
+            });
+        },
+        cambiar_genero_carrera: function(id, genero){
+            let campo = genero == '1' ? 'x_name' : 'x_female_name';
+            return rpc.query({
+                route: '/get_carrera_genero',
+                params: {'id_carrera': id, 'campo': campo, }
+            }).then(function(response){
+                return response.carrera[0][campo];
             }).catch(function(err){
                 console.log(err);
             });
@@ -510,7 +518,6 @@ odoo.define('website.tramites', function(require) {
     
     // Borra el value de la universidad si cambia el tipo de universidad
     let tipo_univ = $('#x_institution_type_ID').val();
-    console.log('TIPO: '+tipo_univ);
     $('#x_institution_type_ID').change(function(e){
         if($('#universidades') != undefined && $('#seleccion_univ') != undefined ){
             if(tipo_univ != $('#x_institution_type_ID').val() ){
@@ -592,11 +599,13 @@ odoo.define('website.tramites', function(require) {
     // Carga las opciones para el autocomplete de las carreras
     $('#carreras').on('keyup paste', async function(e){
         let nivelProf = $('#x_level_ID').val();
+        let genero = $('#x_gender_ID').val() != '' ? $('#x_gender_ID').val() : '1';
         if(e.target.value.length > 1){
-           let consulta = await tramites.data_autocomplete_carreras(e.target.value, nivelProf);
+           let consulta = await tramites.data_autocomplete_carreras(e.target.value, nivelProf, genero);
            $('#result_carreras').html('');
            $.each(consulta.carreras, function(key, value) { 
-               $('#result_carreras').append('<li class="list-group-item link-carreras"><span id="'+ value.id +'" class="text-gray carreras">' + value.x_name + '</span></li>');
+               let carrera = genero == '1' ? value.x_name : value.x_female_name;
+               $('#result_carreras').append('<li class="list-group-item link-carreras"><span id="'+ value.id +'" class="text-gray carreras">' + carrera + '</span></li>');
            });
         }
     })
@@ -624,14 +633,24 @@ odoo.define('website.tramites', function(require) {
     })
     
     // Cambia arquitecto/arquitecta según selección de género
-    $('#x_gender_ID').change(function(e){
-        // Validamos si es profesional para controlar con el genero
-        if($('#x_level_ID').val() == '1' && $('#x_gender_ID').val() != ''){
+    $('#x_gender_ID').change(async function(e){
+        // Cambiamos el genero de la carrera
+        if($('#x_level_ID').val() == '1'){
             if($('#x_gender_ID').val() == '1'){
                 $('#x_institute_career').val('109');
-            }else{
+            }else if ($('#x_gender_ID').val() == '2'){
                 $('#x_institute_career').val('110');
             }
+        } else if (($('#x_level_ID').val() != '1') && $('#x_gender_ID').val() != '' && $('#x_institute_career').val() != ''){
+            let carrera = await tramites.cambiar_genero_carrera($('#x_institute_career').val(), $('#x_gender_ID').val());
+            console.log(carrera);
+            if(carrera){
+                $('#carreras').val(carrera);
+                $('select[name="x_institute_career"] option:selected').text(carrera);
+            }
+        } else if($('#x_gender_ID').val() == ''){
+            $('#carreras').val('');
+            $('#x_institute_career').val('');
         }
     }).change();
     

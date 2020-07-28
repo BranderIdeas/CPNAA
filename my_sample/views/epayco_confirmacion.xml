@@ -9,7 +9,7 @@
                             <font>RESUMEN DE LA TRANSACCIÓN</font>
                         </h1>
                     </div>
-                    <div class="container mb-5 col-sm-8 col-lg-6 justify-content-md-center">
+                    <div class="container col-sm-8 col-lg-6 justify-content-md-center">
                         <div class="formSection">
                         <table class="table table-striped">
                             <tbody>
@@ -50,7 +50,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="row col-sm-12 justify-content-md-center my-5">
+                <div id="error_pagos" class="row col-sm-12 justify-content-md-center invisible" aria-hidden="true">
+                    <div class="alert alert-primary col-sm-7 text-center" role="alert">
+                    </div>
+                </div>
+                <div class="row col-sm-12 justify-content-md-center mt-2 mb-5">
                     <div>
                         <button id="imprimir" type="button" class="btn btn-primary btn-stadium float-right">Imprimir</button>
                     </div>

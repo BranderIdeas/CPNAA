@@ -631,7 +631,7 @@ odoo.define('website.tramites', function(require) {
             $('#result_carreras').html('');
         }
     })
-    console.log('seleccion_carreras');
+
     // Cambia arquitecto/arquitecta según selección de género
     $('#x_gender_ID').change(async function(e){
         // Cambiamos el genero de la carrera

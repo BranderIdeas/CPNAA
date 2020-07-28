@@ -256,16 +256,24 @@ odoo.define('website.pagos', function(require) {
                         route: '/tramite_fase_verificacion',
                         params: {'data': datosTramite}
                     }).then(function(response){
-                        if(response.ok){
+                        if(response.ok && !response.error){
                             console.log(response.message)
-                        }else{
-                            console.log(response.error)
+                        }else if(response.ok && response.error){
+                            console.warn(response.message+'\n'+response.error)
+                        }else if(response.error){
+                            console.error(response.error);
+                            let enlaceEstado = response.id_user ? `<a href="${urlBase}/cliente/${response.id_user}/tramites">Ver estado del trámite</a><br/>` : '';
+                            $('#error_pagos').removeClass('invisible').attr('aria-hidden',false);
+                            $('#error_pagos').find('.alert').html(
+                                `${response.error}<br/>${enlaceEstado}
+                                 Si tiene alguna duda, por favor comuníquese con el CPNAA al siguiente correo 
+                                 electrónico: info@cpnaa.gov.co o al número telefónico (1)3502700 ext 111-115 en Bogotá`);
                         }
                     }).catch(function(e){
                         console.error('Ha ocurrido un error: '+e)
                     })
                 } else {
-                     Toast.fire({
+                    Toast.fire({
                         icon: 'warning',
                         title: `<br/>Error consultando la información.<br/><br/> `,
                         confirmButtonText: 'Ocultar',

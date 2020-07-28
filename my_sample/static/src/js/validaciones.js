@@ -107,7 +107,7 @@ odoo.define('website.validations', function(require) {
             const regex = /^[0-9]*$/;
             if (!regex.test(entrada)) {
                 Toast.fire({
-                    title: `<br/>No es válido, solo se permiten números.<br/><br/> `,
+                    title: `<br/>No es válido, ingrese solo números.<br/><br/> `,
                     icon: 'error',
                     confirmButtonText: 'Ocultar',
                 })
@@ -126,7 +126,7 @@ odoo.define('website.validations', function(require) {
             const regex = /^[0-9]*$/;
             if (!regex.test(entrada)) {
                 Toast.fire({
-                    title: `<br/>No es válido, solo se permiten números.<br/><br/> `,
+                    title: `<br/>No es válido, ingrese solo números.<br/><br/> `,
                     icon: 'error',
                     confirmButtonText: 'Ocultar',
                 })
@@ -139,7 +139,7 @@ odoo.define('website.validations', function(require) {
             const regex = /^[a-zA-ZÑñ ]*$/;
             if (!regex.test(entrada)) {
                 Toast.fire({
-                    title: `<br/>No es válido, solo se permiten letras.<br/><br/> `,
+                    title: `<br/>No es válido, solo se permiten letras, evite tildes y caracteres especiales.<br/><br/> `,
                     icon: 'error',
                     confirmButtonText: 'Ocultar',
                 })

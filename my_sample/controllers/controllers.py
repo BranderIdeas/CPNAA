@@ -191,30 +191,48 @@ class MySample(http.Controller):
         format = '%Y-%m-%d %H:%M:%S' # The format 
         datetime_str = datetime.strptime(data['fecha_pago'], format)
         datetime_str = datetime_str + timedelta(hours=5)
-        _logger.info(data['id_tramite'])
+        _logger.info(datetime_str)
+        id_user, error, tramite, pago_registrado, mailthread_registrado = False, False, False, False, False
         try:
-            tramite = http.request.env['x_cpnaa_procedure'].sudo().search_read([('id','=',data['id_tramite']),('x_cycle_ID.x_order','=',0)])
-            ciclo_ID = http.request.env["x_cpnaa_cycle"].sudo().search(["&",("x_service_ID.id","=",tramite[0]["x_service_ID"][0]),("x_order","=",1)])
-            update = {'x_cycle_ID': ciclo_ID.id,'x_radicacion_date': datetime_str, 'x_pay_datetime': datetime_str, 'x_pay_type': data['tipo_pago'], 
-                      'x_consignment_number': data['numero_pago'], 'x_bank': data['banco'], 'x_consignment_price': data['monto_pago']}
-            mailthread = {
-                'email_from': tramite[0]['x_full_name'],
-                'subject': 'Trámite recibido en fase de verificación',
-                'model': 'x_cpnaa_procedure',
-                'subtype_id': 2,
-                'body': 'Trámite de cliente '+tramite[0]['x_full_name']+' realizo el pago y ha sido recibido en fase de verificación',
-                'author_id': http.request.env['res.partner'].search([('email','=',tramite[0]['x_studio_correo_electrnico'])])[0].id,
-                'message_type': 'notification',
-                'res_id': tramite[0]['id']
-            }
-            http.request.env['x_cpnaa_procedure'].browse(tramite[0]['id']).sudo().write(update)
-            http.request.env['mail.message'].sudo().create(mailthread)
-            if len(tramite)>0:
-                return {'ok': True, 'message': 'Trámite actualizado con exito'}
+            tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',data["id_tramite"])])
+            id_user = tramite.x_user_ID
+            if len(tramite) > 0:
+                if tramite.x_cycle_ID.x_order == 0:
+                    ciclo_ID = http.request.env["x_cpnaa_cycle"].sudo().search(["&",("x_service_ID.id","=",tramite["x_service_ID"].id),("x_order","=",1)])
+                    update = {'x_cycle_ID': ciclo_ID.id,'x_radicacion_date': datetime_str, 'x_pay_datetime': datetime_str, 'x_pay_type': data['tipo_pago'], 
+                              'x_consignment_number': data['numero_pago'], 'x_bank': data['banco'], 'x_consignment_price': data['monto_pago']}
+                    pago_registrado = http.request.env['x_cpnaa_procedure'].browse(tramite['id']).sudo().write(update)
+                    if not pago_registrado:
+                        raise Exception('No se puedo registrar el pago')
+                if tramite.x_cycle_ID.x_order > 0:
+                    raise Exception('Este pago ya fue registrado')
             else:
-                return {'ok': True, 'message': 'No se encontro ningún trámite para actualizar'}
+                raise Exception('No se encontro trámite, no se completado la solicitud')                 
+        except:        
+            error = str(sys.exc_info()[1])
+        try:
+            if pago_registrado:
+                mailthread = {
+                    'email_from': tramite['x_full_name'],
+                    'subject': 'Trámite recibido en fase de verificación',
+                    'model': 'x_cpnaa_procedure',
+                    'subtype_id': 2,
+                    'body': 'Trámite de cliente '+tramite['x_full_name']+' realizo el pago y ha sido recibido en fase de verificación',
+                    'author_id': http.request.env['res.partner'].search([('email','=',tramite['x_studio_correo_electrnico'])])[0].id,
+                    'message_type': 'notification',
+                    'res_id': tramite['id']
+                }
+                mailthread_registrado = http.request.env['mail.message'].sudo().create(mailthread)
         except:
-            return {'ok': False, 'error': 'Ha ocurrido un error en la solicitud'}
+            if pago_registrado:
+                error = 'Se registro el pago pero no se escribio el mailthread \n'+str(sys.exc_info())
+        if not error and mailthread_registrado:
+            return {'ok': True, 'message': 'Trámite actualizado con exito y registrado en el mailthread', 'mailthread': mailthread_registrado.id}
+        if pago_registrado and error:
+            _logger.info(error)
+            return {'ok': True, 'message': 'Trámite actualizado con exito', 'error': error}
+        if not pago_registrado:        
+            return {'ok': False, 'error': error, 'id_user': id_user.id}
         
     @http.route('/cliente/<model("x_cpnaa_user"):persona>', auth='public', website=True)
     def buscar_persona(self, persona):

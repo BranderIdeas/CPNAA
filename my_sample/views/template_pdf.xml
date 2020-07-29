@@ -13,9 +13,9 @@
                 <br/>
                 <br/>
                 <br/>
-                <div style="text-align:right">Ref. listado definitivo de reconfirmación de graduandos convenio <t t-esc="convenio.x_agreement_code" /> - 
+                <div style="text-align:right">Ref. listado definitivo de reconfirmación de graduandos convenio <t t-esc="convenio.x_name" /> - 
                     CPNAA <t t-esc="convenio.x_user_ID.x_name" /> - 
-                    <span t-if="nivel == 'PROFESIONAL'"> Matricula Profesional de Arquitectura </span>
+                    <span t-if="nivel == 'PROFESIONAL'"> Matrícula Profesional de Arquitectura </span>
                     <span t-else="" >  Certificado de Inscripción Profesional  </span>
                 </div>
                 <br/><br/><br/> Respetados Señores:<br/><br/> 
@@ -29,12 +29,29 @@
                 <br/>
                 <table width="100%">
                     <tr>
-                        <td style="text-align:center; font-weight:bold" width="20px">No.</td>
+                        <td style="text-align:center; font-weight:bold" width="25px">No.</td>
                         <td style="text-align:center; font-weight:bold">Número de Identificación</td>
                         <td style="text-align:center; font-weight:bold">Nombres</td>
                         <td style="text-align:center; font-weight:bold">Apellidos</td>
                         <td style="text-align:center; font-weight:bold" width="80px">Fecha de Grado</td>
                     </tr>
+                    <t t-set="j" t-value="0"/>
+                    <t t-foreach="request.env['x_cpnaa_procedure'].search([('x_grade_ID.id','=',grado.id),
+                        ('x_cycle_ID.x_order','>',0)])" t-as="estudiantes">
+                        <t t-set="j" t-value="j+1"/>
+                        <t t-if="estudiantes.x_studio_tipo_de_documento_1.id == 1" t-set="tipo_doc" t-value="'C.C. '"/>
+                        <t t-if="estudiantes.x_studio_tipo_de_documento_1.id == 2" t-set="tipo_doc" t-value="'C.E. '"/>
+                        <t t-if="estudiantes.x_studio_tipo_de_documento_1.id == 5" t-set="tipo_doc" t-value="'PA. '"/>
+                        <tr>
+                            <td width="20px"><t t-esc="j" /></td>
+                            <td>
+                                <t t-esc="tipo_doc"/><t t-esc="estudiantes.x_studio_documento_1"/>
+                            </td>
+                            <td><t t-esc="estudiantes.x_studio_nombres"/></td>
+                            <td><t t-esc="estudiantes.x_studio_apellidos"/></td>
+                            <td width="80px"><t t-esc="estudiantes.x_studio_fecha_de_grado_2.strftime('%d-%m-%Y')"/></td>
+                        </tr>
+                    </t>
                 </table>
                 <br/>
                 <br/> Agradezco de antemano su gentil y valiosa atención.

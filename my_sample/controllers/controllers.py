@@ -197,6 +197,8 @@ class MySample(http.Controller):
             tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',data["id_tramite"])])
             id_user = tramite.x_user_ID
             if len(tramite) > 0:
+                if tramite.x_cycle_ID.x_order > 0:
+                    raise Exception('Este pago ya fue registrado')
                 if tramite.x_cycle_ID.x_order == 0:
                     ciclo_ID = http.request.env["x_cpnaa_cycle"].sudo().search(["&",("x_service_ID.id","=",tramite["x_service_ID"].id),("x_order","=",1)])
                     update = {'x_cycle_ID': ciclo_ID.id,'x_radicacion_date': datetime_str, 'x_pay_datetime': datetime_str, 'x_pay_type': data['tipo_pago'], 
@@ -204,8 +206,6 @@ class MySample(http.Controller):
                     pago_registrado = http.request.env['x_cpnaa_procedure'].browse(tramite['id']).sudo().write(update)
                     if not pago_registrado:
                         raise Exception('No se puedo registrar el pago')
-                if tramite.x_cycle_ID.x_order > 0:
-                    raise Exception('Este pago ya fue registrado')
             else:
                 raise Exception('No se encontro trámite, no se completado la solicitud')                 
         except:        
@@ -213,19 +213,19 @@ class MySample(http.Controller):
         try:
             if pago_registrado:
                 mailthread = {
-                    'email_from': tramite['x_full_name'],
+                    'email_from': tramite.x_full_name,
                     'subject': 'Trámite recibido en fase de verificación',
                     'model': 'x_cpnaa_procedure',
                     'subtype_id': 2,
-                    'body': 'Trámite de cliente '+tramite['x_full_name']+' realizo el pago y ha sido recibido en fase de verificación',
-                    'author_id': http.request.env['res.partner'].search([('email','=',tramite['x_studio_correo_electrnico'])])[0].id,
+                    'body': 'Trámite de cliente '+tramite.x_full_name+' realizo el pago y ha sido recibido en fase de verificación',
+                    'author_id': http.request.env['res.partner'].search([('email','=',tramite.x_studio_correo_electrnico)]).id,
                     'message_type': 'notification',
-                    'res_id': tramite['id']
+                    'res_id': tramite.id
                 }
                 mailthread_registrado = http.request.env['mail.message'].sudo().create(mailthread)
         except:
             if pago_registrado:
-                error = 'Se registro el pago pero no se escribio el mailthread \n'+str(sys.exc_info())
+                error = 'Se registro el pago pero no se escribio el mailthread'+'\nTrámite ID: '+str(tramite.id)+'\n'+str(sys.exc_info())
         if not error and mailthread_registrado:
             return {'ok': True, 'message': 'Trámite actualizado con exito y registrado en el mailthread', 'mailthread': mailthread_registrado.id}
         if pago_registrado and error:

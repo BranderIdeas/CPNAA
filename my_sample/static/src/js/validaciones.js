@@ -139,7 +139,7 @@ odoo.define('website.validations', function(require) {
             const regex = /^[a-zA-ZÑñ ]*$/;
             if (!regex.test(entrada)) {
                 Toast.fire({
-                    title: `<br/>No es válido, solo se permiten letras, evite tildes y caracteres especiales.<br/><br/> `,
+                    title: `<br/>No es válido, solo se permiten letras, evite números, tildes ó caracteres especiales.<br/><br/> `,
                     icon: 'error',
                     confirmButtonText: 'Ocultar',
                 })

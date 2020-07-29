@@ -252,26 +252,32 @@ odoo.define('website.pagos', function(require) {
                     datosTramite['tipo_pago'] = transaction.data.x_type_payment;
                     datosTramite['id_tramite'] = transaction.data.x_extra1;
 //                     console.log(datosTramite);    
-                    rpc.query({
-                        route: '/tramite_fase_verificacion',
-                        params: {'data': datosTramite}
-                    }).then(function(response){
-                        if(response.ok && !response.error){
-                            console.log(response.message)
-                        }else if(response.ok && response.error){
-                            console.warn(response.message+'\n'+response.error)
-                        }else if(response.error){
-                            console.error(response.error);
-                            let enlaceEstado = response.id_user ? `<a href="${urlBase}/cliente/${response.id_user}/tramites">Ver estado del trámite</a><br/>` : '';
+                    if(transaction.data.x_response === 'Aceptada'){
+                        rpc.query({
+                            route: '/tramite_fase_verificacion',
+                            params: {'data': datosTramite}
+                        }).then(function(response){
+                            if(response.ok && !response.error){
+                                console.log(response.message)
+                            }else if(response.ok && response.error){
+                                console.warn(response.message+'\n'+response.error)
+                            }else if(!response.ok && response.error){
+                                console.error(response.error);
+                                let enlaceEstado = response.id_user ? `<a href="${urlBase}/cliente/${response.id_user}/tramites">Ver estado del trámite</a><br/>` : '';
+                                $('#error_pagos').removeClass('invisible').attr('aria-hidden',false);
+                                $('#error_pagos').find('.alert').html(
+                                    `${response.error}<br/>${enlaceEstado}
+                                     Si tiene alguna duda, por favor comuníquese con el CPNAA al siguiente correo 
+                                     electrónico: info@cpnaa.gov.co o al número telefónico (1)3502700 ext 111-115 en Bogotá`);
+                            }
+                        }).catch(function(e){
+                            console.error('Ha ocurrido un error: '+e);
                             $('#error_pagos').removeClass('invisible').attr('aria-hidden',false);
                             $('#error_pagos').find('.alert').html(
-                                `${response.error}<br/>${enlaceEstado}
-                                 Si tiene alguna duda, por favor comuníquese con el CPNAA al siguiente correo 
-                                 electrónico: info@cpnaa.gov.co o al número telefónico (1)3502700 ext 111-115 en Bogotá`);
-                        }
-                    }).catch(function(e){
-                        console.error('Ha ocurrido un error: '+e)
-                    })
+                                `Su pago ha sido exitoso pero no se pudo completar el trámite, por favor envie esta información al
+                                 correo info@cpnaa.gov.co`);
+                        })
+                    }
                 } else {
                     Toast.fire({
                         icon: 'warning',

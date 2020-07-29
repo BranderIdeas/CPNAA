@@ -183,7 +183,7 @@
                                                 <t t-foreach="estudiantes_con_pago" t-as="estudiante">
                                                     <t t-set="j" t-value="j+1"/>
                                                     <tr>
-                                                      <th scope="row"><t t-esc="i" /></th>
+                                                      <th scope="row"><t t-esc="j" /></th>
                                                       <td><t t-esc="estudiante.x_studio_tipo_de_documento_1.x_name" /></td>
                                                       <td><t t-esc="estudiante.x_studio_documento_1" /></td>
                                                       <td><t t-esc="estudiante.x_studio_nombres" /></td>

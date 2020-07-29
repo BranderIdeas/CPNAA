@@ -5,6 +5,10 @@ odoo.define('website.pagos', function(require) {
     var rpc = require('web.rpc');
     
     var dataPDF = {};
+    let urlBase = "https://branderideas-cpnaa.odoo.com";
+    if(location.href.indexOf(urlBase) === -1 ){
+        urlBase = "https://branderideas-cpnaa-developing-984497.dev.odoo.com";
+    }
     
     // Configuración de las alertas
     const Toast = Swal.mixin({
@@ -37,7 +41,7 @@ odoo.define('website.pagos', function(require) {
                     $('#recibo').removeAttr('disabled');
                     $('#epayco').removeAttr('disabled');
                 }else{
-                    location.replace('/cliente/tramite/matricula');
+                    location.replace('http://34.70.101.32');
                 }
             })
         },
@@ -63,7 +67,7 @@ odoo.define('website.pagos', function(require) {
                 country: "co",
                 lang: "es",
                 external: false,
-                response: "https://branderideas-cpnaa-developing-984497.dev.odoo.com/pagos/confirmacion",
+                response: `${urlBase}/pagos/confirmacion`,
 
                 //Atributos cliente
                 name_billing: `${dataPDF.tramite.x_studio_nombres} ${dataPDF.tramite.x_studio_apellidos}`,
@@ -79,6 +83,24 @@ odoo.define('website.pagos', function(require) {
             console.log(dataTran);
             handler.open(dataTran)
         },
+        buscar_numero_recibo: async function() {
+            let corte = dataPDF.corte ? dataPDF.corte.x_name : false;
+            let numero_recibo = 0;
+            let data = {
+                'id_tramite': dataPDF.tramite.id,
+                'corte': corte,
+            };
+            await rpc.query({
+                route: '/recibo_pago',
+                params: {'data': data}
+            }).then(function(response){
+                if(response.ok){
+                    console.log(response);
+                    numero_recibo = response.numero_recibo
+                }
+            })
+            return numero_recibo;
+        },
         downloadPDF: function() {
             const linkSource = $('#pdfFrame').attr('src');
             const downloadLink = document.createElement("a");
@@ -89,9 +111,10 @@ odoo.define('website.pagos', function(require) {
             downloadLink.click();
         },
     })
-    
-    $('#recibo').click(()=>{
+
+    $('#recibo').click(async ()=>{
         
+        let num_recibo = await pagos.buscar_numero_recibo();
         let mes = '';
         let dia = '';
         let re = /[a-zA-Z]/g;
@@ -111,9 +134,11 @@ odoo.define('website.pagos', function(require) {
         let lugar_expedicion = dataPDF.tramite.x_studio_pas_de_expedicin_1[1] == 'COLOMBIA' 
                              ? dataPDF.tramite.x_studio_ciudad_de_expedicin[1]
                              : dataPDF.tramite.x_studio_pas_de_expedicin_1[1];
-        
+        while (num_recibo.length < 12) {
+            num_recibo = '0' + num_recibo;
+        }
         let invoiceData = {
-            invoice: "000000016"+dataPDF.tramite.id,
+            invoice: num_recibo,
             firstname: dataPDF.tramite.x_studio_nombres,
             lastname: dataPDF.tramite.x_studio_apellidos,
             type_doc: dataPDF.tramite.x_studio_tipo_de_documento_1[0],
@@ -170,7 +195,7 @@ odoo.define('website.pagos', function(require) {
         location.replace('/cliente/tramite/'+tramite);
     })
 
-    if(location.href.indexOf('https://branderideas-cpnaa-developing-984497.dev.odoo.com/pagos/[') != -1){
+    if(location.href.indexOf(`${urlBase}/pagos/[`) != -1){
         console.log('PAGOS')
         var pagos = new Pagos();
         pagos.traer_data(pagos);
@@ -197,7 +222,7 @@ odoo.define('website.pagos', function(require) {
         })
 
         $('#volver').click(()=>{
-            location.replace('http://35.222.118.62/');
+            location.replace('http://34.70.101.32/');
         })
     
         const urlHead = "https://secure.epayco.co/validation/v1/reference/";
@@ -227,18 +252,34 @@ odoo.define('website.pagos', function(require) {
                     datosTramite['tipo_pago'] = transaction.data.x_type_payment;
                     datosTramite['id_tramite'] = transaction.data.x_extra1;
 //                     console.log(datosTramite);    
-                    rpc.query({
-                        route: '/tramite_fase_verificacion',
-                        params: {'data': datosTramite}
-                    }).then(function(response){
-                        if(response){
-                            console.log('Todo OK')
-                        }
-                    }).catch(function(e){
-                        console.error('Ha ocurrido un error: '+e)
-                    })
+                    if(transaction.data.x_response === 'Aceptada'){
+                        rpc.query({
+                            route: '/tramite_fase_verificacion',
+                            params: {'data': datosTramite}
+                        }).then(function(response){
+                            if(response.ok && !response.error){
+                                console.log(response.message)
+                            }else if(response.ok && response.error){
+                                console.warn(response.message+'\n'+response.error)
+                            }else if(!response.ok && response.error){
+                                console.error(response.error);
+                                let enlaceEstado = response.id_user ? `<a href="${urlBase}/cliente/${response.id_user}/tramites">Ver estado del trámite</a><br/>` : '';
+                                $('#error_pagos').removeClass('invisible').attr('aria-hidden',false);
+                                $('#error_pagos').find('.alert').html(
+                                    `${response.error}<br/>${enlaceEstado}
+                                     Si tiene alguna duda, por favor comuníquese con el CPNAA al siguiente correo 
+                                     electrónico: info@cpnaa.gov.co o al número telefónico (1)3502700 ext 111-115 en Bogotá`);
+                            }
+                        }).catch(function(e){
+                            console.error('Ha ocurrido un error: '+e);
+                            $('#error_pagos').removeClass('invisible').attr('aria-hidden',false);
+                            $('#error_pagos').find('.alert').html(
+                                `Su pago ha sido exitoso pero no se pudo completar el trámite, por favor envie esta información al
+                                 correo info@cpnaa.gov.co`);
+                        })
+                    }
                 } else {
-                     Toast.fire({
+                    Toast.fire({
                         icon: 'warning',
                         title: `<br/>Error consultando la información.<br/><br/> `,
                         confirmButtonText: 'Ocultar',

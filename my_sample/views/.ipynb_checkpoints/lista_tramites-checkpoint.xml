@@ -144,18 +144,32 @@
                                     </span>
                                 </div>
                             </div>
+                            <div t-if="diploma">
+                                <div class="row justify-content-md-center">
+                                    <span id="mssg_result" class="alert alert-warning" role="alert">
+                                        Para continuar con el trámite cargue la imágen del diploma en formato PDF, tamaño máximo 800Kb.
+                                    </span>
+                                </div>
+                            </div>                            
                             <div class="row float-right mb-4">
                                 <button id="btn-atras" class="btn btn-primary btn-lg btn-stadium mr-3">Atras</button>
                                 <td>
                                 <a t-if="rechazo" class="btn btn-primary btn-lg btn-stadium ml-3"
-                                   t-attf-href="/tramite/{{form}}/edicion/[{{persona.x_document_type_ID[0].id}}:{{persona.x_document}}]" >
+                                    t-attf-href="/tramite/{{form}}/edicion/[{{persona.x_document_type_ID[0].id}}:{{persona.x_document}}]">
                                     Actualizar Registro
                                 </a>
-                                <button t-elif="tramites[0].x_cycle_ID[0].x_order == 0"
+                                <div t-if="diploma">
+                                    <label for="inputDiploma" class="btn btn-primary btn-lg btn-stadium ml-3" style="text-transform: capitalize">
+                                        Cargar Diploma
+                                    </label>
+                                    <input id="inputDiploma" type="file" style='display:none;' accept=".pdf"/>
+                                </div>
+                                <button t-if="tramites[0].x_cycle_ID[0].x_order == 0"
                                     id="btn-pagar" class="btn btn-primary btn-lg btn-stadium ml-3">Pagar</button>
-                                <a t-else="" href="http://35.222.118.62/calendario-de-matriculas-d65/"
-                                   class="btn btn-primary btn-lg btn-stadium ml-3">Su solicitud esta en trámite</a>
-                                </td>
+                                <a t-if="tramites[0].x_cycle_ID[0].x_order &gt; 0 and tramites[0].x_cycle_ID[0].x_order &lt; 5 and not rechazo and not diploma" 
+                                    href="http://34.70.101.32/calendario-de-matriculas-d65/"
+                                    class="btn btn-primary btn-lg btn-stadium ml-3">Su solicitud esta en trámite</a>
+                                </td>                                
                             </div>
                         </div>
                     </div>
@@ -167,6 +181,24 @@
                         <br/>
                     </div>
                 </div>
+                <div id="viewerModalDiploma" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header pdfViewer">
+                              <h3 class="modal-title formTitle" id="exampleModalLongTitle">Previsualización del diploma</h3>
+                            </div>
+                            <div class="modal-body pdfViewer">
+                              <iframe id="pdfViewerDiploma" src="#" height="800"></iframe>
+                            </div>
+                            <div class="modal-footer d-flex justify-content-between align-items-center">
+                              <button id="cancelarDiploma" type="button" class="btn btn-primary btn-lg btn-stadium" 
+                                      data-dismiss="modal">Cancelar</button>
+                              <button id="guardarDiploma" type="button" class="btn btn-primary btn-lg btn-stadium"
+                                      t-attf-data-tramite_id="{{tramites[0].id}}">Guardar Diploma</button>
+                            </div>
+                          </div>
+                    </div>
+                </div>                
             </t>
         </template>
     </data>

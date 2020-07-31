@@ -1,29 +1,17 @@
 odoo.define('website.pagos', function(require) {
 'use strict';
     
-    var Class = require('web.Class');
-    var rpc = require('web.rpc');
-    
-    var dataPDF = {};
+    const Class = require('web.Class');
+    const rpc = require('web.rpc');
+    const Validaciones = require('website.validations');
+    const validaciones = new Validaciones();
+    let dataPDF = {};
     let urlBase = "https://branderideas-cpnaa.odoo.com";
     if(location.href.indexOf(urlBase) === -1 ){
         urlBase = "https://branderideas-cpnaa-developing-984497.dev.odoo.com";
     }
     
-    // Configuración de las alertas
-    const Toast = Swal.mixin({
-        toast: true,
-        position: 'center',
-        showConfirmButton: true,
-        timer: 3000,
-        timerProgressBar: true,
-        onOpen: (toast) => {
-            toast.addEventListener('mouseenter', Swal.stopTimer)
-            toast.addEventListener('mouseleave', Swal.resumeTimer)
-        }
-    })
-        
-    var Pagos = Class.extend({
+    const Pagos = Class.extend({
         traer_data: function(_this) {
             let dataTramite = {
                 'doc_type': $('#tipo_doc').attr('data-tipo'),
@@ -33,11 +21,11 @@ odoo.define('website.pagos', function(require) {
                 route: '/tramite_fase_inicial',
                 params: {'data': dataTramite}
             }).then(function(response){
-//                 console.log(response);
                 if(response.ok){
                     dataPDF.tramite = response.tramite;
                     dataPDF.corte = response.corte;
                     dataPDF.grado = response.grado;
+                    dataPDF.tramite.codigo_recibo = response.codigo;
                     $('#recibo').removeAttr('disabled');
                     $('#epayco').removeAttr('disabled');
                 }else{
@@ -54,7 +42,6 @@ odoo.define('website.pagos', function(require) {
                 key: '9e73b510f7dfd7568b5e876a970962cb',
                 test: true
             })
-            console.log(tipo_documento);
             var dataTran = {
                 //Parametros compra (obligatorio)
                 name: 'PAGO CPNAA',
@@ -80,7 +67,6 @@ odoo.define('website.pagos', function(require) {
                 methodsDisable: ["SP","CASH","DP"]
 
             }
-            console.log(dataTran);
             handler.open(dataTran)
         },
         buscar_numero_recibo: async function() {
@@ -95,7 +81,6 @@ odoo.define('website.pagos', function(require) {
                 params: {'data': data}
             }).then(function(response){
                 if(response.ok){
-                    console.log(response);
                     numero_recibo = response.numero_recibo
                 }
             })
@@ -138,16 +123,17 @@ odoo.define('website.pagos', function(require) {
             num_recibo = '0' + num_recibo;
         }
         let invoiceData = {
+            code: dataPDF.tramite.codigo_recibo,
             invoice: num_recibo,
             firstname: dataPDF.tramite.x_studio_nombres,
             lastname: dataPDF.tramite.x_studio_apellidos,
             type_doc: dataPDF.tramite.x_studio_tipo_de_documento_1[0],
             procedure: dataPDF.tramite.x_service_ID[1],
             num_doc: dataPDF.tramite.x_studio_documento_1,
-            exp_doc: lugar_expedicion,
+            exp_doc: validaciones.quitarAcentos(lugar_expedicion),
             address: dataPDF.tramite.x_studio_direccin,
-            city: dataPDF.tramite.x_studio_ciudad_1[1],
-            department: dataPDF.tramite.x_studio_departamento_estado[1],
+            city: validaciones.quitarAcentos(dataPDF.tramite.x_studio_ciudad_1[1]),
+            department: validaciones.quitarAcentos(dataPDF.tramite.x_studio_departamento_estado[1]),
             email: dataPDF.tramite.x_studio_correo_electrnico,
             phone: `${dataPDF.tramite.x_studio_telfono}`,
             cell_phone: dataPDF.tramite.x_user_celular,
@@ -160,7 +146,7 @@ odoo.define('website.pagos', function(require) {
             amount: dataPDF.tramite.x_rate,
             local_code: "7709998454712"
         };
-        
+//         console.log(dataPDF.tramite);
         try {
             generatePDF(invoiceData);
             $('#modal-recibo-pdf').modal({ keyboard: false, backdrop: 'static' });
@@ -169,11 +155,7 @@ odoo.define('website.pagos', function(require) {
         } catch (e) {
             console.error('Error al generar recibo PDF: '+e);
             console.log(invoiceData);
-            Toast.fire({
-                icon: 'warning',
-                title: `<br/>No hemos podido generar tu recibo PDF.<br/><br/> `,
-                confirmButtonText: 'Ocultar',
-            })
+            validaciones.alert_error_toast('No hemos podido generar tu recibo PDF.', 'center');
         }
         
     })

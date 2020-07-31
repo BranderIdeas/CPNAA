@@ -877,7 +877,7 @@
                         <div class="modal-dialog modal-xl" role="document">
                             <div class="modal-content">
                             <div class="modal-header">
-                                <h1 class="modal-title formTitle">POLÍTICA PROTECCIÓN DE DATOS PERSONALES</h1>
+                                <h3 class="modal-title formTitle">POLÍTICA PROTECCIÓN DE DATOS PERSONALES</h3>
                             </div>
                             <div class="modal-body">
                                 <div class="container">
@@ -926,18 +926,14 @@
                         <div class="modal fade" id="viewerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                             <div class="modal-dialog modal-xl" role="document">
                                 <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title formTitle">Previsualización de archivo</h1>
+                                    <div class="modal-header pdfViewer">
+                                        <h3 class="modal-title formTitle">Previsualización de archivo</h3>
                                     </div>
-                                    <div class="modal-body">
-                                        <div class="container">
-                                            <div class="row">
-                                                <iframe id="pdfViewer" class="col-md-12" src="#" height="800"></iframe>
-                                            </div>
-                                        </div>
+                                    <div class="modal-body pdfViewer">
+                                        <iframe id="pdfViewer" src="#" height="800"></iframe>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
+                                        <button type="button" class="btn btn-primary btn-lg btn-stadium" data-dismiss="modal">Cerrar</button>
                                     </div>
                                 </div>
                             </div>

@@ -40,7 +40,6 @@ class MySample(http.Controller):
 #             user = http.request.env['res.users'].search([('login','=',http.request.session.login)])
 #             if len(user.groups_id) == 2 and user.groups_id[0].id == 43 and user.groups_id[1].id == 43:
 #                 return http.request.redirect('/convenios')
-#             elif len(user.groups_id) == 2 and user.groups_id[0].id == 45 and user.groups_id[1].id == 45:
 #                 return http.request.redirect('/historial-tramites')
 #             else:
 #                 return http.request.redirect('/my/home')
@@ -52,7 +51,9 @@ class MySample(http.Controller):
 #             return http.request.redirect('/convenios')
 #         elif len(user.groups_id) == 2 and user.groups_id[0].id == 45 and user.groups_id[1].id == 45:
 #             return http.request.redirect('/historial-tramites')
-        
+    
+    # Crea un usuario tipo persona desde el formulario del website
+    # Activa la automatización para la creación y seguimiento del trámite
     @http.route('/create_user', methods=["POST"], auth='public', website=True)
     def create_user(self, **kw):
         resp = {}
@@ -69,7 +70,8 @@ class MySample(http.Controller):
             return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
         else:
             return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
-        
+    
+    # Actualiza el registro desde el formulario del website cuando el el trámite tiene un rechazo
     @http.route('/update_tramite', methods=["POST"], auth='public', website=True)
     def update_tramite(self, **kw):
         resp = {}
@@ -84,27 +86,23 @@ class MySample(http.Controller):
                       'x_full_name': kw.get('x_name')+' '+kw.get('x_last_name'), 'x_validation_refuse': False,
                       'x_name': tramite['x_service_ID'][1]+'-'+kw.get('x_name')+'-'+kw.get('x_last_name')}
             rechazos = http.request.env['x_cpnaa_refuse_procedure'].sudo().search_read([('x_procedure_ID','=',tramite['id'])])
-            id_rechazo = rechazos[len(rechazos)-1]['id']
-            mailthread = {
-                'subject': 'Trámite actualizado por ' + kw.get('x_name')+' '+kw.get('x_last_name'),
-                'model': 'x_cpnaa_procedure',
-                'email_from': kw.get('x_name')+' '+kw.get('x_last_name'),
-                'subtype_id': 2,
-                'body': kw.get('x_name')+' '+kw.get('x_last_name') + ' ha actualizado la información del trámite',
-                'author_id': http.request.env['res.partner'].search([('email','=',kw.get('x_email'))]).id,
-                'message_type': 'notification',
-                'res_id': tramite['id']
-            }
+            id_rechazo = rechazos[-1]['id']
+            # Escribe en el mailthread que el trámite ha sido actualizado
+            subject = 'Trámite actualizado por ' + kw.get('x_name')+' '+kw.get('x_last_name')
+            body = kw.get('x_name')+' '+kw.get('x_last_name') + ' ha actualizado la información del trámite'
+            self.mailthread_tramite(tramite['id'], kw.get('x_name'), kw.get('x_last_name'), kw.get('x_email'), subject, body)
             http.request.env['x_cpnaa_procedure'].browse(tramite['id']).sudo().write(update)
             http.request.env['x_cpnaa_user'].browse(id_user).sudo().write(kw)
+            # Marca el rechazo como corregido
             http.request.env['x_cpnaa_refuse_procedure'].browse(id_rechazo).sudo().write({'x_corrected':True})
-            http.request.env["mail.message"].sudo().create(mailthread)
             resp = { 'ok': True, 'message': 'Usuario y trámite actualizados con exito', 'id_user': id_user }
         except:
+            _logger.info(sys.exc_info())
             tb = sys.exc_info()[2]
             resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }
         return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
     
+    # Ruta que renderiza pagina de pagos, si no existe un trámite por pagar lo redirige al inicio del trámite
     @http.route('/pagos/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)
     def epayco(self, tipo_doc, documento):
         campos = ['id','x_studio_tipo_de_documento_1','x_studio_documento_1','x_service_ID','x_rate']
@@ -116,18 +114,24 @@ class MySample(http.Controller):
         else:
             return http.request.redirect('/cliente/tramite/matricula')
     
+    # Ruta que renderiza página de respuesta de pasarela de pagos
     @http.route('/pagos/respuesta', auth='public', website=True)
     def respuesta_epayco(self):
         return  http.request.render('my_sample.respuesta_pago', {})
-        
+    
+    # Ruta que renderiza página de confirmación de pasarela de pagos
     @http.route('/pagos/confirmacion', auth='public', website=True)
     def epayco_confirmacion(self):
         return  http.request.render('my_sample.epayco_confirmacion', {})
             
-    @http.route('/recibo_pago', type="json", auth='public', website=True)
+    """
+    Valida si el trámite tiene recibo de pago, si es necesario actualiza el consecutivo de los recibos
+    Si es convenios o si aún esta vigente el corte le devuelve el mismo número de recibo
+    Si paso la fecha limite de pago del corte le asigna un nuevo número de recibo y lo actualiza en el trámite
+    """
+    @http.route('/recibo_pago', methods=["POST"], type="json", auth='public', website=True)
     def recibo_pago(self, **kw):
         data = kw.get('data')
-        _logger.info(data)
         tramite = http.request.env['x_cpnaa_procedure'].search([('id','=',int(data['id_tramite']))])
         numero_recibo = tramite.x_voucher_number
         if (not data['corte'] and numero_recibo) and (data['corte'] == tramite.x_origin_name and numero_recibo):
@@ -142,7 +146,8 @@ class MySample(http.Controller):
             http.request.env['x_cpnaa_procedure'].browse(tramite.id).sudo().write(update)
         return  {'ok': True, 'numero_recibo': str(numero_recibo)}
     
-    @http.route('/tramite_fase_inicial', type="json", auth='public', website=True)
+    # Envia la información necesaria para el recibo de pago o para el pago desde la pasarela
+    @http.route('/tramite_fase_inicial', methods=["POST"], type="json", auth='public', website=True)
     def tramite_fase_inicial(self, **kw):
         hoy = date.today()
 #         hoy = date(2020,8,25)
@@ -155,12 +160,14 @@ class MySample(http.Controller):
                                                                       ('x_studio_documento_1','=',data['doc']),
                                                                       ('x_cycle_ID.x_order','=',0)],campos)
         if tramites:
+            # Código del servicio para generar el código de barras del recibo
+            codigo = http.request.env['x_cpnaa_service'].search([('id','=',tramites[0]['x_service_ID'][0])]).x_code
             if (tramites[0]['x_origin_type'][1] == 'CORTE'):
                 campos_corte = ['id','x_name','x_lim_pay_date']
                 corte_tramite = http.request.env['x_cpnaa_cut'].search_read([('x_name','=',tramites[0]['x_origin_name'])],campos_corte)[0]
                 fecha_limite_pago = corte_tramite['x_lim_pay_date']
                 if fecha_limite_pago < hoy:
-                    # Buscar y asignar nuevo corte
+                    # Buscar y asignar nuevo corte si ya paso la fecha limite de pago
                     cortes = http.request.env['x_cpnaa_cut'].search_read([],campos_corte)
                     primer = True
                     for corte in cortes:
@@ -172,24 +179,23 @@ class MySample(http.Controller):
                                 fecha_limite_pago = corte['x_lim_pay_date']
                                 nuevo_corte = corte
                     tramites[0]['x_origin_name'] = nuevo_corte['x_name']
-                    return {'ok': True, 'tramite': tramites[0], 'corte': nuevo_corte}
+                    return {'ok': True, 'tramite': tramites[0], 'codigo': codigo, 'corte': nuevo_corte}
                 else:
-                    return {'ok': True, 'tramite': tramites[0], 'corte': corte_tramite}
+                    return {'ok': True, 'tramite': tramites[0], 'codigo': codigo, 'corte': corte_tramite}
             elif tramites[0]['x_grade_ID']:
                 grado = http.request.env['x_cpnaa_grade'].sudo().browse(tramites[0]['x_grade_ID'][0])
                 fecha_lim = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
-                return {'ok': True, 'tramite': tramites[0], 'grado': { 'id': grado.id, 'x_fecha_limite': fecha_lim }}
+                return {'ok': True, 'tramite': tramites[0], 'codigo': codigo, 'grado': { 'id': grado.id, 'x_fecha_limite': fecha_lim }}
             else:
                 return {'ok': False, 'error': 'Tramite no existe'}
         else:
             return {'ok': False , 'error': 'Tramite no existe'}
 
-            
-    @http.route('/tramite_fase_verificacion', type="json", auth='public', website=True)
+    # Si el pago es aprobado pasa el trámite a fase de verificación, registra los cambios en el mailthread
+    @http.route('/tramite_fase_verificacion', methods=["POST"], type="json", auth='public', website=True)
     def tramite_fase_verificacion(self, **kw):
         data = kw.get('data')
-        format = '%Y-%m-%d %H:%M:%S' # The format 
-        datetime_str = datetime.strptime(data['fecha_pago'], format)
+        datetime_str = datetime.strptime(data['fecha_pago'], '%Y-%m-%d %H:%M:%S')
         datetime_str = datetime_str + timedelta(hours=5)
         _logger.info(datetime_str)
         id_user, error, tramite, pago_registrado, mailthread_registrado = False, False, False, False, False
@@ -212,17 +218,10 @@ class MySample(http.Controller):
             error = str(sys.exc_info()[1])
         try:
             if pago_registrado:
-                mailthread = {
-                    'email_from': tramite.x_full_name,
-                    'subject': 'Trámite recibido en fase de verificación',
-                    'model': 'x_cpnaa_procedure',
-                    'subtype_id': 2,
-                    'body': 'Trámite de cliente '+tramite.x_full_name+' realizo el pago y ha sido recibido en fase de verificación',
-                    'author_id': http.request.env['res.partner'].search([('email','=',tramite.x_studio_correo_electrnico)]).id,
-                    'message_type': 'notification',
-                    'res_id': tramite.id
-                }
-                mailthread_registrado = http.request.env['mail.message'].sudo().create(mailthread)
+                subject = 'Trámite recibido en fase de verificación'
+                body = 'Trámite de cliente '+tramite.x_full_name+' realizo el pago y ha sido recibido en fase de verificación'
+                mailthread_registrado = self.mailthread_tramite(tramite.id, tramite.x_studio_nombres, tramite.x_studio_apellidos,
+                                                                tramite.x_studio_correo_electrnico, subject, body)
         except:
             if pago_registrado:
                 error = 'Se registro el pago pero no se escribio el mailthread'+'\nTrámite ID: '+str(tramite.id)+'\n'+str(sys.exc_info())
@@ -233,22 +232,19 @@ class MySample(http.Controller):
             return {'ok': True, 'message': 'Trámite actualizado con exito', 'error': error}
         if not pago_registrado:        
             return {'ok': False, 'error': error, 'id_user': id_user.id}
-        
-    @http.route('/cliente/<model("x_cpnaa_user"):persona>', auth='public', website=True)
-    def buscar_persona(self, persona):
-        return  http.request.render('my_sample.user', {
-            'persona': persona
-        })
-    
+
+    # Ruta que renderiza el inicio del trámite (usuarios ya graduados)
     @http.route('/cliente/tramite/<string:form>', auth='public', website=True)
     def inicio_tramite(self, form):
         return http.request.render('my_sample.inicio_tramite', {'form': form, 'inicio_tramite': True})
     
+    # Ruta que renderiza el inicio del trámite (usuarios de convenios)
     @http.route('/convenios/tramite', auth='public', website=True)
     def inicio_convenio(self):
         return http.request.render('my_sample.inicio_tramite', {'form': 'convenio', 'inicio_tramite': True })
     
-    @http.route('/validar_tramites', type="json", methods=["POST"], auth='public', website=True)
+    # Valida tipo y número de documento, valida si es un usuario nuevo, si tiene trámite o si es un graduando
+    @http.route('/validar_tramites', methods=["POST"], type="json", auth='public', website=True)
     def validar_tramites(self, **kw):
         hoy = date.today()
 #         hoy= datetime.strptime('24062020', '%d%m%Y').date()
@@ -278,7 +274,8 @@ class MySample(http.Controller):
         else:
             return { 'ok': False, 'id': False, 'convenio': False }
     
-    @http.route('/validar_estudiante', type="json", methods=["POST"], auth='public', website=True)
+    # Busca al graduando de convenios en la tabla de egresados, puede ser por documento o por nombres y apellidos 
+    @http.route('/validar_estudiante', methods=["POST"], type="json", auth='public', website=True)
     def validar_estudiante(self, **kw):
         hoy = date.today()
 #         hoy= datetime.strptime('24062020', '%d%m%Y').date()
@@ -321,13 +318,14 @@ class MySample(http.Controller):
         else:
             return { 'ok': False, 'graduandos': False }
         
+    # Renderiza el formulario para trámites, valida si ya ha realizado este trámite y lo redirige al inicio del tramite
     @http.route('/tramite/<string:origen>/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)
     def formulario_tramites(self, origen, tipo_doc, documento):
         validos = ['matricula','inscripciontt','licencia']
         doc_validos = ['1','2','5']
         servicio = 'MATRICULA PROFESIONAL'
         if tipo_doc == '1' and not self.validar_solo_numeros(documento):
-            return http.request.redirect('/')
+            return http.request.redirect('/cliente/tramite/'+origen)
         if origen == validos[1]:
             servicio = 'CERTIFICADO DE INSCRIPCION PROFESIONAL'
         if origen == validos[2]:
@@ -335,11 +333,11 @@ class MySample(http.Controller):
         mismo_tramite = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
                                                                       ('x_studio_documento_1','=',documento),('x_service_ID.x_name','like',servicio)])
         if origen in validos and tipo_doc in doc_validos and not mismo_tramite:
-            _logger.info(origen, tipo_doc, documento);
             return http.request.render('my_sample.formulario_tramites', {'tipo_doc': tipo_doc, 'documento':documento, 'form': origen, 'origen': 1})
         else:
-            return http.request.redirect('/')
+            return http.request.redirect('/cliente/tramite/'+origen)
     
+    # Renderiza el formulario para trámites por convenios, valida si ya hay trámite en curso y lo redirige al estado del tramite
     @http.route('/tramite/convenios/<model("x_procedure_temp"):cliente>', auth='public', website=True)
     def formulario_convenio(self, cliente):
         form = 'inscripciontt'
@@ -353,6 +351,7 @@ class MySample(http.Controller):
         else:
             return http.request.render('my_sample.formulario_tramites', {'cliente': cliente, 'form': form, 'origen': 2})
     
+    # Renderiza formulario para corregir rechazos, si el trámite no tiene rechazo o ya fue corregido lo redirige al inicio
     @http.route('/tramite/<string:form>/edicion/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)
     def editar_tramite(self, form, tipo_doc, documento):
         tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
@@ -361,45 +360,76 @@ class MySample(http.Controller):
         rechazos = http.request.env['x_cpnaa_refuse_procedure'].sudo().search_read([('x_procedure_ID','=',tramite.id)])
         user = http.request.env['x_cpnaa_user'].sudo().browse(tramite.x_user_ID.id)
         if user and len(rechazos)>0:
-            if not rechazos[len(rechazos)-1]['x_corrected']:
+            if not rechazos[-1]['x_corrected']:
                 return http.request.render('my_sample.formulario_tramites', {'form': form, 'user': user, 'origen': tramite.x_origin_type.id})
             else:
                 return http.request.redirect('/cliente/tramite/'+form)
         else:
             return http.request.redirect('/cliente/tramite/'+form)
 
+    # Renderiza el estado del trámite, valida las diferentes opciones a realizar (Pagar, Cargar Diploma, Corregir rechazos, Ver calendario)
     @http.route('/cliente/<model("x_cpnaa_user"):persona>/tramites', auth='public', website=True)
     def list_tramites(self, persona):
         tramites = http.request.env['x_cpnaa_procedure'].sudo().search([('x_user_ID','=',persona[0].id),('x_cycle_ID.x_order','<','5')])
         form = 'inscripciontt'
-        rechazo = False
-        rechazos = []
+        solicitud_diploma, rechazo, rechazos = False, False, []
         if len(tramites)>0:
             if (tramites[0].x_service_ID.x_name.find('MATR') != -1):
                 form = 'matricula'
             if (tramites[0].x_service_ID.x_name.find('LICENCIA') != -1):
                 form = 'licencia'
             rechazos = http.request.env['x_cpnaa_refuse_procedure'].sudo().search_read([('x_procedure_ID','=',tramites[0].id)],
-                                                                                   ['x_observation','x_refuse_ID','x_corrected'])
+                                                                                       ['x_observation','x_refuse_ID','x_corrected'])
+            if tramites[0].x_cycle_ID.x_order == 4 and tramites[0].x_origin_type.x_name == 'CONVENIO' and not tramites[0].x_CD:
+                result = http.request.env['mail.message'].sudo().search_read([('res_id','=',tramites[0].id),('subject','=','Solicitud de cargue de Diploma')])
+                if len(result) > 0:
+                    solicitud_diploma = True
         if len(rechazos)>0:
-            if not rechazos[len(rechazos)-1]['x_corrected']:
-                rechazo = rechazos[len(rechazos)-1]
+            if not rechazos[-1]['x_corrected']:
+                rechazo = rechazos[-1]
         return http.request.render('my_sample.lista_tramites', {
             'tramites': tramites,
             'rechazo': rechazo,
             'persona': persona,
-            'form': form
+            'form': form,
+            'diploma': solicitud_diploma
         })
-            
-    @http.route('/get_data_edicion', type="json", auth='public', website=True)
+    
+    # Retorna los datos del trámite para el formulario de edición
+    @http.route('/get_data_edicion', methods=["POST"], type="json", auth='public', website=True)
     def get_data_edicion(self, **kw):
         data = kw.get('data')
         campos = ['x_expedition_city','x_expedition_country','x_expedition_state','x_country_ID','x_state_ID','x_city_ID','x_foreign_country']
         data_edicion = http.request.env['x_cpnaa_user'].sudo().search_read([('x_document_type_ID.id','=',data['tipo_doc']),
                                                                             ('x_document','=',data['documento'])],campos)[0]
         return { 'ok': True, 'data': data_edicion }
-        
-    @http.route('/get_email', type="json", auth='public', website=True)
+    
+    # Guarda el diploma del graduando, actualiza el trámite, escribe en el mailthread y envia un mail al usuario interno encargado
+    @http.route('/save_diploma', methods=["POST"], type="json", auth='public', website=True) 
+    def save_diploma(self, **kw):
+        archivo = kw.get('diploma')
+        id_tramite = kw.get('id_tramite')
+        archivo_temp = unicodedata.normalize('NFKD', archivo)
+        archivo_pdf = archivo_temp.lstrip('data:application/pdf;base64,')
+        tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',id_tramite)])
+        actualizado = False
+        try:
+            update = {'x_studio_imagen_diploma': archivo_pdf, 'x_CD': True}
+            actualizado = http.request.env['x_cpnaa_procedure'].browse(id_tramite).sudo().write(update)
+        except:
+            _logger.info(sys.exc_info())
+            return {'ok': False, 'error': str(sys.exc_info()[1])}
+        if actualizado:
+            subject = tramite.x_studio_nombres+' '+tramite.x_studio_apellidos+' ha cargado el PDF del diploma'
+            body = tramite.x_studio_nombres+' '+tramite.x_studio_apellidos + ' ha cargado el PDF del diploma'
+            self.mailthread_tramite(tramite.id, tramite.x_studio_nombres, tramite.x_studio_apellidos, tramite.x_studio_correo_electrnico, subject, body)
+            http.request.env['mail.template'].sudo().search([('name','=','cpnaa_template_load_CD')])[0].sudo().send_mail(id_tramite,force_send=True)
+            return {'ok': True, 'message': 'Trámite Actualizado, se guardo el diploma en PDF.'}
+        else:
+            return {'ok': False, 'error': 'Trámite no pudo ser actualizado, intente nuevamente.'}
+               
+    # Verifica si ya existe un usuario creado con el correo electrónico recibido
+    @http.route('/get_email', methods=["POST"], type="json", auth='public', website=True)
     def get_email(self, **kw):
         cadena = kw.get('cadena')
         result = http.request.env['x_cpnaa_user'].sudo().search([('x_email'.lower(),'=',cadena.lower())])
@@ -407,17 +437,18 @@ class MySample(http.Controller):
             return { 'ok': True, 'email_exists': False }
         else:
             return { 'ok': False, 'email_exists': True }
-                                                                               
-    @http.route('/get_universidades', type="json", auth='public', website=True)
+    
+    # Retorna las universidades que coinciden con la cadena recibida
+    @http.route('/get_universidades', methods=["POST"], type="json", auth='public', website=True)
     def get_universidades(self, **kw):
         cadena = kw.get('cadena')
         tipo_universidad = kw.get('tipo_universidad')
         return {'universidades': http.request.env['x_cpnaa_user'].sudo().search_read([('x_user_type_ID.id','=',3),('x_institution_type_ID.id', '=', tipo_universidad),
                                                                                ('x_name', 'ilike', cadena)],['id','x_name'], limit=6)}
     
-    @http.route('/get_carreras', type="json", auth='public', website=True)
+    # Retorna las carreas que coinciden con la cadena y nivel profesional recibidos
+    @http.route('/get_carreras', methods=["POST"], type="json", auth='public', website=True)
     def get_carreras(self, **kw):
-        _logger.info(kw)
         cadena = kw.get('cadena')
         nivel_profesional = kw.get('nivel_profesional')
         id_genero = kw.get('id_genero')
@@ -429,14 +460,32 @@ class MySample(http.Controller):
                                                                                        (nombre_carrera, 'ilike', cadena)],
                                                                                        ['id',nombre_carrera], limit=6)}
     
-    @http.route('/get_carrera_genero', type="json", auth='public', website=True)
+    # Retorna el nombre de la carrera según el genero 
+    @http.route('/get_carrera_genero', methods=["POST"], type="json", auth='public', website=True)
     def get_carrera_genero(self, **kw):
         campo = kw.get('campo')
         id_carrera = kw.get('id_carrera')
         return {'carrera': http.request.env['x_cpnaa_career'].sudo().search_read([('id','=',id_carrera)],[campo])}
+    
+    # Escribe en el mailthread del trámite
+    def mailthread_tramite(self, id_tramite, nombres, apellidos, email, asunto, mensaje):
+        mailthread = {
+            'subject': asunto,
+            'model': 'x_cpnaa_procedure',
+            'email_from': nombres+' '+apellidos,
+            'subtype_id': 2,
+            'body': mensaje,
+            'author_id': http.request.env['res.partner'].sudo().search([('email','=',email)]).id,
+            'message_type': 'notification',
+            'res_id': id_tramite
+        }
+        return http.request.env['mail.message'].sudo().create(mailthread)
+        
         
     """   RUTAS DE CONVENIOS  """
 
+    # Menu principal de convenios
+    # Valida que el usuario logueado sea un IES y a cual pertenece
     @http.route('/convenios', auth='user', website=True)
     def inicio_convenios(self):
         universidad = http.request.env['x_cpnaa_user'].search([('x_email','=',http.request.session.login)])
@@ -444,7 +493,8 @@ class MySample(http.Controller):
             return http.request.redirect('/')
         convenios = http.request.env['x_cpnaa_agreement'].search([('x_user_ID','=',universidad.id)])
         return http.request.render('my_sample.convenios', {'universidad': universidad, 'convenios': convenios})
-        
+    
+    # Ruta donde carga por primera vez estudiantes y crea el grado
     @http.route('/convenios/<model("x_cpnaa_user"):universidad>/<model("x_cpnaa_agreement"):convenio>', auth='user', website=True) 
     def form_archivo_csv(self, universidad, convenio):
         if universidad.x_email != http.request.session.login or universidad.x_user_type_ID.x_name != 'IES':
@@ -454,6 +504,7 @@ class MySample(http.Controller):
         return http.request.render('my_sample.convenios_archivo_csv', {'profesiones': profesiones, 'convenios': convenios,
                                                                        'universidad':universidad, 'convenio':convenio})
     
+    # Ruta donde agrega mas estudiantes cuando el grado ya esta creado
     @http.route('/convenios/<model("x_cpnaa_user"):universidad>/gradoCsv/<model("x_cpnaa_grade"):grado>', auth='user', website=True) 
     def form_archivo_csv_grado(self, universidad, grado):
         if universidad.x_email != http.request.session.login or universidad.x_user_type_ID.x_name != 'IES':
@@ -464,6 +515,7 @@ class MySample(http.Controller):
         return http.request.render('my_sample.convenios_archivo_csv', {'profesiones': profesiones, 'convenios': convenios,
                                                                        'universidad':universidad, 'grado': grado, 'convenio': convenio})
     
+    # Ruta donde carga el archivo definitivo de graduandos, la fecha actual es para el archivo guia
     @http.route('/convenios/<model("x_cpnaa_user"):universidad>/gradoPdf/<model("x_cpnaa_grade"):grado>', auth='user', website=True) 
     def form_archivo_definitivo_pdf(self, universidad, grado):
         if universidad.x_email != http.request.session.login or universidad.x_user_type_ID.x_name != 'IES':
@@ -476,6 +528,7 @@ class MySample(http.Controller):
         return http.request.render('my_sample.convenios_definitivo_pdf', {'universidad': universidad, 'grado': grado, 'convenio': convenio,
                                                                           'convenios': convenios, 'fechaActual': fechaActualFormat})
     
+    # Ruta donde carga el archivo de actas de diploma
     @http.route('/convenios/<model("x_cpnaa_user"):universidad>/gradoActas/<model("x_cpnaa_grade"):grado>', auth='user', website=True) 
     def form_archivo_actas_grado(self, universidad, grado):
         if universidad.x_email != http.request.session.login or universidad.x_user_type_ID.x_name != 'IES':
@@ -486,6 +539,7 @@ class MySample(http.Controller):
         return http.request.render('my_sample.convenios_grado_actas', {'profesiones': profesiones, 'convenios': convenios,
                                                                        'universidad':universidad, 'grado': grado, 'convenio': convenio})
     
+    # Ruta donde carga el cuadro de mando del grado
     @http.route('/convenios/<model("x_cpnaa_user"):universidad>/detalle_grado/<model("x_cpnaa_grade"):grado>', auth='user', website=True) 
     def detalles_grado(self, universidad, grado):
         if universidad.x_email != http.request.session.login or universidad.x_user_type_ID.x_name != 'IES':
@@ -496,7 +550,8 @@ class MySample(http.Controller):
         return http.request.render('my_sample.detalles_grado', {'profesiones': profesiones, 'convenios': convenios,
                                                                 'universidad':universidad, 'grado': grado, 'convenio': convenio})
     
-    @http.route('/guardar_pdf_definitivo', type="json", auth='user', website=True) 
+    # Recibe el archivo definitivo de graduandos, lo guarda y marca fase como realizada
+    @http.route('/guardar_pdf_definitivo', methods=['POST'], type="json", auth='user', website=True) 
     def guardar_pdf_definitivo(self, **kw):
         data = kw.get('data')
         archivo = data['archivo_pdf']
@@ -511,8 +566,9 @@ class MySample(http.Controller):
         except:
             return {'ok': False, 'error': 'Ha ocurrido un error al intentar guardar el archivo, vuelve a intentarlo más tarde'}
         return {'ok': True, 'message': 'Listado guardado con exito', 'grado': id_grado, 'convenio': id_convenio, 'universidad': id_universidad}
-        
-    @http.route('/guardar_pdf_actas', type="json", auth='user', website=True) 
+    
+    # Recibe el archivo de diplomas, lo guarda y marca fase como realizada
+    @http.route('/guardar_pdf_actas', methods=['POST'], type="json", auth='user', website=True) 
     def guardar_pdf_actas(self, **kw):
         data = kw.get('data')
         archivo = data['archivo_pdf']
@@ -528,7 +584,8 @@ class MySample(http.Controller):
             return {'ok': False, 'error': 'Ha ocurrido un error al intentar guardar el archivo, vuelve a intentarlo más tarde'}
         return {'ok': True, 'message': 'Listado guardado con exito', 'grado': id_grado, 'convenio': id_convenio, 'universidad': id_universidad}
     
-    @http.route('/guardar_registros', type="json", auth='user', website=True) 
+    # Recibe los graduandos verificados y los agrega al grado, si no existe el grado lo crea
+    @http.route('/guardar_registros', methods=['POST'], type="json", auth='user', website=True) 
     def guardar_registros_csv(self, **kw):
         registros = kw.get('registros')
         data = kw.get('data')
@@ -563,7 +620,8 @@ class MySample(http.Controller):
             return {'ok': False, 'error': 'Ha ocurrido un error al intentar guardar los registros, vuelve a intentarlo'}
         return {'ok': True, 'message': str(guardados)+' Registros guardados con exito', 'grado': id_grado, 'convenio': id_convenio, 'universidad': id_universidad}
     
-    @http.route('/procesar_archivo', type="json", auth='user', website=True) 
+    # Recibe el archivo csv de graduandos, verifica los datos y le devuelve el resumen y marca fase como realizada
+    @http.route('/procesar_archivo', methods=['POST'], type="json", auth='user', website=True) 
     def procesar_csv(self, **kw):
         data = kw.get('data')
         f = data['fecha_grado'].split('-')
@@ -633,7 +691,6 @@ class MySample(http.Controller):
                 vals['g_email'] = {'valor':'N/A', 'clase':'valido'}
             return vals
                 
-
     def validar_solo_letras(self, cadena):
         regex = '^[a-zA-ZÑñ ]*$'
         if(re.search(regex, cadena)):  
@@ -673,11 +730,12 @@ class MySample(http.Controller):
         else:
             return 0
     
-    @http.route('/validar_documento_bd', type="json", auth='user', website=True) 
+    @http.route('/validar_documento_bd', methods=["POST"], type="json", auth='user', website=True) 
     def validar_documento_bd(self, **kw):
         data = kw.get('data')
         error = ''
         results = True
+        _logger.info(data)
         if data['profesion_id'] == '110' or data['profesion_id'] == '109':
             data['profesion_id'] = ['110','109']
         else:

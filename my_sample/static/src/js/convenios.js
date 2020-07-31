@@ -11,6 +11,7 @@ odoo.define('website.convenios', function(require) {
                 timer: 3000,
                 timerProgressBar: true,
                 showLoaderOnConfirm: true,
+                confirmButtonColor: '#c8112d',
                 preConfirm: () => {},
                 onOpen: (toast) => {
                     toast.addEventListener('mouseenter', Swal.stopTimer)
@@ -95,6 +96,41 @@ odoo.define('website.convenios', function(require) {
             let row = $('#resultados').find(`#row-${cant}`).find('input')[1];
             validaciones.validar_en_BD(row.id, validaciones);
         },
+        hay_duplicados: function(cantidad){
+            let campos = [];
+            let repetidos = [];
+            for (let i = 0; i < cantidad; i++) {
+                let tip_doc = $('#a_document_type-'+(i+1)).val();
+                let num_doc = $('#b_document-'+(i+1)).val();
+                let row = {
+                    tip_doc,
+                    num_doc,
+                    posicion: i+1
+                }
+                campos.push(row);
+            }
+            for (let i = 0; i < campos.length; i++) {
+                for (let j = 0; j < campos.length; j++) {
+                    if(i != j){
+                        if (campos[i].tip_doc === campos[j].tip_doc && campos[i].num_doc === campos[j].num_doc){
+                            repetidos.push(campos[i]);
+                        }
+                    }
+                }
+            }
+            if(repetidos.length > 0){
+                let rows = [];
+                repetidos.forEach(row => {
+                    $('#a_document_type-'+(row.posicion)).removeClass('valido').addClass('invalido');
+                    $('#b_document-'+(row.posicion)).removeClass('valido').addClass('invalido');
+                    rows.push(row.posicion);
+                })
+                validaciones.alert_error_toast('Existen documentos repetidos en la lista, filas: '+rows, 'top')
+                return true;
+            }else{
+                return false;
+            }
+        },
         guardar_registros: function(registros, data, _this) {
             Swal.fire({
                 toast: true,
@@ -103,6 +139,7 @@ odoo.define('website.convenios', function(require) {
                 showLoaderOnConfirm: true,
                 confirmButtonText: 'Confirmar',
                 cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#c8112d',
                 preConfirm: (response) => {
                     return rpc.query({
                         route: '/guardar_registros',
@@ -168,10 +205,15 @@ odoo.define('website.convenios', function(require) {
         subir_definitivo_pdf: function(data){
             Swal.fire({
                 toast: true,
-                title: `Listado definivo de graduandos enviado`,
+                title: `¿Confirmar envio de listado definivo de graduandos?`,
                 showConfirmButton: true,
+                showCancelButton: true,
+                confirmButtonText: 'Confirmar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#c8112d',
                 showLoaderOnConfirm: true,
                   preConfirm: (response) => {
+                    $('#btn_pdf_graduandos').attr('disabled','');
                     return rpc.query({
                         route: '/guardar_pdf_definitivo',
                         params: {'data': data}
@@ -200,10 +242,15 @@ odoo.define('website.convenios', function(require) {
         subir_actas_pdf: function(data){
             Swal.fire({
                 toast: true,
-                title: `Archivo pdf de Actas de Grado enviado`,
+                title: `¿Confirmar envio de Archivo pdf de Actas de Grado?`,
                 showConfirmButton: true,
+                showCancelButton: true,
+                confirmButtonText: 'Confirmar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#c8112d',
                 showLoaderOnConfirm: true,
                   preConfirm: (response) => {
+                    $('#btn_pdf_graduandos').attr('disabled','');
                     return rpc.query({
                         route: '/guardar_pdf_actas',
                         params: {'data': data}
@@ -326,6 +373,9 @@ odoo.define('website.convenios', function(require) {
             grado = parseInt($('#grado').attr('name'));
         }
         let rows = $('#resultados').find('tr');
+        if(convenios.hay_duplicados(rows.length)){
+            return;
+        }
         for(let i = 0; i < rows.length; i++){
             let datos = {};
             let row = $('#'+rows[i].id).children('td');
@@ -347,8 +397,8 @@ odoo.define('website.convenios', function(require) {
             Toast.fire({
                 icon: 'error',
                 title: `Ningún registro válido para guardar.`,
-                    confirmButtonText: 'Ocultar',
-                })
+                confirmButtonText: 'Ocultar',
+            })
         }
     })
        
@@ -364,8 +414,9 @@ odoo.define('website.convenios', function(require) {
         })
         ToastCerrar.fire({
             title: `<br/>¿Cerrar sin guardar los registros?<br/><br/> `,
-            icon: 'warning',
+            icon: 'question',
             confirmButtonText: 'Confirmar',
+            confirmButtonColor: '#c8112d',
             cancelButtonText: `&nbsp;Cancelar&nbsp;`
         });
     });
@@ -390,7 +441,6 @@ odoo.define('website.convenios', function(require) {
         if(archivo_graduandos == undefined){
             convenios.mostrar_helper('pdf_graduandos');
         } else {
-            $('#btn_pdf_graduandos').attr('disabled','');
             const archivo_pdf = await convenios.toBase64(archivo_graduandos).catch(e => Error(e));
                if(archivo_pdf instanceof Error) {
                   console.log('Error: ', archivo_pdf.message);              
@@ -415,7 +465,6 @@ odoo.define('website.convenios', function(require) {
         if(archivo_pdf_actas == undefined){
             convenios.mostrar_helper('archivo_pdf_actas');
         } else {
-            $('#btn_pdf_graduandos').attr('disabled','');
             const archivo_pdf = await convenios.toBase64(archivo_pdf_actas).catch(e => Error(e));
                if(archivo_pdf instanceof Error) {
                   console.log('Error: ', archivo_pdf.message);              

@@ -88,6 +88,43 @@ odoo.define('website.tramites', function(require) {
                 $('#help_text').addClass('invisible');
             },1500);
         },
+        guardar_diploma: function(diploma, id_tramite){
+            Swal.fire({
+                toast: true,
+                title: `¿Confirmar envio del archivo del diploma?`,
+                showConfirmButton: true,
+                showCancelButton: true,
+                confirmButtonText: 'Confirmar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#c8112d',
+                showLoaderOnConfirm: true,
+                  preConfirm: (response) => {
+                    return rpc.query({
+                            route: '/save_diploma',
+                            params: {'diploma': diploma, 'id_tramite': id_tramite}
+                        }).then(function(response){
+                            if (!response.ok) {
+                              throw new Error(response.error.message)
+                            }
+                            return response;
+                        }).catch((error) => {
+                            let message = error.message.message == undefined ? error : error.message.message;
+                            Swal.showValidationMessage(
+                              `Error: ${message}`
+                            )
+                        })
+                  },
+            }).then((result) => {
+                if (result.value) {
+                    validaciones.alert_success_toast(`${result.value.message}`,'center')
+                    if(result.value.ok){
+                        setTimeout(()=>{
+                            location.reload();
+                        },1000)
+                    }
+                }
+            })
+        },
         data_autocomplete_univ: function(cadena, tipoUniv){
             return rpc.query({
                 route: '/get_universidades',
@@ -239,9 +276,9 @@ odoo.define('website.tramites', function(require) {
                     $('[for="' + idname + '"]').find('i').removeClass('fa-check').addClass('fa-search');
                     $('[for="' + idname + '"]').removeClass('texto-verde').addClass('texto-gris invalido-form');
                     if(ext != "pdf"){
-                      validaciones.alert_error_toast( "Extensión ." +ext +" no permitida." );
+                      validaciones.alert_error_toast( "Extensión ." +ext +" no permitida.", 'top');
                     }else if (fileSize > 819200){
-                      validaciones.alert_error_toast( "El documento excede el tamaño máximo de 800Kb." );
+                      validaciones.alert_error_toast( "El documento excede el tamaño máximo de 800Kb.", 'top');
                     }
 
                   }
@@ -486,7 +523,6 @@ odoo.define('website.tramites', function(require) {
         $('#div_results').attr('aria-hidden', true).addClass('invisible');
     }
     
-        
     function ocultarSpinner(){
         $('#div_results').attr('aria-hidden', false).removeClass('invisible');
         $('#div_spinner').attr('aria-hidden', true).addClass('invisible');
@@ -654,6 +690,35 @@ odoo.define('website.tramites', function(require) {
             $('#x_institute_career').val('');
         }
     }).change();
+    
+    // Mostrar modal preview del cargue de diploma en PDF
+    $("#inputDiploma").change(function(ev){
+        let file = ev.target.files[0];
+        let ext = $('#inputDiploma').val().split('.').pop();
+        let objElm = $("#pdfViewerDiploma");
+        if(file){
+            if (file.size > 819200 || ext != 'pdf'){
+                validaciones.alert_error_toast( "El documento debe ser formato PDF y no exceder de 800Kb.", 'top');
+                return;
+            }
+            $('#viewerModalDiploma').on('show.bs.modal', function (e) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    objElm.attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            });
+            $("#viewerModalDiploma").modal('show');            
+        }
+    });
+    
+    // Guardar el diploma PDF
+    $("#guardarDiploma").click(function(e){
+        e.preventDefault();
+        let id_tramite = $(this).data('tramite_id');
+        let diploma_b64 = $("#pdfViewerDiploma").attr('src');
+        tramites.guardar_diploma(diploma_b64, id_tramite); 
+    })
     
     // Inicializa el popup que muestra la imágen de la ciudad de expedición de la cédula
     $('a[rel=popover]').popover({

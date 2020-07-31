@@ -9,6 +9,7 @@ odoo.define('website.validations', function(require) {
         toast: true,
         position: 'top',
         showConfirmButton: true,
+        confirmButtonColor: '#c8112d',
         timer: 3000,
         timerProgressBar: true,
         onOpen: (toast) => {
@@ -16,7 +17,7 @@ odoo.define('website.validations', function(require) {
             toast.addEventListener('mouseleave', Swal.resumeTimer)
         }
     })
-    
+
     const Validaciones = Class.extend({
         validar_input_resultados: function (entrada, tipo, elem_id, _this) {
             let esPA = false;
@@ -33,12 +34,8 @@ odoo.define('website.validations', function(require) {
                     _this.colocar_borde(elem_id, _this.validar_tipo_doc(entrada, elem_id, _this));
                     break;
                 case 'document':
-                    let tipo_doc = $('#'+elem_id).parent().prev().children().val();
-                    if(tipo_doc == 'PA' || tipo_doc == 'PA.'){
-                        _this.colocar_borde(elem_id, _this.validar_alfanum(entrada, 'pasaporte'));
-                    }else{
-                        _this.colocar_borde(elem_id, _this.validar_solo_numeros(entrada));
-                    }
+                    let tipo_doc = $('#'+elem_id).parent().prev().children();
+                    _this.colocar_borde(tipo_doc.attr("id"), _this.validar_tipo_doc(tipo_doc.val(), tipo_doc.attr("id"), _this));
                     break;
                 case 'name':
                 case 'lastname':
@@ -79,7 +76,7 @@ odoo.define('website.validations', function(require) {
             return false;
         },
         validar_tipo_doc: function (entrada, elem_id, _this) {
-            const tipos_validos = ['CC', 'CE', 'PA', 'C.C.', 'C.E.', 'PA.', 'cc', 'ce', 'pa'];
+            const tipos_validos = ['CC', 'CE', 'PA', 'C.C.', 'C.E.', 'PA.'];
             const doc_elem = $('#'+elem_id).parent().next().children().attr('id');
             const num_doc = $('#'+elem_id).parent().next().children().val();
             if (!tipos_validos.some(t => t == entrada)) {
@@ -91,16 +88,16 @@ odoo.define('website.validations', function(require) {
                 })
                 return false;
             } else {
-                if (entrada == 'CC' || entrada == 'C.C.') {
-                    _this.colocar_borde(doc_elem, _this.validar_solo_numeros(num_doc));
-                }
-                if (entrada == 'CE' || entrada == 'C.E.') {
-                    _this.colocar_borde(doc_elem, _this.validar_solo_numeros(num_doc));
+                let result = false;
+                if (entrada == 'CC' || entrada == 'C.C.' || entrada == 'CE' || entrada == 'C.E.') {
+                    result = _this.validar_solo_numeros(num_doc);
+                    _this.colocar_borde(doc_elem, result);
                 }
                 if (entrada == 'PA' || entrada == 'PA.') {
-                    _this.colocar_borde(doc_elem, _this.validar_alfanum(num_doc, 'pasaporte'));
+                    result = _this.validar_alfanum(num_doc, 'pasaporte');
+                    _this.colocar_borde(doc_elem, result);
                 }
-                return true;
+                return result;
             }
         },
         validar_celular: function (entrada) {
@@ -262,11 +259,20 @@ odoo.define('website.validations', function(require) {
                     return 'campo';
             }
         },
-        alert_error_toast: function (text) {
+        alert_error_toast: function (text, pos) {
             Toast.fire({
                 title: `<br/>${text}<br/><br/> `,
                 icon: 'error',
                 confirmButtonText: 'Ocultar',
+                position: pos
+            })
+        },
+        alert_success_toast: function (text) {
+            Toast.fire({
+                title: `<br/>${text}<br/><br/> `,
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+                position: 'center'
             })
         },
         quitarAcentos: function(cadena){
@@ -275,7 +281,7 @@ odoo.define('website.validations', function(require) {
         },
         validar_en_BD: function(elem_id, _this){
 
-            let nro_reg = elem_id.charAt(elem_id.length - 1);
+            let nro_reg = elem_id.split('-')[1];
             let input_tipo = $('#a_document_type-'+nro_reg);
             let input_nro_doc = $('#b_document-'+nro_reg);
             let profesion_id = $('#profesion').val();
@@ -290,7 +296,6 @@ odoo.define('website.validations', function(require) {
                 route: '/validar_documento_bd',
                 params: {'data': data}
             }).then(function(response){
-//                 console.log(response);
                 if(!response.ok){
                     Toast.fire({
                         title: `<br/>${response.error}<br/><br/>`,
@@ -304,9 +309,6 @@ odoo.define('website.validations', function(require) {
                     input_nro_doc.removeClass('invalido').addClass('valido');
                 }
             })
-        },
-        validar_duplicados: function(){
-            console.log('ok');
         },
         es_invalido: function(elem){
             if(elem.hasClass('invalido')){

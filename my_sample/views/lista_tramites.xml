@@ -2,7 +2,7 @@
     <data>
         <template id="lista_tramites" name="Estado del Trámite">
             <t t-call="website.layout">
-                <t t-call="my_sample.header_form_tramite"/>
+                <t t-call="my_sample.titulo_tramites"/>
                 <div class="container mt-5">
                     <div t-if="len(tramites) > 0">
                         <div class="container">
@@ -154,7 +154,7 @@
                             <div class="row float-right mb-4">
                                 <button id="btn-atras" class="btn btn-primary btn-lg btn-stadium mr-3">Atras</button>
                                 <td>
-                                <a t-if="rechazo" class="btn btn-primary btn-lg btn-stadium ml-3"
+                                <a t-if="rechazo or tramites[0].x_cycle_ID[0].x_order == 0" class="btn btn-primary btn-lg btn-stadium ml-3"
                                     t-attf-href="/tramite/{{form}}/edicion/[{{persona.x_document_type_ID[0].id}}:{{persona.x_document}}]">
                                     Actualizar Registro
                                 </a>
@@ -174,14 +174,19 @@
                         </div>
                     </div>
                     <div t-else="">
-                        <h5 class="mb-5">
-                            El documento <t t-raw="(persona.x_document_type_ID[0].x_name)"/> : 
-                            <t t-raw="(persona.x_document)"/> esta registrado pero no tiene ningún trámite
-                        </h5>
+                        <div class="row justify-content-md-center mb-5">
+                            <span class="alert alert-info col-sm-8" role="alert">
+                                El tipo de documento: <t t-raw="(persona.x_document_type_ID[0].x_name.title())"/> con el número: 
+                                <t t-raw="(persona.x_document)"/> esta registrado pero actualmente no tiene ningúna solicitud de tramite.
+                                <br/><br/>
+                                Si tiene alguna duda, por favor comuníquese con el CPNAA al siguiente correo 
+                                electrónico: info@cpnaa.gov.co o al número telefónico (1)3502700 ext 111-115 en Bogotá
+                            </span>
+                        </div>
                         <br/>
                     </div>
                 </div>
-                <div id="viewerModalDiploma" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                <div t-if="len(tramites) > 0" id="viewerModalDiploma" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <div class="modal-header pdfViewer">

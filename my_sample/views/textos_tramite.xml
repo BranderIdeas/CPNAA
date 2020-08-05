@@ -1,0 +1,42 @@
+<odoo>
+    <data>
+        <template id="textos_tramite" name="Encabezado Trámites">
+          <div class="container border-gray p-1 mb-5">
+            <div class="row">
+                <div class="col-sm-5">
+                    <div class="embed-responsive embed-responsive-4by3">
+                        <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/vIOF5W6kZbM" frameborder="0"></iframe>
+                    </div>
+                    <span class="font-italic font-weight-bold">Video Tutorial</span>
+                </div>
+                <div class="col-sm-7">
+                    <div class="row bg-red mr-cuadro border-gray sombra-sobre-rojo">
+                        <div class="col-sm-5 vertical-center">
+                            <h6><i class="fa fa-file-text"></i> Circular No 3 del 2020</h6>
+                        </div>
+                        <div class="col-sm-7 ft12 p-0">
+                            Conozca las disposiciones del CPNAA, en el marco de la emergencia sanitaria por el riesgo de contagio del virus COVID-19, sobre el trámite de Matrícula Profesional de Arquitectura.
+                        </div>
+                    </div>
+                    <div class="row vertical-center border-gray mr-cuadro bg-red mt-2 sombra-sobre-rojo">
+                        <div class="col-sm-2 d-flex justify-content-center">
+                            <i class="fa fa-file-text ft16"></i>
+                        </div>
+                        <div class="col-sm-10 ft08">
+                            Para realizar el trámite lea y acepte los siguientes términos y condiciones de uso del sistema, consulte nuestra Política de Seguridad y Privacidad de la Información
+                        </div>
+                    </div>
+                    <div class="row mr-cuadro border-gray p-1">
+                        <ul class="ft12">
+                            <br/>
+                            <li>NOTA: Si usted es ARQUITECTO CONSTRUCTOR, el trámite de la matrícula profesional debe realizarlo con el COPNIA (Consejo Profesional Nacional de Ingeniería).</li>
+                            <br/>
+                            <li>'El Consejo Profesional Nacional de Arquitectura y sus Profesiones Auxiliares conforme los lincamientos establecidos en la Ley 1581 de 2012 y sus decretos reglamentarios, como responsable de la recolección de los datos personales suministrados en el presente documento, garantiza la seguridad y confidencialidad respecto del tratamiento de los datos sensibles o personales suministrados para los fines de la presente solicitud, igualmente propenderá por su debida custodia, uso. circulación y supresión.’.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </template>
+    </data>
+</odoo>

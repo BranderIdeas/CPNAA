@@ -6,7 +6,7 @@
         Modulo de la oficina virtual del CPNAA""",
 
     'description': """
-        App del Cpnaa
+        App del CPNAA
     """,
 
     'author': "Brander Ideas",
@@ -26,7 +26,7 @@
         # 'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',
-        'views/header_form_tramite.xml',
+        'views/textos_tramite.xml',
         'views/nav_bar_convenios.xml',
         'views/inicio_tramite.xml',
         'views/lista_tramites.xml',
@@ -38,6 +38,7 @@
         'views/formulario_tramites.xml',
         'views/template_pdf.xml',
         'views/epayco.xml',
+        'views/titulo_tramites.xml',
         'views/epayco_confirmacion.xml'
     ],
     # only loaded in demonstration mode

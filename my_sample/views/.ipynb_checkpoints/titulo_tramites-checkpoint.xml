@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <template id="titulo_tramites" name="Titulo Trámites">
+            <div class="row pt48">
+                <h1 id="tramite" class="formTitle mt-0" t-att-data-tramite="form">
+                    <font t-if="form == 'inscripciontt'">CERTIFICADO DE INSCRIPCIÓN PROFESIONAL - PROFESIONAL AUXILIAR DE LA ARQUITECTURA</font>
+                    <font t-elif="form == 'licencia'">LICENCIA TEMPORAL ESPECIAL</font>
+                    <font t-elif="form == 'convenio'">CONVENIOS - ACCESO ESTUDIANTES</font>
+                    <font t-else="">MATRÍCULA PROFESIONAL DE ARQUITECTO</font>
+                </h1>
+            </div>
+        </template>
+    </data>
+</odoo>

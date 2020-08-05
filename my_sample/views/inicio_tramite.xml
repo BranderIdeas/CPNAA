@@ -3,10 +3,10 @@
         <template id="inicio_tramite" name="Inicio de Trámite">
             <t t-call="website.layout">
                 <t t-set="additional_title">Inicio de Trámite</t>
-                <t t-call="my_sample.header_form_tramite"/>
-                <div class="container offset-lg-3 offset-sm-1 col-sm-9 col-lg-6 formSection mt-3">
+                <t t-call="my_sample.titulo_tramites"/>
+                <div class="container formSection mt-3">
                     <nav t-if="form == 'convenio'">
-                        <ul class="nav nav-tabs mb-3 mt-0" id="nav-tab" role="tablist">
+                        <ul class="nav nav-tabs mb-3 mt-0 w80" id="nav-tab" role="tablist">
                             <li class="nav-item">
                                 <a class="nav-link active" id="nav-document-tab" data-toggle="tab" 
                                    href="#nav-document" role="tab" aria-controls="nav-document" aria-selected="true">
@@ -92,6 +92,7 @@
                     </div>
                 </div>
                 <br/>
+                <t t-call="my_sample.textos_tramite"/>
              </t>
         </template>
     </data>

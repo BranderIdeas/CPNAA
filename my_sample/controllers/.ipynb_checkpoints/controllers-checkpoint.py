@@ -75,27 +75,32 @@ class MySample(http.Controller):
     @http.route('/update_tramite', methods=["POST"], auth='public', website=True)
     def update_tramite(self, **kw):
         resp = {}
+        data_user = False
         for key, value in kw.items():
             if type(value) != str:
                 kw[key] = base64.b64encode(kw[key].read())
         try:
-            id_user = http.request.env['x_cpnaa_user'].search([('x_document_type_ID.id','=',kw.get('x_document_type_ID')),
-                                                               ('x_document','=',kw.get('x_document'))]).id
-            tramite = http.request.env['x_cpnaa_procedure'].search_read([('x_user_ID','=',id_user)],['x_service_ID','write_uid'])[0]
+            user = http.request.env['x_cpnaa_user'].search([('x_document_type_ID.id','=',kw.get('x_document_type_ID')),
+                                                               ('x_document','=',kw.get('x_document'))])
+            tramite = http.request.env['x_cpnaa_procedure'].search([('x_user_ID','=',user.id)])[0]
             update = {'x_studio_carrera_1':kw.get('x_institute_career'),'x_studio_universidad_5': kw.get('x_institution_ID'),
                       'x_full_name': kw.get('x_name')+' '+kw.get('x_last_name'), 'x_validation_refuse': False,
-                      'x_name': tramite['x_service_ID'][1]+'-'+kw.get('x_name')+'-'+kw.get('x_last_name')}
-            rechazos = http.request.env['x_cpnaa_refuse_procedure'].sudo().search_read([('x_procedure_ID','=',tramite['id'])])
-            id_rechazo = rechazos[-1]['id']
+                      'x_name': tramite.x_service_ID.x_name+'-'+kw.get('x_name')+'-'+kw.get('x_last_name')}
+            rechazos = http.request.env['x_cpnaa_refuse_procedure'].sudo().search([('x_procedure_ID','=',tramite.id)])
+            if len(rechazos) > 0:
+                id_rechazo = rechazos[-1].id
+            if tramite.x_cycle_ID.x_order == 0:
+                data_user = {'tipo_doc': kw['x_document_type_ID'], 'documento': kw['x_document']}
+            http.request.env['x_cpnaa_procedure'].browse(tramite.id).sudo().write(update)
+            http.request.env['x_cpnaa_user'].browse(user.id).sudo().write(kw)
             # Escribe en el mailthread que el trámite ha sido actualizado
             subject = 'Trámite actualizado por ' + kw.get('x_name')+' '+kw.get('x_last_name')
             body = kw.get('x_name')+' '+kw.get('x_last_name') + ' ha actualizado la información del trámite'
-            self.mailthread_tramite(tramite['id'], kw.get('x_name'), kw.get('x_last_name'), kw.get('x_email'), subject, body)
-            http.request.env['x_cpnaa_procedure'].browse(tramite['id']).sudo().write(update)
-            http.request.env['x_cpnaa_user'].browse(id_user).sudo().write(kw)
-            # Marca el rechazo como corregido
-            http.request.env['x_cpnaa_refuse_procedure'].browse(id_rechazo).sudo().write({'x_corrected':True})
-            resp = { 'ok': True, 'message': 'Usuario y trámite actualizados con exito', 'id_user': id_user }
+            self.mailthread_tramite(tramite.id, kw.get('x_name'), kw.get('x_last_name'), subject, body, user.x_partner_ID.id)
+            if len(rechazos) > 0:
+                # Marca el rechazo como corregido
+                http.request.env['x_cpnaa_refuse_procedure'].browse(id_rechazo).sudo().write({'x_corrected':True})
+            resp = { 'ok': True, 'message': 'Usuario y trámite actualizados con exito', 'id_user': user.id, 'data_user': data_user}
         except:
             _logger.info(sys.exc_info())
             tb = sys.exc_info()[2]
@@ -221,7 +226,7 @@ class MySample(http.Controller):
                 subject = 'Trámite recibido en fase de verificación'
                 body = 'Trámite de cliente '+tramite.x_full_name+' realizo el pago y ha sido recibido en fase de verificación'
                 mailthread_registrado = self.mailthread_tramite(tramite.id, tramite.x_studio_nombres, tramite.x_studio_apellidos,
-                                                                tramite.x_studio_correo_electrnico, subject, body)
+                                                                subject, body, tramite.x_user_ID.x_partner_ID.id)
         except:
             if pago_registrado:
                 error = 'Se registro el pago pero no se escribio el mailthread'+'\nTrámite ID: '+str(tramite.id)+'\n'+str(sys.exc_info())
@@ -364,6 +369,8 @@ class MySample(http.Controller):
                 return http.request.render('my_sample.formulario_tramites', {'form': form, 'user': user, 'origen': tramite.x_origin_type.id})
             else:
                 return http.request.redirect('/cliente/tramite/'+form)
+        elif user and tramite.x_cycle_ID.x_order == 0:
+            return http.request.render('my_sample.formulario_tramites', {'form': form, 'user': user, 'origen': tramite.x_origin_type.id})
         else:
             return http.request.redirect('/cliente/tramite/'+form)
 
@@ -387,6 +394,7 @@ class MySample(http.Controller):
         if len(rechazos)>0:
             if not rechazos[-1]['x_corrected']:
                 rechazo = rechazos[-1]
+        _logger.info(tramites.x_user_ID.x_partner_ID.id)
         return http.request.render('my_sample.lista_tramites', {
             'tramites': tramites,
             'rechazo': rechazo,
@@ -422,7 +430,8 @@ class MySample(http.Controller):
         if actualizado:
             subject = tramite.x_studio_nombres+' '+tramite.x_studio_apellidos+' ha cargado el PDF del diploma'
             body = tramite.x_studio_nombres+' '+tramite.x_studio_apellidos + ' ha cargado el PDF del diploma'
-            self.mailthread_tramite(tramite.id, tramite.x_studio_nombres, tramite.x_studio_apellidos, tramite.x_studio_correo_electrnico, subject, body)
+            self.mailthread_tramite(tramite.id, tramite.x_studio_nombres, tramite.x_studio_apellidos,
+                                    subject, body, tramite.x_user_ID.x_partner_ID.id)
             http.request.env['mail.template'].sudo().search([('name','=','cpnaa_template_load_CD')])[0].sudo().send_mail(id_tramite,force_send=True)
             return {'ok': True, 'message': 'Trámite Actualizado, se guardo el diploma en PDF.'}
         else:
@@ -468,14 +477,14 @@ class MySample(http.Controller):
         return {'carrera': http.request.env['x_cpnaa_career'].sudo().search_read([('id','=',id_carrera)],[campo])}
     
     # Escribe en el mailthread del trámite
-    def mailthread_tramite(self, id_tramite, nombres, apellidos, email, asunto, mensaje):
+    def mailthread_tramite(self, id_tramite, nombres, apellidos, asunto, mensaje, id_contacto):
         mailthread = {
             'subject': asunto,
             'model': 'x_cpnaa_procedure',
             'email_from': nombres+' '+apellidos,
             'subtype_id': 2,
             'body': mensaje,
-            'author_id': http.request.env['res.partner'].sudo().search([('email','=',email)]).id,
+            'author_id': id_contacto,
             'message_type': 'notification',
             'res_id': id_tramite
         }

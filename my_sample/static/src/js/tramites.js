@@ -360,12 +360,13 @@ odoo.define('website.tramites', function(require) {
                     if (request.readyState == 4) {
                         if(request.status == 200){
                             let resp = JSON.parse(request.responseText);
+                            console.log(resp);
                             if(resp.data_user){
                                 location.replace(`/pagos/[${resp.data_user.tipo_doc}:${resp.data_user.documento}]`);
                             }else if(resp.id_user){
                                 ocultarSpinner();
                                 $('#div_results').removeClass('offset-md-2 col-md-8').addClass('offset-md-4 col-md-6');
-                                $('#mssg_result').addClass('alert alert-warning').text('Trámite actualizado con exito');
+                                $('#mssg_result').addClass('alert alert-info').text('Trámite actualizado con exito');
                                 setTimeout(()=>{ 
                                     location.replace(`http://34.70.101.32/`);
                                 },800);

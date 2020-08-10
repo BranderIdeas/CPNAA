@@ -57,6 +57,7 @@ class MySample(http.Controller):
     @http.route('/create_user', methods=["POST"], auth='public', website=True)
     def create_user(self, **kw):
         resp = {}
+        _logger.info(kw)
         for key, value in kw.items():
             if type(value) != str:
                 kw[key] = base64.b64encode(kw[key].read())
@@ -598,6 +599,7 @@ class MySample(http.Controller):
     def guardar_registros_csv(self, **kw):
         registros = kw.get('registros')
         data = kw.get('data')
+        hoy = date.today()
         _logger.info(data)
         id_carrera = data['profesion']
         id_universidad = data['universidad']
@@ -622,7 +624,8 @@ class MySample(http.Controller):
                 id_guardado = http.request.env['x_procedure_temp'].sudo().create({
                     'x_tipo_documento_select': tipo_doc, 'x_documento': reg['b_document'], 'x_nombres': reg['c_name'], 'x_genero_ID': genero,
                     'x_apellidos': reg['d_lastname'],  'x_fecha_de_grado': fecha, 'x_email': reg['g_email'], 'x_agreement_ID': id_convenio, 
-                    'x_grado_ID': id_grado, 'x_carrera_select': id_carrera, 'x_universidad_select': id_universidad, 'x_origin_type': 'CONVENIO'})
+                    'x_grado_ID': id_grado, 'x_carrera_select': id_carrera, 'x_universidad_select': id_universidad, 'x_origin_type': 'CONVENIO',
+                    'x_fecha_radicacion_universidad': hoy})
                 guardados = guardados + 1
         except IOError:
             _logger.info(IOError)

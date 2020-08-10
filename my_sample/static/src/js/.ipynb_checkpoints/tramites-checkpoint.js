@@ -7,6 +7,11 @@ odoo.define('website.tramites', function(require) {
     const Validaciones = require('website.validations');
     const validaciones = new Validaciones();
     
+    let urlBase = "https://branderideas-cpnaa.odoo.com";
+    if(location.href.indexOf(urlBase) === -1 ){
+        urlBase = "https://branderideas-cpnaa-developing-984497.dev.odoo.com";
+    }
+    
     let tramite = $('#tramite').attr('data-tramite');
     let data = {
         doc: '',
@@ -68,13 +73,21 @@ odoo.define('website.tramites', function(require) {
                     }
                 } else if (response.graduandos.length > 1){
                     div_msj.removeClass('invisible').attr('aria-hidden',false);
-                    let texto = '';
+                    div_msj.find('div').removeClass('alert-primary').addClass('alert-info');
+                    let texto = '<h5 class="text-center">Se han encontrado varias coincidencias, por favor selecciona</h5>';
+                    console.log(response);
                     response.graduandos.forEach((grad)=>{
-                        texto += `GRADUANDO: </br>
-                                  ${grad.graduando.x_tipo_documento_select[1]}: ${grad.graduando.x_documento} </br> 
-                                  ${grad.graduando.x_nombres} ${grad.graduando.x_apellidos} </br> 
-                                  ${grad.graduando.x_service_ID[1]} </br>
-                                  ${grad.graduando.x_universidad} </br></br>`;
+                        let enlace = grad.id_user_tramite ? `/cliente/${grad.id_user_tramite}/tramites` : `/tramite/convenios/${grad.graduando.id}`;
+                        texto += `<a class="card card-link" href=${urlBase}${enlace}>
+                                    <div class="card-header">
+                                        GRADUANDO: ${grad.graduando.x_nombres} ${grad.graduando.x_apellidos}
+                                    </div>
+                                    <div class="card-body">
+                                      ${grad.graduando.x_tipo_documento_select[1]}: ${grad.graduando.x_documento} </br> 
+                                      TRÁMITE : ${grad.graduando.x_service_ID[1]} </br>
+                                      INSTITUCIÓN: ${grad.graduando.x_universidad} </br>
+                                    </div>
+                                  </a></br>`;
                     })
                     div_msj.find('div').html(texto);
                 }
@@ -220,7 +233,6 @@ odoo.define('website.tramites', function(require) {
             if(data.nombres.length > 1 && data.apellidos.length > 1){
                 $('#btn_verificar_nombres').removeAttr('disabled');
                 if(e.key == "Enter" || e.type == "click"){
-                    console.log(e.target.name);
                     $('#btn_verificar_nombres').attr('disabled', 'disabled');
                     data.nombres = data.nombres.trim();
                     data.apellidos = data.apellidos.trim();
@@ -261,7 +273,6 @@ odoo.define('website.tramites', function(require) {
                         $('#viewerModal').on('show.bs.modal', function (e) {
                             let reader = new FileReader();
                             reader.onload = function(e) {
-                                console.log(e);
                                 objElm.attr('src', e.target.result);
                             }
                             reader.readAsDataURL(inputElm[0].files[0]);
@@ -324,6 +335,9 @@ odoo.define('website.tramites', function(require) {
                 $('#x_state_ID').val(response.data.x_state_ID[0]);
                 $('#x_city_ID').val(response.data.x_city_ID[0]);
                 $('#x_foreign_country').val(response.data.x_foreign_country[0]);
+                document.querySelector("#status").style.display = "none";
+                document.querySelector("#preloader").style.display = "none";
+                document.querySelector("body").style.overflow = "visible";
             }).catch(function(err){
                 console.log(err);
             });
@@ -360,7 +374,6 @@ odoo.define('website.tramites', function(require) {
                     if (request.readyState == 4) {
                         if(request.status == 200){
                             let resp = JSON.parse(request.responseText);
-                            console.log(resp);
                             if(resp.data_user){
                                 location.replace(`/pagos/[${resp.data_user.tipo_doc}:${resp.data_user.documento}]`);
                             }else if(resp.id_user){
@@ -392,6 +405,11 @@ odoo.define('website.tramites', function(require) {
     });
     
     const tramites = new Tramites();
+    
+    //Cargar el documento en el input file
+    if(location.href.indexOf('/edicion/') != -1){
+        tramites.get_data_edicion();
+    }
     
     // Inicio del trámite boton de enviar
     $('#btn_verificar').click(function(e) {
@@ -472,11 +490,6 @@ odoo.define('website.tramites', function(require) {
     $('input[type=file]').change(function(){
         tramites.label_input_file(this);
     });
-    
-    //Cargar el documento en el input file
-    if(location.href.indexOf('/edicion/') != -1){
-        tramites.get_data_edicion();
-    }
     
     // Validaciones de tipo de datos en los input del formulario
     $('#tramiteForm').on('change', async function(e){
@@ -680,7 +693,6 @@ odoo.define('website.tramites', function(require) {
             }
         } else if (($('#x_level_ID').val() != '1') && $('#x_gender_ID').val() != '' && $('#x_institute_career').val() != ''){
             let carrera = await tramites.cambiar_genero_carrera($('#x_institute_career').val(), $('#x_gender_ID').val());
-            console.log(carrera);
             if(carrera){
                 $('#carreras').val(carrera);
                 $('select[name="x_institute_career"] option:selected').text(carrera);

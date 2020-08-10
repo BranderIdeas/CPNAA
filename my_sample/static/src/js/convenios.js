@@ -256,7 +256,7 @@ odoo.define('website.convenios', function(require) {
                         params: {'data': data}
                     }).then(function(response){
                         if (!response.ok) {
-                          console.log(response);
+//                           console.log(response);
                           throw new Error(response.error.message)
                         }
                         return response

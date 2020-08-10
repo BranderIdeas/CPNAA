@@ -167,7 +167,7 @@
                                 <button t-if="tramites[0].x_cycle_ID[0].x_order == 0"
                                     id="btn-pagar" class="btn btn-primary btn-lg btn-stadium ml-3">Pagar</button>
                                 <a t-if="tramites[0].x_cycle_ID[0].x_order &gt; 0 and tramites[0].x_cycle_ID[0].x_order &lt; 5 and not rechazo and not diploma" 
-                                    href="http://34.70.101.32/calendario-de-matriculas-d65/"
+                                    href="https://cpnaa.gov.co/calendario-de-matriculas-d65/"
                                     class="btn btn-primary btn-lg btn-stadium ml-3">Su solicitud esta en trámite</a>
                                 </td>                                
                             </div>

@@ -3,6 +3,7 @@
         <template id="assets_frontend" inherit_id="website.assets_frontend" name="Assets">
             <xpath expr="." position="inside">
                 <link rel="stylesheet" href="/my_sample/static/src/css/styles.css"/>
+                <link rel="stylesheet" href="/my_sample/static/src/css/website_preloader.css"/>
                 <script src='/my_sample/static/src/js/swal.js'></script>
                 <script src="/my_sample/static/src/js/tramites.js"></script>
                 <script src="/my_sample/static/src/js/convenios.js"></script>
@@ -64,6 +65,22 @@
                         </div>
                 </div>
             </t>
+        </template>
+        <template id="user_navbar_odooitnow" inherit_id="web.layout">
+            <xpath expr="//body" position="inside">
+                <div id="preloader">
+                    <div id="status">&amp;nbsp;</div>
+                </div>
+                <script language="javascript" type="text/javascript">
+                    window.onload = function(){
+                        if(location.href.indexOf('/edicion/') === -1){
+                            document.querySelector("#status").style.display = "none";
+                            document.querySelector("#preloader").style.display = "none";
+                            document.querySelector("body").style.overflow = "visible";
+                        }
+                    }
+                </script>
+            </xpath>
         </template>
     </data>
 </odoo>

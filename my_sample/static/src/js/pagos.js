@@ -29,7 +29,7 @@ odoo.define('website.pagos', function(require) {
                     $('#recibo').removeAttr('disabled');
                     $('#epayco').removeAttr('disabled');
                 }else{
-                    location.replace('http://34.70.101.32');
+                    location.replace('https://www.cpnaa.gov.co');
                 }
             })
         },
@@ -39,7 +39,7 @@ odoo.define('website.pagos', function(require) {
             if(dataPDF.tramite.x_studio_tipo_de_documento_1[0] == 5){ tipo_documento = 'PPN' };
             
             var handler = ePayco.checkout.configure({
-                key: '9e73b510f7dfd7568b5e876a970962cb',
+                key: '57d20fccb29db60eb4e1be5ff866548f',
                 test: true
             })
             var dataTran = {
@@ -204,7 +204,7 @@ odoo.define('website.pagos', function(require) {
         })
 
         $('#volver').click(()=>{
-            location.replace('http://34.70.101.32/');
+            location.replace('http://https://www.cpnaa.gov.co/');
         })
     
         const urlHead = "https://secure.epayco.co/validation/v1/reference/";
@@ -261,19 +261,11 @@ odoo.define('website.pagos', function(require) {
                         })
                     }
                 } else {
-                    Toast.fire({
-                        icon: 'warning',
-                        title: `<br/>Error consultando la información.<br/><br/> `,
-                        confirmButtonText: 'Ocultar',
-                    })
+                    validaciones.alert_error_toast('Error consultando la información.', 'center');
                 }
                 
             } catch (error) {
-                Toast.fire({
-                    icon: 'error',
-                    title: `<br/>Error en la transacción, ${error}<br/><br/> `,
-                    confirmButtonText: 'Ocultar',
-                })
+                validaciones.alert_error_toast('Error consultando la información.', 'center');
                 console.log('Error en la transaccion ', error);
             }
 

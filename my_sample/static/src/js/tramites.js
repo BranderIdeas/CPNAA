@@ -381,7 +381,7 @@ odoo.define('website.tramites', function(require) {
                                 $('#div_results').removeClass('offset-md-2 col-md-8').addClass('offset-md-4 col-md-6');
                                 $('#mssg_result').addClass('alert alert-info').text('Trámite actualizado con exito');
                                 setTimeout(()=>{ 
-                                    location.replace(`http://34.70.101.32/`);
+                                    location.replace(`https://www.cpnaa.gov.co`);
                                 },800);
                             }else{
                                 ocultarSpinner();

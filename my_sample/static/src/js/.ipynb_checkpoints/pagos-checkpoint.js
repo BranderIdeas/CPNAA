@@ -204,7 +204,7 @@ odoo.define('website.pagos', function(require) {
         })
 
         $('#volver').click(()=>{
-            location.replace('http://https://www.cpnaa.gov.co/');
+            location.replace('https://www.cpnaa.gov.co/');
         })
     
         const urlHead = "https://secure.epayco.co/validation/v1/reference/";

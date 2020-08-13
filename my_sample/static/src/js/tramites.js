@@ -7,6 +7,10 @@ odoo.define('website.tramites', function(require) {
     const Validaciones = require('website.validations');
     const validaciones = new Validaciones();
     
+    if ( window.location !== window.parent.location ) {
+        $( "header#top, #oe_main_menu_navbar, footer" ).hide();
+    }
+    
     let urlBase = "https://branderideas-cpnaa.odoo.com";
     if(location.href.indexOf(urlBase) === -1 ){
         urlBase = "https://branderideas-cpnaa-developing-984497.dev.odoo.com";

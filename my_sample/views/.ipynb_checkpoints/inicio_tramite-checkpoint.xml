@@ -6,7 +6,7 @@
                 <t t-call="my_sample.titulo_tramites"/>
                 <div class="container formSection mt-3">
                     <nav t-if="form == 'convenio'">
-                        <ul class="nav nav-tabs mb-3 mt-0 w80" id="nav-tab" role="tablist">
+                        <ul class="nav nav-tabs mb-3 mt-0 wInput mx-auto" id="nav-tab" role="tablist">
                             <li class="nav-item">
                                 <a class="nav-link active" id="nav-document-tab" data-toggle="tab" 
                                    href="#nav-document" role="tab" aria-controls="nav-document" aria-selected="true">
@@ -23,7 +23,7 @@
                     </nav>
                     <div class="tab-content" id="nav-tabContent">
                         <div class="tab-pane fade show active" id="nav-document" role="tabpanel" aria-labelledby="nav-document-tab">
-                            <div class="row form-group form-field w80 ml-5">
+                            <div class="row form-group form-field wInput mx-auto">
                                 <label class="col-form-label" for="x_document_type_ID"> 
                                     Tipo de Documento
                                 </label>
@@ -39,7 +39,7 @@
                                     </option>
                                 </select>
                             </div>
-                            <div class="row form-group form-field w80 ml-5">
+                            <div class="row form-group form-field wInput mx-auto">
                                 <label class="col-form-label" for="x_document">
                                     Número de documento
                                 </label>
@@ -67,13 +67,13 @@
                             </div>
                         </div>
                         <div class="tab-pane fade" id="nav-nombres" role="tabpanel" aria-labelledby="nav-nombres-tab">
-                            <div class="row form-group form-field w80 ml-5">
+                            <div class="row form-group form-field wInput mx-auto">
                                 <label class="col-form-label" for="x_names">
                                     Ingrese sus nombres
                                 </label>
                                 <input type="text" class="form-control" name="x_names" id="x_names" maxlength="80" required="required" />
                             </div>
-                            <div class="row form-group form-field w80 ml-5">
+                            <div class="row form-group form-field wInput mx-auto">
                                 <label class="col-form-label" for="x_lastnames">
                                     Ingrese sus apellidos
                                 </label>

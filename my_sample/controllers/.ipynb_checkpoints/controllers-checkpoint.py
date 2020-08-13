@@ -600,7 +600,8 @@ class MySample(http.Controller):
         registros = kw.get('registros')
         data = kw.get('data')
         hoy = date.today()
-        _logger.info(data)
+        _logger.info('TODAY')
+        _logger.info(kw)
         id_carrera = data['profesion']
         id_universidad = data['universidad']
         id_convenio = data['convenio']
@@ -608,24 +609,25 @@ class MySample(http.Controller):
         fecha = data['fecha']
         guardados = 0
         try:
-            if (id_grado == ''):
+            if not id_grado:
                 grado = http.request.env['x_cpnaa_grade'].sudo().create({'x_phase_1': True, 'x_carrera_ID': id_carrera, 
                                          'x_date': fecha, 'x_agreement_ID': id_convenio, 'x_studio_universidad': id_universidad})
                 id_grado = grado['id']
             for reg in registros:
+                carrera_registro = id_carrera
                 genero = self.validar_genero(reg['f_gender'])
                 id_arquitecto = http.request.env['x_cpnaa_career'].search([('x_name','=','ARQUITECTO')]).id
                 id_arquitecta = http.request.env['x_cpnaa_career'].search([('x_name','=','ARQUITECTA')]).id
                 id_femenino   = http.request.env['x_cpnaa_gender'].search([('x_name','=','FEMENINO')]).id
                 if genero == id_femenino and id_carrera == id_arquitecto:
-                    id_carrera = id_arquitecta
+                    carrera_registro = id_arquitecta
                 tipo_doc = self.validar_tipo_doc(reg['a_document_type'])
                 name = reg['c_name'].split(' ')[0]
                 id_guardado = http.request.env['x_procedure_temp'].sudo().create({
                     'x_tipo_documento_select': tipo_doc, 'x_documento': reg['b_document'], 'x_nombres': reg['c_name'], 'x_genero_ID': genero,
                     'x_apellidos': reg['d_lastname'],  'x_fecha_de_grado': fecha, 'x_email': reg['g_email'], 'x_agreement_ID': id_convenio, 
-                    'x_grado_ID': id_grado, 'x_carrera_select': id_carrera, 'x_universidad_select': id_universidad, 'x_origin_type': 'CONVENIO',
-                    'x_fecha_radicacion_universidad': hoy})
+                    'x_grado_ID': id_grado, 'x_carrera_select': carrera_registro, 'x_universidad_select': id_universidad, 
+                    'x_origin_type': 'CONVENIO', 'x_fecha_radicacion_universidad': hoy})
                 guardados = guardados + 1
         except IOError:
             _logger.info(IOError)

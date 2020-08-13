@@ -284,9 +284,8 @@ modal-body.pdfViewer {
 .formSection .is-invalid{
     border: 1.5px solid #ff0000 !important;
 }
-.w80{
-    margin-left: 9rem !important;
-    margin-right: 10rem !important;
+.wInput{
+    width: 75% !important;
 }
 .popover {
     border: 0;
@@ -325,4 +324,37 @@ modal-body.pdfViewer {
     -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
     -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
     box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+}
+.link-portal{
+    color: #FFF !important;
+}
+.link-portal:hover{
+    text-decoration: none !important;
+    color: #cccccc !important;
+}
+.price{
+    color: #cc0000 !important;
+    font-size: 1rem !important;
+}
+.btn-calendar{
+    border-radius: 25px !important;
+}
+.fw700{
+    font-weight: 700 !important;
+}
+.info-tramites{
+    width: 80% !important;
+    margin-left: 10% !important;
+}
+@media (max-width: 992px) {
+    .info-tramites {
+        width: 100% !important;
+        margin-left: 0% !important;
+    }
+    .mr-cuadro{
+        margin-left: 0.25rem !important;
+    }
+    .wInput{
+        width: 90% !important;
+    }
 }

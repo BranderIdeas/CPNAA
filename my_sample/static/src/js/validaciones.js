@@ -1,6 +1,5 @@
 odoo.define('website.validations', function(require) {
     
-    console.log('VALIDACIONES')
     const Class = require('web.Class');
     const rpc = require('web.rpc');
     
@@ -146,10 +145,10 @@ odoo.define('website.validations', function(require) {
             }
         },
         validar_direccion: function (entrada) {
-            const regex = /^[^\/&<>"';%]*$/;
+            const regex = /^[0-9a-zA-ZÑñ\-#() ]*$/;
             if (!regex.test(entrada)) {
                 Toast.fire({
-                    title: `<br/>No es válido, evite los siguientes caracteres ;'\&<>"% <br/><br/> `,
+                    title: `<br/>No es válido, evite tildes y caracteres como \;'&<>"% <br/><br/> `,
                     icon: 'error',
                     confirmButtonText: 'Ocultar',
                 })

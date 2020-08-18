@@ -7,8 +7,13 @@ odoo.define('website.pagos', function(require) {
     const validaciones = new Validaciones();
     let dataPDF = {};
     let urlBase = "https://branderideas-cpnaa.odoo.com";
-    if(location.href.indexOf(urlBase) === -1 ){
+    let urlCpnaa = "https://cpnaa.gov.co";
+    let key = '57d20fccb29db60eb4e1be5ff866548f';
+    let mode = false;
+    if(location.href.indexOf(urlBase) === -1 || location.href.indexOf(urlCpnaa) === -1){
         urlBase = "https://branderideas-cpnaa-developing-984497.dev.odoo.com";
+        key = '9e73b510f7dfd7568b5e876a970962cb';
+        mode = true;
     }
     
     const Pagos = Class.extend({
@@ -39,8 +44,8 @@ odoo.define('website.pagos', function(require) {
             if(dataPDF.tramite.x_studio_tipo_de_documento_1[0] == 5){ tipo_documento = 'PPN' };
             
             var handler = ePayco.checkout.configure({
-                key: '57d20fccb29db60eb4e1be5ff866548f',
-                test: true
+                key: key,
+                test: mode
             })
             var dataTran = {
                 //Parametros compra (obligatorio)

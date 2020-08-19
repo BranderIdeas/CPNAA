@@ -16,7 +16,7 @@
                         <h5 class="titulo inferior">Cargue CSV de posibles graduandos</h5>
                         <div class="alert alert-block alert-dark"><strong>Importante!</strong><br/>
                             <p>En el siguiente enlace podrá descargar un archivo CSV que puede ser tomado como guía para los archivos que puede cargar en
-                            ésta opción del sistema: <a href="https://cpnaa.gov.co/app_cpnaa/convenios/assets/download/formato_cargue_posibles_graduandos_v2.csv">
+                            ésta opción del sistema: <a href="https://cpnaa.gov.co/wp-content/uploads/2020/08/formato_cargue_posibles_graduandos_v2.csv">
                             <strong>Descargar Archivo Guía </strong><i class="fa fa-download"></i></a></p>
                         </div>
                         <div>
@@ -76,7 +76,7 @@
                                             <div class="o_website_form_date input-group">
                                                 <input t-if="grado" class="form-control inputDisabled" name="fecha_grado" disabled="true"
                                                    t-attf-value="{{ (grado.x_date.strftime('%d-%m-%Y')) }}" readonly="true"/>
-                                                <input t-else="" type="text" class="form-control hand" name="fecha_grado" readonly="true"
+                                                <input t-else="" type="text" class="form-control hand blanco" name="fecha_grado" readonly="true"
                                             t-attf-data-min="{{ (datetime.date.today() + datetime.timedelta(days=convenio.x_days_before_degree)).strftime('%d-%m-%Y') }}" 
                                             t-attf-data-max="{{ (convenio.x_end_date + datetime.timedelta(days=convenio.x_days_after_expiration)).strftime('%d-%m-%Y') }}"/>
                                                 <div class="input-group-append">

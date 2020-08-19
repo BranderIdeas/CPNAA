@@ -11,19 +11,20 @@
                                     <h6 class="fw700"> Valor del trámite vigencia 2020:
                                         <span class="price fw700"> 
                                             <t t-if="form == 'licencia'">
-                                               $<t t-esc="str(int(request.env['x_cpnaa_service'].sudo().browse(3).x_rate))"/>
+                                                <t t-set="tarifa" t-value="int(request.env['x_cpnaa_service'].sudo().browse(3).x_rate)"/>
                                             </t>
-                                            <t t-if="form == 'inscripciontt'"> 
-                                               $<t t-esc="str(int(request.env['x_cpnaa_service'].sudo().browse(2).x_rate))"/>
+                                            <t t-if="form == 'inscripciontt'">
+                                                <t t-set="tarifa" t-value="int(request.env['x_cpnaa_service'].sudo().browse(2).x_rate)"/>
                                             </t>
                                             <t t-if="form == 'matricula'">
-                                               $<t t-esc="str(int(request.env['x_cpnaa_service'].sudo().browse(1).x_rate))"/>
+                                                <t t-set="tarifa" t-value="int(request.env['x_cpnaa_service'].sudo().browse(1).x_rate)"/>
                                             </t>
+                                            $<t t-esc="'{:,}'.format(tarifa).replace(',','.')"/>
                                         </span>
                                     </h6>
                                 </div>
                                 <div class="col-sm-12 vertical-center">
-                                    <a href="https://cpnaa.gov.co/calendario-de-matriculas-d65" class="btn btn-primary mb-2 btn-calendar btn-block">Calendario de trámites</a>
+                                    <a href="https://cpnaa.gov.co/calendario-de-matriculas-d65" target="_blank" class="btn btn-primary mb-2 btn-calendar btn-block">Calendario de trámites</a>
                                 </div>
                             </div>
                           </t>
@@ -37,7 +38,8 @@
                         <div class="row bg-red mr-cuadro border-gray sombra-sobre-rojo">
                             <div class="col-sm-12 col-md-5 vertical-center">
                                 <h6>
-                                    <a href="https://cpnaa.gov.co/wp-content/uploads/2020/06/Circular-No.3-de-2020_0.pdf" class="link-portal">
+                                    <a href="https://cpnaa.gov.co/wp-content/uploads/2020/06/Circular-No.3-de-2020_0.pdf" 
+                                       target="_blank" class="link-portal">
                                         <i class="fa fa-file-text"></i> Circular No 3 del 2020
                                     </a>
                                 </h6>

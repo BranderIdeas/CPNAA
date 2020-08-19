@@ -11,14 +11,15 @@
                                     <h6 class="fw700"> Valor del trámite vigencia 2020:
                                         <span class="price fw700"> 
                                             <t t-if="form == 'licencia'">
-                                               $<t t-esc="str(int(request.env['x_cpnaa_service'].sudo().browse(3).x_rate))"/>
+                                                <t t-set="tarifa" t-value="int(request.env['x_cpnaa_service'].sudo().browse(3).x_rate)"/>
                                             </t>
-                                            <t t-if="form == 'inscripciontt'"> 
-                                               $<t t-esc="str(int(request.env['x_cpnaa_service'].sudo().browse(2).x_rate))"/>
+                                            <t t-if="form == 'inscripciontt'">
+                                                <t t-set="tarifa" t-value="int(request.env['x_cpnaa_service'].sudo().browse(2).x_rate)"/>
                                             </t>
                                             <t t-if="form == 'matricula'">
-                                               $<t t-esc="str(int(request.env['x_cpnaa_service'].sudo().browse(1).x_rate))"/>
+                                                <t t-set="tarifa" t-value="int(request.env['x_cpnaa_service'].sudo().browse(1).x_rate)"/>
                                             </t>
+                                            $<t t-esc="'{:,}'.format(tarifa).replace(',','.')"/>
                                         </span>
                                     </h6>
                                 </div>

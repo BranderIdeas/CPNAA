@@ -6,9 +6,14 @@ odoo.define('website.pagos', function(require) {
     const Validaciones = require('website.validations');
     const validaciones = new Validaciones();
     let dataPDF = {};
-    let urlBase = "https://branderideas-cpnaa.odoo.com";
-    if(location.href.indexOf(urlBase) === -1 ){
-        urlBase = "https://branderideas-cpnaa-developing-984497.dev.odoo.com";
+    let urlBase = "branderideas-cpnaa.odoo.com";
+    let urlCpnaa = "cpnaa.gov.co";
+    let key = '57d20fccb29db60eb4e1be5ff866548f';
+    let mode = true;
+    if(location.href.indexOf(urlBase) === -1){
+        urlBase = "branderideas-cpnaa-developing-984497.dev.odoo.com";
+        key = '9e73b510f7dfd7568b5e876a970962cb';
+        mode = true;
     }
     
     const Pagos = Class.extend({
@@ -39,8 +44,8 @@ odoo.define('website.pagos', function(require) {
             if(dataPDF.tramite.x_studio_tipo_de_documento_1[0] == 5){ tipo_documento = 'PPN' };
             
             var handler = ePayco.checkout.configure({
-                key: '57d20fccb29db60eb4e1be5ff866548f',
-                test: true
+                key: key,
+                test: mode
             })
             var dataTran = {
                 //Parametros compra (obligatorio)
@@ -178,7 +183,7 @@ odoo.define('website.pagos', function(require) {
     })
 
     if(location.href.indexOf(`${urlBase}/pagos/[`) != -1){
-        console.log('PAGOS')
+        console.log('<-->')
         var pagos = new Pagos();
         pagos.traer_data(pagos);
         $('#epayco').click(pagos.iniciar_pago);

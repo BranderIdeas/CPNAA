@@ -1,7 +1,6 @@
 odoo.define('website.tramites', function(require) {
 'use strict';
     
-    console.log('TRAMITES')
     const Class = require('web.Class');
     const rpc = require('web.rpc');
     const Validaciones = require('website.validations');

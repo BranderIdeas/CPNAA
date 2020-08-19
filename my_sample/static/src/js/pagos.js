@@ -6,14 +6,13 @@ odoo.define('website.pagos', function(require) {
     const Validaciones = require('website.validations');
     const validaciones = new Validaciones();
     let dataPDF = {};
-    let urlBase = "branderideas-cpnaa.odoo.com";
-    let urlCpnaa = "cpnaa.gov.co";
-    let key = '57d20fccb29db60eb4e1be5ff866548f';
+    let urlBase = `${location.href.split(':')[0]}://${location.hostname}`;
+    let key = '9e73b510f7dfd7568b5e876a970962cb';
     let mode = true;
-    if(location.href.indexOf(urlBase) === -1){
-        urlBase = "branderideas-cpnaa-developing-984497.dev.odoo.com";
-        key = '9e73b510f7dfd7568b5e876a970962cb';
-        mode = true;
+    if(urlBase.indexOf('cpnaa-developing') === -1){
+        mode = false;
+        key = '57d20fccb29db60eb4e1be5ff866548f';
+        urlBase = 'https://oficinavirtual.cpnaa.gov.co';
     }
     
     const Pagos = Class.extend({
@@ -182,7 +181,7 @@ odoo.define('website.pagos', function(require) {
         location.replace('/cliente/tramite/'+tramite);
     })
 
-    if(location.href.indexOf(`${urlBase}/pagos/[`) != -1){
+    if(location.href.indexOf(`/pagos/[`) != -1){
         console.log('<-->')
         var pagos = new Pagos();
         pagos.traer_data(pagos);

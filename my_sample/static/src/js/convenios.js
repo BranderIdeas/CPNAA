@@ -1,6 +1,5 @@
 odoo.define('website.convenios', function(require) {
 
-    console.log('CONVENIOS')
     const Class = require('web.Class');
     const rpc = require('web.rpc');
     const Validaciones = require('website.validations');

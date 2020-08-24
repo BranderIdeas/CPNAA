@@ -5,32 +5,50 @@
             <div class="container mt-5 border-gray p-2">
                 <div class="row">
                     <div class="col-sm-12 col-md-5">
-                        <t t-if="form != 'convenio'">
-                            <div class="col-sm-12 pl-0 pt-2 pb-3">
-                                <div class="col-sm-12 vertical-center">
-                                    <h6 class="fw700"> Valor del trámite vigencia 2020:
-                                        <span class="price fw700"> 
-                                            <t t-if="form == 'licencia'">
-                                                <t t-set="tarifa" t-value="int(request.env['x_cpnaa_service'].sudo().browse(3).x_rate)"/>
-                                            </t>
-                                            <t t-if="form == 'inscripciontt'">
-                                                <t t-set="tarifa" t-value="int(request.env['x_cpnaa_service'].sudo().browse(2).x_rate)"/>
-                                            </t>
-                                            <t t-if="form == 'matricula'">
-                                                <t t-set="tarifa" t-value="int(request.env['x_cpnaa_service'].sudo().browse(1).x_rate)"/>
-                                            </t>
-                                            $<t t-esc="'{:,}'.format(tarifa).replace(',','.')"/>
-                                        </span>
-                                    </h6>
-                                </div>
-                                <div class="col-sm-12 vertical-center">
-                                    <a href="https://cpnaa.gov.co/calendario-de-matriculas-d65" target="_blank" class="btn btn-primary mb-2 btn-calendar btn-block">Calendario de trámites</a>
-                                </div>
+                        <div class="col-sm-12 pl-0 pt-2 pb-3">
+                            <div class="col-sm-12 vertical-center">
+                                        <t t-if="form != 'convenio'">
+                                            <h6 class="fw700"> Valor del trámite vigencia 2020:
+                                                <span class="price fw700">
+                                                    <t t-if="form == 'licencia'">
+                                                        <t t-set="tarifa" t-value="int(request.env['x_cpnaa_service'].sudo().browse(3).x_rate)"/>
+                                                    </t>
+                                                    <t t-if="form == 'inscripciontt'">
+                                                        <t t-set="tarifa" t-value="int(request.env['x_cpnaa_service'].sudo().browse(2).x_rate)"/>
+                                                    </t>
+                                                    <t t-if="form == 'matricula'">
+                                                        <t t-set="tarifa" t-value="int(request.env['x_cpnaa_service'].sudo().browse(1).x_rate)"/>
+                                                    </t>
+                                                    $<t t-esc="'{:,}'.format(tarifa).replace(',','.')"/>
+                                                </span>
+                                            </h6>
+                                        </t>
+                                        <t t-if="form == 'convenio'">
+                                            <h6 class="fw700"> Valor del trámite vigencia 2020:
+                                                <br/><br/>Mátricula Profesional de Arquitecto: 
+                                                <span class="price fw700">
+                                                    <t t-set="servicio" t-value="request.env['x_cpnaa_service'].sudo().browse(24)"/>
+                                                    <t t-set="tarifa" t-value="int(servicio.x_rate - servicio.x_discount)"/>
+                                                    $<t t-esc="'{:,}'.format(tarifa).replace(',','.')"/>
+                                                </span>
+                                                <br/><br/>Certificado de Inscripción Profesional: 
+                                                <span class="price fw700">
+                                                    <t t-set="servicio" t-value="request.env['x_cpnaa_service'].sudo().browse(26)"/>
+                                                    <t t-set="tarifa" t-value="int(servicio.x_rate - servicio.x_discount)"/>
+                                                    $<t t-esc="'{:,}'.format(tarifa).replace(',','.')"/>
+                                                </span>
+                                            </h6>
+                                        </t>                                        
                             </div>
-                          </t>
+                            <div t-if="form != 'convenio'" class="col-sm-12 vertical-center">
+                                <a href="https://cpnaa.gov.co/calendario-de-matriculas-d65" target="_blank" class="btn btn-primary mb-2 btn-calendar btn-block">Calendario de trámites</a>
+                            </div>
+                        </div>
                         <div class="embed-responsive embed-responsive-4by3">
                             <iframe t-if="form == 'matricula'" class="embed-responsive-item" src="https://www.youtube.com/embed/vIOF5W6kZbM" frameborder="0"></iframe>
-                            <iframe t-else="" class="embed-responsive-item" src="https://www.youtube.com/embed/BwCN5udmlq0" frameborder="0"></iframe>
+                            <iframe t-if="form == 'inscripciontt'" class="embed-responsive-item" src="https://www.youtube.com/embed/BwCN5udmlq0" frameborder="0"></iframe>
+                            <iframe t-if="form == 'convenio'" class="embed-responsive-item" src="https://www.youtube.com/embed/hxadCw-4kTk" frameborder="0"></iframe>
+                            <iframe t-if="form == 'licencia'" class="embed-responsive-item" src="https://www.youtube.com/embed/vIOF5W6kZbM" frameborder="0"></iframe>
                         </div>
                         <span class="font-italic font-weight-bold">Video Tutorial</span>
                     </div>

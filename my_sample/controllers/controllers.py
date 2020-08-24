@@ -1,4 +1,3 @@
- # -*- coding: utf-8 -*-
 from odoo import http
 from datetime import date, datetime, timedelta
 import logging
@@ -242,7 +241,11 @@ class MySample(http.Controller):
     # Ruta que renderiza el inicio del trámite (usuarios ya graduados)
     @http.route('/cliente/tramite/<string:form>', auth='public', website=True)
     def inicio_tramite(self, form):
-        return http.request.render('my_sample.inicio_tramite', {'form': form, 'inicio_tramite': True})
+        validos = ['matricula','inscripciontt','licencia']
+        if form in validos:
+            return http.request.render('my_sample.inicio_tramite', {'form': form, 'inicio_tramite': True})
+        else:
+            return http.request.redirect('/cliente/tramite/matricula')
     
     # Ruta que renderiza el inicio del trámite (usuarios de convenios)
     @http.route('/convenios/tramite', auth='public', website=True)
@@ -759,7 +762,8 @@ class MySample(http.Controller):
                                                                 ('x_studio_carrera_1.id','in',data['profesion_id'])])
         egresado = http.request.env['x_procedure_temp'].search([('x_tipo_documento_select.id','=',self.validar_tipo_doc(data['tipo_doc'])),
                                                                 ('x_documento','=',data['numero_doc']),
-                                                                ('x_carrera_select.id','in',data['profesion_id'])])
+                                                                ('x_carrera_select.id','in',data['profesion_id']),
+                                                                ('x_origin_type','=','CONVENIO')])
         if egresado:
             results = False
             error = 'Ya existe en egresados un registro para esta profesión con '+data['tipo_doc']+': ' +data['numero_doc']

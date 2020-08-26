@@ -137,6 +137,7 @@ class MySample(http.Controller):
     @http.route('/recibo_pago', methods=["POST"], type="json", auth='public', website=True)
     def recibo_pago(self, **kw):
         data = kw.get('data')
+        _logger.info(data)
         tramite = http.request.env['x_cpnaa_procedure'].search([('id','=',int(data['id_tramite']))])
         numero_recibo = tramite.x_voucher_number
         if (not data['corte'] and numero_recibo) and (data['corte'] == tramite.x_origin_name and numero_recibo):
@@ -154,8 +155,6 @@ class MySample(http.Controller):
     # Envia la información necesaria para el recibo de pago o para el pago desde la pasarela
     @http.route('/tramite_fase_inicial', methods=["POST"], type="json", auth='public', website=True)
     def tramite_fase_inicial(self, **kw):
-        hoy = date.today()
-#         hoy = date(2020,8,25)
         data = kw.get('data')
         campos = ['id','x_studio_tipo_de_documento_1', 'x_studio_documento_1','x_service_ID','x_studio_correo_electrnico',
                   'x_user_celular','x_studio_pas_de_expedicin_1','x_studio_ciudad_de_expedicin','x_studio_direccin','x_studio_telfono',
@@ -168,31 +167,16 @@ class MySample(http.Controller):
             # Código del servicio para generar el código de barras del recibo
             codigo = http.request.env['x_cpnaa_service'].search([('id','=',tramites[0]['x_service_ID'][0])]).x_code
             if (tramites[0]['x_origin_type'][1] == 'CORTE'):
-                campos_corte = ['id','x_name','x_lim_pay_date']
-                corte_tramite = http.request.env['x_cpnaa_cut'].search_read([('x_name','=',tramites[0]['x_origin_name'])],campos_corte)[0]
-                fecha_limite_pago = corte_tramite['x_lim_pay_date']
-                if fecha_limite_pago < hoy:
-                    # Buscar y asignar nuevo corte si ya paso la fecha limite de pago
-                    cortes = http.request.env['x_cpnaa_cut'].search_read([],campos_corte)
-                    primer = True
-                    for corte in cortes:
-                        if corte['x_lim_pay_date'] >= hoy:
-                            if primer:
-                                fecha_limite_pago = corte['x_lim_pay_date']
-                                primer = False
-                            if fecha_limite_pago >= corte['x_lim_pay_date']:
-                                fecha_limite_pago = corte['x_lim_pay_date']
-                                nuevo_corte = corte
-                    tramites[0]['x_origin_name'] = nuevo_corte['x_name']
-                    return {'ok': True, 'tramite': tramites[0], 'codigo': codigo, 'corte': nuevo_corte}
-                else:
-                    return {'ok': True, 'tramite': tramites[0], 'codigo': codigo, 'corte': corte_tramite}
+                corte_vigente = self.buscar_corte(tramites[0]['x_origin_name'])
+                _logger.info(corte_vigente)
+                tramites[0]['x_origin_name'] = corte_vigente['x_name']
+                return {'ok': True, 'tramite': tramites[0], 'codigo': codigo, 'corte': corte_vigente}
             elif tramites[0]['x_grade_ID']:
                 grado = http.request.env['x_cpnaa_grade'].sudo().browse(tramites[0]['x_grade_ID'][0])
                 fecha_lim = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
                 return {'ok': True, 'tramite': tramites[0], 'codigo': codigo, 'grado': { 'id': grado.id, 'x_fecha_limite': fecha_lim }}
             else:
-                return {'ok': False, 'error': 'Tramite no existe'}
+                return {'ok': False, 'error': 'Ha ocurrido un error con el origen del trámite'}
         else:
             return {'ok': False , 'error': 'Tramite no existe'}
 
@@ -203,7 +187,7 @@ class MySample(http.Controller):
         datetime_str = datetime.strptime(data['fecha_pago'], '%Y-%m-%d %H:%M:%S')
         datetime_str = datetime_str + timedelta(hours=5)
         _logger.info(datetime_str)
-        id_user, error, tramite, pago_registrado, mailthread_registrado = False, False, False, False, False
+        id_user, error, tramite, pago_registrado, mailthread_registrado, origin_name = False, False, False, False, False, False
         try:
             tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',data["id_tramite"])])
             id_user = tramite.x_user_ID
@@ -211,9 +195,15 @@ class MySample(http.Controller):
                 if tramite.x_cycle_ID.x_order > 0:
                     raise Exception('Este pago ya fue registrado')
                 if tramite.x_cycle_ID.x_order == 0:
+                    if (tramite.x_origin_type.x_name == 'CORTE'):
+                        corte_vigente = self.buscar_corte(tramite.x_origin_name)
+                        origin_name = corte_vigente['x_name']
+                    else:
+                        origin_name = tramite.x_origin_name
                     ciclo_ID = http.request.env["x_cpnaa_cycle"].sudo().search(["&",("x_service_ID.id","=",tramite["x_service_ID"].id),("x_order","=",1)])
-                    update = {'x_cycle_ID': ciclo_ID.id,'x_radicacion_date': datetime_str, 'x_pay_datetime': datetime_str, 'x_pay_type': data['tipo_pago'], 
-                              'x_consignment_number': data['numero_pago'], 'x_bank': data['banco'], 'x_consignment_price': data['monto_pago']}
+                    update = {'x_cycle_ID': ciclo_ID.id,'x_radicacion_date': datetime_str, 'x_pay_datetime': datetime_str,
+                              'x_pay_type': data['tipo_pago'],'x_consignment_number': data['numero_pago'], 'x_bank': data['banco'],
+                              'x_consignment_price': data['monto_pago'],'x_origin_name': origin_name}
                     pago_registrado = http.request.env['x_cpnaa_procedure'].browse(tramite['id']).sudo().write(update)
                     if not pago_registrado:
                         raise Exception('No se puedo registrar el pago')
@@ -238,6 +228,30 @@ class MySample(http.Controller):
         if not pago_registrado:        
             return {'ok': False, 'error': error, 'id_user': id_user.id}
 
+    # Valida si la fecha limite de pago del corte caducó, de ser asi retorna el corte vigente
+    def buscar_corte(self, origin_name):
+        hoy = date.today()
+        campos_corte = ['id','x_name','x_lim_pay_date']
+        corte_tramite = http.request.env['x_cpnaa_cut'].search_read([('x_name','=',origin_name)],campos_corte)[0]
+        fecha_limite_pago = corte_tramite['x_lim_pay_date']
+        if fecha_limite_pago < hoy:
+            cortes = http.request.env['x_cpnaa_cut'].search_read([],campos_corte)
+            primer = True
+            nuevo_corte = False
+            for corte in cortes:
+                if corte['x_lim_pay_date'] >= hoy:
+                    # Obtener una fecha limite de pago posterior a hoy y comparar con las fechas limites para validar que sea la mas cercana
+                    if primer:
+                        fecha_limite_pago = corte['x_lim_pay_date']
+                        primer = False
+                        nuevo_corte = corte
+                    if fecha_limite_pago >= corte['x_lim_pay_date']:
+                        fecha_limite_pago = corte['x_lim_pay_date']
+                        nuevo_corte = corte
+            return nuevo_corte
+        else:
+            return corte_tramite
+        
     # Ruta que renderiza el inicio del trámite (usuarios ya graduados)
     @http.route('/cliente/tramite/<string:form>', auth='public', website=True)
     def inicio_tramite(self, form):

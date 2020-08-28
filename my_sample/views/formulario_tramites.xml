@@ -316,7 +316,7 @@
                                 </div>
                                 <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
                                 <div class="col-md-6">
-                                    <label class="col-form-label o_fake_editable"> Imagen del documento </label>
+                                    <label class="col-form-label o_fake_editable"> Cargue su documento de identidad legible por ambas caras </label>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="x_document_image" class="file-label"><i class="fa fa-search"></i>
@@ -369,7 +369,7 @@
                                 <div t-if="(form == 'matricula' or form == 'inscripciontt') and origen != 2" 
                                      class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
                                     <div class="col-md-6">
-                                        <label class="col-form-label o_fake_editable"> Diploma </label>
+                                        <label class="col-form-label o_fake_editable"> Cargue la imágen legible de su diploma </label>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="x_diploma_image" class="file-label"><i class="fa fa-search"></i>

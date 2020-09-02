@@ -4,25 +4,72 @@
             <t t-call="website.layout">
                 <t t-set="additional_title">Inicio de Trámite</t>
                 <t t-call="my_sample.titulo_tramites"/>
-                <form id="validar_tramites" class="container formSection mt-3">
-                    <nav t-if="form == 'convenio'">
-                        <ul class="nav nav-tabs mb-3 mt-0 wInput mx-auto" id="nav-tab" role="tablist">
+                <form t-if="form != 'convenio'" id="validar_tramites" class="container formSection mt-3">
+                    <div class="tab-content" id="nav-tabContent">
+                        <div class="tab-pane fade show active" id="nav-document" role="tabpanel" aria-labelledby="nav-document-tab">
+                            <div class="row form-group form-field wInput mx-auto">
+                                <label class="col-form-label" for="x_document_type_ID">
+                                    Tipo de Documento
+                                </label>
+                                <select class="form-control" name="x_document_type_ID" id="doc_type" required="required">
+                                    <option value="1">
+                                        CÉDULA DE CIUDADANÍA
+                                    </option>
+                                    <option value="2">
+                                        CÉDULA DE EXTRANJERÍA
+                                    </option>
+                                    <option value="5">
+                                        PASAPORTE
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="row form-group form-field wInput mx-auto">
+                                <label class="col-form-label" for="x_document">
+                                    Documento
+                                </label>
+                                <input type="text" class="form-control" name="x_document" id="doc" maxlength="45" required="required" />
+                            </div>
+                            <div class="form-group row d-flex justify-content-center">
+                                <small id="help_text" class="text-danger invisible" area-hidden="false">Helper-text</small>
+                            </div>
+                            <div class="form-group row d-flex justify-content-center">
+                                <div class="g-recaptcha" data-sitekey="6Lf2UcMZAAAAAMBlukQO3XsknMUsIEnWI2GXuX0z"></div>
+                            </div>                            
+                            <div id="msj_matricula" class="invisible mb-3" aria-hidden="true">
+                                <div class="alert alert-primary d-flex justify-content-center" role="alert">
+                                    Usted ya posee Matricula Profesional de Arquitecto
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <a id="btn-cancelar" type="button" class="btn btn-light">Cancelar</a>
+                                    <a href="https://cpnaa.gov.co/" type="button" class="btn btn-light">Contactar con el CPNAA</a>
+                                </div>
+                            </div>
+                            <div id="msj_documento" class="invisible mb-3" aria-hidden="true">
+                                <div class="alert alert-primary" role="alert"></div>
+                            </div>
+                            <div class="form-group row d-flex justify-content-center">
+                                <button type="submit" id="btn_verificar" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <form t-if="form == 'convenio' and not por_nombre" id="validar_convenios_doc" class="container formSection mt-3">
+                    <nav>
+                        <ul class="nav nav-tabs mb-3 mt-0 wInput mx-auto">
                             <li class="nav-item">
-                                <a class="nav-link active" id="nav-document-tab" data-toggle="tab" 
-                                   href="#nav-document" role="tab" aria-controls="nav-document" aria-selected="true">
+                                <a class="nav-link active" href="/convenios/tramite">
                                     Buscar por Documento
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-item nav-link" id="nav-nombres-tab" data-toggle="tab" 
-                                   href="#nav-nombres" role="tab" aria-controls="nav-nombres" aria-selected="false">
+                                <a class="nav-link" href="/convenios/tramite/por_nombre">
                                     Buscar por Nombres y Apellidos
                                 </a>
                             </li>
                         </ul>
                     </nav>
-                    <div class="tab-content" id="nav-tabContent">
-                        <div class="tab-pane fade show active" id="nav-document" role="tabpanel" aria-labelledby="nav-document-tab">
+                    <div>
+                        <div>
                             <div class="row form-group form-field wInput mx-auto">
                                 <label class="col-form-label" for="x_document_type_ID"> 
                                     Tipo de Documento
@@ -64,12 +111,30 @@
                                 <div class="alert alert-primary" role="alert"></div>
                             </div>
                             <div class="form-group row d-flex justify-content-center">
-                                <button t-if="form == 'convenio'" type="submit" id="btn_verificar_convenios" 
-                                    class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
-                                <button t-else="" type="submit" id="btn_verificar" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
+                                <button type="submit" id="btn_verificar_convenios" 
+                                    class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar
+                                </button>
                             </div>
                         </div>
-                        <div t-if="form == 'convenio'" class="tab-pane fade" id="nav-nombres" role="tabpanel" aria-labelledby="nav-nombres-tab">
+                    </div>
+                </form>
+                <form t-if="form == 'convenio' and por_nombre" id="validar_convenios_nombre" class="container formSection mt-3">
+                    <nav>
+                        <ul class="nav nav-tabs mb-3 mt-0 wInput mx-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/convenios/tramite">
+                                    Buscar por Documento
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" href="/convenios/tramite/por_nombre">
+                                    Buscar por Nombres y Apellidos
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <div>
+                        <div>
                             <div class="row form-group form-field wInput mx-auto">
                                 <label class="col-form-label" for="x_names">
                                     Ingrese sus nombres
@@ -95,8 +160,8 @@
                                 <button type="submit" id="btn_verificar_nombres" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
                             </div>
                         </div>
-                    </div>
-                </form>
+                    </div>                    
+                </form>    
                 <br/>
                 <t t-call="my_sample.textos_tramite"/>
              </t>

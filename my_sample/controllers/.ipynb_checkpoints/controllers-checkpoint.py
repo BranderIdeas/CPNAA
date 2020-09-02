@@ -266,7 +266,12 @@ class MySample(http.Controller):
     # Ruta que renderiza el inicio del trámite (usuarios de convenios)
     @http.route('/convenios/tramite', auth='public', website=True)
     def inicio_convenio(self):
-        return http.request.render('my_sample.inicio_tramite', {'form': 'convenio', 'inicio_tramite': True })
+        return http.request.render('my_sample.inicio_tramite', {'form': 'convenio', 'inicio_tramite': True, 'por_nombre': False })
+    
+    # Ruta que renderiza el inicio del trámite (usuarios de convenios)
+    @http.route('/convenios/tramite/por_nombre', auth='public', website=True)
+    def inicio_convenio_nombre(self):
+        return http.request.render('my_sample.inicio_tramite', {'form': 'convenio', 'inicio_tramite': True, 'por_nombre': True })
     
     # Ruta que renderiza el inicio del trámite certificado de vigencia virtual
     @http.route('/tramites/certificado_de_vigencia', auth='public', website=True)
@@ -404,46 +409,49 @@ class MySample(http.Controller):
     # Busca al graduando de convenios en la tabla de egresados, puede ser por documento o por nombres y apellidos 
     @http.route('/validar_estudiante', methods=["POST"], type="json", auth='public', website=True)
     def validar_estudiante(self, **kw):
-        hoy = date.today()
-#         hoy= datetime.strptime('24062020', '%d%m%Y').date()
-        data = kw.get('data')
-        doc_type = data['doc_type']
-        fecha_maxima, graduandos, definitivos = '', [], []
-        if doc_type == '':
-            graduandos = http.request.env['x_procedure_temp'].sudo().search_read([('x_nombres','=',data['nombres']),
-                                                                            ('x_apellidos','=',data['apellidos']),
-                                                                            ('x_grado_ID','!=',False),
-                                                                            ('x_origin_type','=','CONVENIO')])
+        _logger.info(kw)
+        if self.validar_captcha(kw.get('token')):
+            hoy = date.today()
+            data = kw.get('data')
+            doc_type = data['doc_type']
+            fecha_maxima, graduandos, definitivos = '', [], []
+            if doc_type == '':
+                graduandos = http.request.env['x_procedure_temp'].sudo().search_read([('x_nombres','=',data['nombres']),
+                                                                                ('x_apellidos','=',data['apellidos']),
+                                                                                ('x_grado_ID','!=',False),
+                                                                                ('x_origin_type','=','CONVENIO')])
+            else:
+                doc_type = int(data['doc_type'])
+                graduandos = http.request.env['x_procedure_temp'].sudo().search_read([('x_tipo_documento_select','=',doc_type),
+                                                                                      ('x_grado_ID','!=',False),
+                                                                                      ('x_documento','=',data['doc']),
+                                                                                      ('x_origin_type','=','CONVENIO')])
+            if (len(graduandos) > 0):
+                for graduando in graduandos:
+                    grado = http.request.env['x_cpnaa_grade'].sudo().browse(graduando['x_grado_ID'][0])
+                    id_grado = grado.id
+                    if grado:
+                        fecha_maxima = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
+                        if fecha_maxima >= hoy:
+                            _logger.info(fecha_maxima)
+                        else:
+                            id_grado = False
+                        tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',graduando['x_tipo_documento_select'][0]),
+                                                                                   ('x_studio_documento_1','=',graduando['x_documento']),
+                                                                                   ('x_cycle_ID.x_order','<','5')])
+                        definitivo = {
+                            'graduando': graduando,
+                            'id_user_tramite': tramite.x_user_ID.id,
+                            'id_grado': id_grado,
+                            'fecha_maxima': fecha_maxima
+                        }
+                        definitivos.append(definitivo)
+            if (graduandos):
+                return { 'ok': True, 'graduandos': definitivos }
+            else:
+                return { 'ok': False, 'graduandos': False }
         else:
-            doc_type = int(data['doc_type'])
-            graduandos = http.request.env['x_procedure_temp'].sudo().search_read([('x_tipo_documento_select','=',doc_type),
-                                                                                  ('x_grado_ID','!=',False),
-                                                                                  ('x_documento','=',data['doc']),
-                                                                                  ('x_origin_type','=','CONVENIO')])
-        if (len(graduandos) > 0):
-            for graduando in graduandos:
-                grado = http.request.env['x_cpnaa_grade'].sudo().browse(graduando['x_grado_ID'][0])
-                id_grado = grado.id
-                if grado:
-                    fecha_maxima = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
-                    if fecha_maxima >= hoy:
-                        _logger.info(fecha_maxima)
-                    else:
-                        id_grado = False
-                    tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',graduando['x_tipo_documento_select'][0]),
-                                                                               ('x_studio_documento_1','=',graduando['x_documento']),
-                                                                               ('x_cycle_ID.x_order','<','5')])
-                    definitivo = {
-                        'graduando': graduando,
-                        'id_user_tramite': tramite.x_user_ID.id,
-                        'id_grado': id_grado,
-                        'fecha_maxima': fecha_maxima
-                    }
-                    definitivos.append(definitivo)
-        if (graduandos):
-            return { 'ok': True, 'graduandos': definitivos }
-        else:
-            return { 'ok': False, 'graduandos': False }
+            return { 'ok': False, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página', 'error_captcha': True }
         
     # Renderiza el formulario para trámites, valida si ya ha realizado este trámite y lo redirige al inicio del tramite
     @http.route('/tramite/<string:origen>/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)

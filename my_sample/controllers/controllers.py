@@ -328,8 +328,8 @@ class MySample(http.Controller):
     @http.route('/enviar_certificado_vigencia', methods=["POST"], type="json", auth='public', website=True)
     def enviar_certificado_vigencia(self, **kw):
         tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',kw.get('id_tramite'))])
-        template_obj = http.request.env['mail.template'].sudo().search_read([('id','=',37)])[0]
-        certTemplate = http.request.env['x_cpnaa_template'].sudo().search([('id','=',13)])
+        template_obj = http.request.env['mail.template'].sudo().search_read([('x_name','=','cpnaa_template_validity_certificate')])[0]
+        certTemplate = http.request.env['x_cpnaa_template'].sudo().search([('x_name','=','CERTIFICADO DE VIGENCIA')])
         consecutivo = int(http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Consecutivo Certificado de Vigencia')]).x_value) + 1
         certificado = http.request.env['x_procedure_service'].sudo().create({
             'x_doc_gen': certTemplate.x_html_content,

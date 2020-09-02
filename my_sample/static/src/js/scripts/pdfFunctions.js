@@ -380,7 +380,7 @@ function generatePDF(invoiceData) {
     let pdf = new jsPDF(param);
     let code = `415${invoiceData.local_code}8020${invoiceData.code}${invoiceData.invoice}${
         replaceAndComplete(invoiceData.num_doc)
-    }3900${invoiceData.amount}96${invoiceData.date_end[0]}${
+    }\xCF3900${invoiceData.amount}\xCF96${invoiceData.date_end[0]}${
         invoiceData.date_end[1]
     }${invoiceData.date_end[2]}`
     let Bcontain = document.createElement("canvas");

@@ -1,0 +1,11 @@
+<odoo>
+    <report
+        id="cert_vigencia"
+        model="x_procedure_service"
+        string="Certificado de Vigencia"
+        report_type="qweb-pdf"
+        name="studio_customization.studio_report_docume_549185df-e62c-474f-9118-48b6f6eeba6a"
+        file="studio_customization.studio_report_docume_549185df-e62c-474f-9118-48b6f6eeba6a"
+        attachment_use="True"
+    />
+</odoo>

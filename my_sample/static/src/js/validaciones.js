@@ -458,6 +458,88 @@ odoo.define('website.validations', function(require) {
             console.log(errores);
             return formValido;
         },
+        mostrar_helper_inicio: function(campo, msg) {
+            if(campo) {$('#' + campo).addClass('invalido');}
+            $('#help_text').removeClass('invisible').text(msg);
+        },
+        ocultar_helper: function(campo) {
+            if(campo) {$('#' + campo).removeClass('invalido');}
+            $('#help_text').addClass('invisible');
+        },
+        validar_campos_inicial: function(_this, id_input_doc, id_input_tipo_doc) {
+            let valido = true;
+            let tipo_doc = $('#'+id_input_tipo_doc).val();
+            let documento = $('#'+id_input_doc).val();
+            console.log(tipo_doc, documento);
+            if (documento.length < 1) {
+                _this.mostrar_helper_inicio(id_input_doc, 'El documento es requerido');
+                valido = false;
+            } else if (documento.length < 4) {
+                _this.mostrar_helper_inicio(id_input_doc, 'Ingrese por lo menos 4 caracteres');
+                valido = false;
+            } else if (tipo_doc == 1) {
+                // Solo numeros
+                let regex = /^[0-9]*$/;
+                $('#'+id_input_doc).attr('maxlength', '11');
+                if (!regex.test(documento)) {
+                    _this.mostrar_helper_inicio(id_input_doc, 'Ingrese solo números, no incluya espacios, letras, puntos ó caracteres especiales');
+                    valido = false;
+                } else {
+                    _this.ocultar_helper(id_input_doc);
+                    valido = true;
+                }
+                
+                if (documento.length > 11) {
+                    _this.mostrar_helper_inicio(id_input_doc, 'Verifica tu número de documento');
+                    valido = false;
+                }
+            } else if (tipo_doc != 1) {
+                // Solo numeros y letras
+                let regex = /^[0-9a-zA-Z]*$/;
+                $('#'+id_input_doc).attr('maxlength', '45');
+                if (!regex.test(documento)) {
+                    _this.mostrar_helper_inicio(id_input_doc, 'Ingrese solo números ó letras, no incluya espacios, puntos ó caracteres especiales');
+                    valido = false;
+                } else {
+                    _this.ocultar_helper(id_input_doc);
+                    valido = true;
+                }
+            }
+            return valido;
+        },
+        validar_campos_nombres: function(e, _this){
+            data.nombres = $('#x_names').val().length < 1 ? '' 
+                : validaciones.quitarAcentos($('#x_names').val().toUpperCase().replace(/\s\s+/g, ' '));
+            data.apellidos = $('#x_lastnames').val().length < 1 ? ''
+                : validaciones.quitarAcentos($('#x_lastnames').val().toUpperCase().replace(/\s\s+/g, ' '));
+            $('#x_names').val(data.nombres);
+            $('#x_lastnames').val(data.apellidos);
+            if(data.nombres.length > 1 && data.apellidos.length > 1){
+                $('#btn_verificar_nombres').removeAttr('disabled');
+                if(e.key == "Enter" || e.type == "click"){
+                    $('#btn_verificar_nombres').attr('disabled', 'disabled');
+                    data.nombres = data.nombres.trim();
+                    data.apellidos = data.apellidos.trim();
+                    data.doc = '';
+                    data.doc_type = '';
+                    $('#doc').val('');
+                    $('#doc_type').val('');
+                    $('#x_names').val(data.nombres);
+                    $('#x_lastnames').val(data.apellidos);
+                    _this.validar_convenios();
+                }
+            }else{
+                $('#btn_verificar_nombres').attr('disabled', 'disabled');
+            }
+        },
+        mostrar_helper: function(campo, msg){
+            if(campo) {$('#' + campo).addClass('invalido');}
+            $('#help_text').removeClass('invisible').text(msg);
+            setTimeout(()=>{
+                if(campo) {$('#' + campo).removeClass('invalido');}
+                $('#help_text').addClass('invisible');
+            },1500);
+        },
     });
 
     const validaciones = new Validaciones();

@@ -1,0 +1,52 @@
+<odoo>
+    <data>
+        <template id="inicio_cert_vigencia">
+            <t t-call="website.layout">
+                <t t-set="additional_title">Certificado de Vigencia</t>
+                <h1 class="formTitle mt-5 mb-5" data-tramite="matricula">
+                    <font>SOLICITUD DE CERTIFICADO DE VIGENCIA PROFESIONAL DIGITAL</font>
+                </h1>
+                <div class="container">
+                    <div class="formSection mt-3">
+                        <form id="inicio_vigencia">
+                            <div class="row form-group form-field wInput mx-auto">
+                                <div class="col-sm-12">
+                                    <label class="col-form-label o_fake_editable" for="x_document_type_ID"> Tipo de documento </label>
+                                    <select class="form-control o_website_form_input inputDisabled" id="x_document_type" required="true">
+                                        <option selected="" value="1">
+                                            CÉDULA DE CIUDADANÍA
+                                        </option>
+                                        <option value="2">
+                                            CÉDULA DE EXTRAJERÍA
+                                        </option>
+                                        <option value="5">
+                                            PASAPORTE
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row form-group form-field wInput mx-auto">
+                                <div class="col-sm-12">
+                                    <label class="col-form-label o_fake_editable" for="x_document"> Documento </label>
+                                    <input type="text" class="form-control o_website_form_input" id="x_document" required="true"/>
+                                </div>
+                            </div>
+                            <div class="form-group row d-flex justify-content-center">
+                                <small id="help_text" class="text-danger invisible" area-hidden="false">Helper-text</small>
+                            </div>
+                            <div class="form-group row d-flex justify-content-center">
+                                <div class="g-recaptcha" data-sitekey="6Lf2UcMZAAAAAMBlukQO3XsknMUsIEnWI2GXuX0z"></div>
+                            </div>
+                            <div id="msj_result" class="invisible mb-3" aria-hidden="true">
+                                <div class="alert alert-primary text-center" role="alert"></div>
+                            </div>                            
+                            <div class="form-group row d-flex justify-content-center mb-5 mt-3">
+                                <button type="submit" id="btn_enviar_vigencia" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="true">Enviar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </t>
+        </template>
+    </data>
+</odoo>

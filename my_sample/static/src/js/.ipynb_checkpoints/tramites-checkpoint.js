@@ -6,13 +6,14 @@ odoo.define('website.tramites', function(require) {
     const Validaciones = require('website.validations');
     const validaciones = new Validaciones();
     
+    // Ocultar navbar y footer al estar en iframe
     if ( window.location !== window.parent.location ) {
         $( "header#top, #oe_main_menu_navbar, footer" ).hide();
     }
     
-    let urlBase = "https://branderideas-cpnaa.odoo.com";
-    if(location.href.indexOf(urlBase) === -1 ){
-        urlBase = "https://branderideas-cpnaa-developing-984497.dev.odoo.com";
+    let urlBase = `${location.href.split(':')[0]}://${location.hostname}`;
+    if(urlBase.indexOf('cpnaa-developing') === -1){
+        urlBase = 'https://oficinavirtual.cpnaa.gov.co';
     }
     
     let tramite = $('#tramite').attr('data-tramite');
@@ -25,12 +26,12 @@ odoo.define('website.tramites', function(require) {
     }
         
     const Tramites = Class.extend({
-        validar_tramites: function() {
+        validar_tramites: function(token) {
             let origen = data.origen;
             (!origen) ? origen = '' : origen = `/${data.origen}`;
             return rpc.query({
                 route: '/validar_tramites',
-                params: {'data': data}
+                params: {'data': data, 'token': token}
             }).then(function(response){
                 if(response.convenio){
                     $(location).attr('href','/tramite/convenios/'+ response.id);
@@ -95,14 +96,6 @@ odoo.define('website.tramites', function(require) {
                     div_msj.find('div').html(texto);
                 }
             })
-        },
-        mostrar_helper: function(campo, msg){
-            $('#'+campo).addClass('invalido');
-            $('#help_text').removeClass('invisible').text(msg);
-            setTimeout(()=>{ 
-                $('#'+campo).removeClass('invalido');
-                $('#help_text').addClass('invisible');
-            },1500);
         },
         guardar_diploma: function(diploma, id_tramite){
             Swal.fire({
@@ -171,85 +164,6 @@ odoo.define('website.tramites', function(require) {
             }).catch(function(err){
                 console.log(err);
             });
-        },
-        mostrar_helper_inicio: function(campo, msg) {
-            $('#' + campo).addClass('invalido');
-            $('#help_text').removeClass('invisible').text(msg);
-        },
-        ocultar_helper: function(campo) {
-            $('#' + campo).removeClass('invalido');
-            $('#help_text').addClass('invisible');
-        },
-        validar_campos: function() {
-            let valido = true;
-            if (data.doc.length < 1) {
-                tramites.mostrar_helper_inicio('doc', 'El documento es requerido');
-                valido = false;
-            } else if (data.doc.length < 4) {
-                tramites.mostrar_helper_inicio('doc', 'Ingrese por lo menos 4 caracteres');
-                valido = false;
-            } else if (data.doc_type == 1) {
-                // Solo numeros
-                let regex = /^[0-9]*$/;
-                $('#doc').attr('maxlength', '11');
-                if (!regex.test(data.doc)) {
-                    tramites.mostrar_helper_inicio('doc', 'Ingrese solo números, no incluya espacios, letras, puntos ó caracteres especiales');
-                    valido = false;
-                } else {
-                    tramites.ocultar_helper('doc');
-                    valido = true;
-                }
-                
-                if (data.doc.length > 11) {
-                    tramites.mostrar_helper_inicio('doc', 'Verifica tu número de documento');
-                    valido = false;
-                }
-            } else if (data.doc_type != 1) {
-                // Solo numeros y letras
-                let regex = /^[0-9a-zA-Z]*$/;
-                $('#doc').attr('maxlength', '45');
-                if (!regex.test(data.doc)) {
-                    tramites.mostrar_helper_inicio('doc', 'Ingrese solo números ó letras, no incluya espacios, puntos ó caracteres especiales');
-                    valido = false;
-                } else {
-                    tramites.ocultar_helper('doc');
-                    valido = true;
-                }
-            }
-
-            if (valido) {
-                $('#btn_verificar').removeAttr('disabled');
-                $('#btn_verificar_convenios').removeAttr('disabled');
-            } else {
-                $('#btn_verificar').attr('disabled', 'disabled');
-                $('#btn_verificar_convenios').attr('disabled', 'disabled');
-            }
-            return valido;
-        },
-        validar_campos_nombres: function(e, _this){
-            data.nombres = $('#x_names').val().length < 1 ? '' 
-                : validaciones.quitarAcentos($('#x_names').val().toUpperCase().replace(/\s\s+/g, ' '));
-            data.apellidos = $('#x_lastnames').val().length < 1 ? ''
-                : validaciones.quitarAcentos($('#x_lastnames').val().toUpperCase().replace(/\s\s+/g, ' '));
-            $('#x_names').val(data.nombres);
-            $('#x_lastnames').val(data.apellidos);
-            if(data.nombres.length > 1 && data.apellidos.length > 1){
-                $('#btn_verificar_nombres').removeAttr('disabled');
-                if(e.key == "Enter" || e.type == "click"){
-                    $('#btn_verificar_nombres').attr('disabled', 'disabled');
-                    data.nombres = data.nombres.trim();
-                    data.apellidos = data.apellidos.trim();
-                    data.doc = '';
-                    data.doc_type = '';
-                    $('#doc').val('');
-                    $('#doc_type').val('');
-                    $('#x_names').val(data.nombres);
-                    $('#x_lastnames').val(data.apellidos);
-                    _this.validar_convenios();
-                }
-            }else{
-                $('#btn_verificar_nombres').attr('disabled', 'disabled');
-            }
         },
         label_input_file: function(elem) {
             $("#preview-"+elem.id).hide();
@@ -405,6 +319,15 @@ odoo.define('website.tramites', function(require) {
                 console.warn(err);
             }
         },
+        habilitarBtn: function(campos_validos){
+            if (campos_validos) {
+                $('#btn_verificar').removeAttr('disabled');
+                $('#btn_verificar_convenios').removeAttr('disabled');
+            } else {
+                $('#btn_verificar').attr('disabled', 'disabled');
+                $('#btn_verificar_convenios').attr('disabled', 'disabled');
+            }
+        }
     });
     
     const tramites = new Tramites();
@@ -413,13 +336,25 @@ odoo.define('website.tramites', function(require) {
     if(location.href.indexOf('/edicion/') != -1){
         tramites.get_data_edicion();
     }
-    
+
     // Inicio del trámite boton de enviar
-    $('#btn_verificar').click(function(e) {
-        if (tramites.validar_campos()) {
-            tramites.validar_tramites();
-            $('#btn_verificar').attr('disabled', 'disabled');
-        }
+    $('#validar_tramites').submit(function(e) {
+        event.preventDefault();
+        grecaptcha.ready(async function() {
+            let result = await grecaptcha.getResponse();
+            if(result != ''){
+                let valido = validaciones.validar_campos_inicial(validaciones, 'doc', 'doc_type');
+                tramites.habilitarBtn(valido);
+                if (valido) {
+                    tramites.validar_tramites(result);
+                    $('#btn_verificar').attr('disabled', 'disabled');
+                }
+            }else{
+                console.log('Valida captcha');
+                $('#btn_verificar').removeAttr('disabled');
+                validaciones.mostrar_helper(false,'Por favor, realiza la validación');
+            }
+        });
     });
     
     // Inicio del trámite boton de cancelar
@@ -434,8 +369,8 @@ odoo.define('website.tramites', function(require) {
         data.doc = $('#doc').val().toUpperCase();
         data.doc_type = $('#doc_type').val();
         $('#doc').val(data.doc);
-        tramites.validar_campos();
-        if(e.key == "Enter" && tramites.validar_campos()){
+        let valido = validaciones.validar_campos_inicial(validaciones, 'doc', 'doc_type');
+        if(e.key == "Enter" && valido){
             if(location.href.indexOf('/convenios/tramite') == -1){
                 tramites.validar_tramites();
                 $('#btn_verificar').attr('disabled', 'disabled');
@@ -447,25 +382,27 @@ odoo.define('website.tramites', function(require) {
                 tramites.validar_convenios();
             }
         }
+        tramites.habilitarBtn(valido);
     });
     
     // Inicio del trámite input tipo de documento
     $('#doc_type').change(function(e) {
         data.doc = $('#doc').val();
         data.doc_type = $('#doc_type').val();
-        tramites.validar_campos();
+        let valido = validaciones.validar_campos_inicial(validaciones, 'doc', 'doc_type');
+        tramites.habilitarBtn(valido);
     });
         
     // Inicio de trámite convenios input nombres
     $('#x_names').on('keyup', function(e) {
         e.preventDefault();
-        tramites.validar_campos_nombres(e, tramites);
+        validaciones.validar_campos_nombres(e, tramites);
     });
             
     // Inicio de trámite convenios input apellidos
     $('#x_lastnames').on('keyup', function(e) {
         e.preventDefault();
-        tramites.validar_campos_nombres(e, tramites);
+        validaciones.validar_campos_nombres(e, tramites);
     });
     
     // Inicio del trámite por convenio boton de enviar por nombres
@@ -474,12 +411,14 @@ odoo.define('website.tramites', function(require) {
         $('#doc_type').val('');
         data.doc = '';
         data.doc_type = '';
-        tramites.validar_campos_nombres(e, tramites);
+        validaciones.validar_campos_nombres(e, tramites);
     });
         
     // Inicio del trámite por convenios boton de enviar por documento
     $('#btn_verificar_convenios').click(function(e) {
-        if (tramites.validar_campos()) {
+        let valido = validaciones.validar_campos_inicial(validaciones, 'doc', 'doc_type');
+        tramites.habilitarBtn(valido);
+        if (valido) {
             $('#x_names').val('');
             $('#x_lastnames').val('');
             data.nombres = '';

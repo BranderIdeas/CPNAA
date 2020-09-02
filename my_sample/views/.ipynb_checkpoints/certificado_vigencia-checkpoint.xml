@@ -1,0 +1,132 @@
+<odoo>
+    <data>
+        <template id="certificado_vigencia">
+            <t t-call="website.layout">
+                <t t-set="additional_title">Certificado de Vigencia</t>
+                <h1 id="tramite" class="formTitle mt-5 mb-5" data-tramite="matricula">
+                    <font>SOLICITUD DE CERTIFICADO DE VIGENCIA PROFESIONAL DIGITAL</font>
+                </h1>
+                <div class="container justify-content-center mb-3">
+                    <div class="formSection">
+                        <h2 class="sectionName">Información del egresado</h2>
+                        <div class="row">
+                            <input id="id_tramite" type="hidden" disabled="true" t-attf-value="{{ (tramite.id) }}"/>                            
+                            <div class="form-group row col-sm-12 col-lg-6 form-field">
+                                <div class="col-sm-12 col-lg-4">
+                                    <label class="col-form-label" for="x_name"> Nombres </label>
+                                    <div class="d-sm-none d-lg-block"><br/></div>
+                                </div>
+                                <div class="col-sm-12 col-lg-8">
+                                    <input type="text" class="form-control" disabled="true"
+                                           t-attf-value="{{ (tramite.x_studio_nombres) }}"/>
+                                </div>
+                            </div>
+                            <div class="row col-sm-12 col-lg-6 form-group form-field">
+                                <div class="col-sm-12 col-lg-4">
+                                    <label class="col-form-label" for="x_last_name"> Apellidos </label>
+                                    <div class="d-sm-none d-lg-block"><br/></div>
+                                </div>
+                                <div class="col-sm-12 col-lg-8">
+                                    <input type="text" class="form-control" disabled="true"
+                                           t-attf-value="{{ (tramite.x_studio_apellidos) }}"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="row col-sm-12 col-lg-6 form-group form-field">
+                                <div class="col-sm-12 col-lg-4">
+                                    <label class="col-form-label" for="x_dpto_exp"> Tipo de Documento </label>
+                                </div>
+                                <div class="col-sm-12 col-lg-8">
+                                    <input type="text" class="form-control" disabled="true"
+                                           t-attf-value="{{ (tramite.x_studio_tipo_de_documento_1.x_name) }}"/>
+                                </div>
+                            </div>                            
+                            <div class="form-group row col-sm-12 col-lg-6 form-field">
+                                <div class="col-sm-12 col-lg-4">
+                                    <label class="col-form-label"> Documento </label>
+                                </div>
+                                <div class="col-sm-12 col-lg-8">
+                                    <input type="text" class="form-control" disabled="true"
+                                           t-attf-value="{{ (tramite.x_studio_documento_1) }}"/>
+                                </div>
+                            </div>
+                        </div>                        
+                        <div class="row">
+                            <div class="row col-sm-12 col-lg-6 form-group form-field">
+                                <div class="col-sm-12 col-lg-4">
+                                    <label class="col-form-label"> Género </label>
+                                </div>
+                                <div class="col-sm-12 col-lg-8">
+                                    <input type="text" class="form-control" disabled="true"
+                                           t-attf-value="{{ (tramite.x_studio_gnero.x_name) }}"/>
+                                </div>
+                            </div>                            
+                            <div class="form-group row col-sm-12 col-lg-6 form-field">
+                                <div class="col-sm-12 col-lg-4">
+                                    <label class="col-form-label" for="x_pais_exp"> País de Expedición </label>
+                                </div>
+                                <div class="col-sm-12 col-lg-8">
+                                    <input type="text" class="form-control" disabled="true"
+                                           t-attf-value="{{ (tramite.x_studio_pas_de_expedicin_1.x_name) }}"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="row col-sm-12 col-lg-6 form-group form-field">
+                                <div class="col-sm-12 col-lg-4">
+                                    <label class="col-form-label" for="x_dpto_exp"> Departamento de Expedición </label>
+                                </div>
+                                <div class="col-sm-12 col-lg-8">
+                                    <input type="text" class="form-control" disabled="true"
+                                           t-attf-value="{{ (tramite.x_studio_departamento_de_expedicin.x_name) }}"/>
+                                </div>
+                            </div>                            
+                            <div class="form-group row col-sm-12 col-lg-6 form-field">
+                                <div class="col-sm-12 col-lg-4">
+                                    <label class="col-form-label"> Ciudad de Expedición </label>
+                                </div>
+                                <div class="col-sm-12 col-lg-8">
+                                    <input type="text" class="form-control" disabled="true"
+                                           t-attf-value="{{ (tramite.x_studio_ciudad_de_expedicin.x_name) }}"/>
+                                </div>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div class="form-group row col-sm-12 wInput mx-auto mb-4">
+                            <div class="col-sm-12 text-center">
+                                <label class="col-form-label" for="x_email">
+                                    Ingrese la dirección de correo electrónico para la recepción del certificado
+                                </label>
+                            </div>
+                            <div class="row col-sm-12">
+                                <input type="text" class="o-email form-control i_required" id="email_vigencia" name="x_email" maxlength="80" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row d-flex justify-content-center mt-3">
+                        <div class="justify-content-center mr-3 mb-3">
+                            <button type="button" id="btn_generar_certificado" class="btn btn-primary btn-lg btn-stadium">Generar Certificado</button>
+                        </div>
+                        <div class="justify-content-center">
+                            <a href="https://cpnaa.gov.co" class="btn btn-primary btn-lg btn-stadium">Salir</a>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div id="div_spinner_vig" class="col-md-12 d-flex justify-content-center invisible" aria-hidden="true">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                        <div id="div_results_vig" class="col-md-12 d-flex justify-content-center">
+                            <span id="mssg_result" role="alert"/>
+                        </div>
+                    </div>
+                    <section class="invisible" aria-hidden="true">
+                        <iframe id="pdfFrameVigencia" class="recibo-pdf" frameborder="0" width="100%" height="320" src=""></iframe>
+                    </section>
+                </div>
+            </t>
+        </template>
+    </data>
+</odoo>

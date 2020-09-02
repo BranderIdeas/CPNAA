@@ -4,7 +4,7 @@
             <t t-call="website.layout">
                 <t t-set="additional_title">Inicio de Trámite</t>
                 <t t-call="my_sample.titulo_tramites"/>
-                <div class="container formSection mt-3">
+                <form id="validar_tramites" class="container formSection mt-3">
                     <nav t-if="form == 'convenio'">
                         <ul class="nav nav-tabs mb-3 mt-0 wInput mx-auto" id="nav-tab" role="tablist">
                             <li class="nav-item">
@@ -41,13 +41,16 @@
                             </div>
                             <div class="row form-group form-field wInput mx-auto">
                                 <label class="col-form-label" for="x_document">
-                                    Número de documento
+                                    Documento
                                 </label>
                                 <input type="text" class="form-control" name="x_document" id="doc" maxlength="45" required="required" />
                             </div>
                             <div class="form-group row d-flex justify-content-center">
                                 <small id="help_text" class="text-danger invisible" area-hidden="false">Helper-text</small>
                             </div>
+                            <div class="form-group row d-flex justify-content-center">
+                                <div class="g-recaptcha" data-sitekey="6Lf2UcMZAAAAAMBlukQO3XsknMUsIEnWI2GXuX0z"></div>
+                            </div>                            
                             <div id="msj_matricula" class="invisible mb-3" aria-hidden="true">
                                 <div class="alert alert-primary d-flex justify-content-center" role="alert">
                                     Usted ya posee Matricula Profesional de Arquitecto
@@ -61,12 +64,12 @@
                                 <div class="alert alert-primary" role="alert"></div>
                             </div>
                             <div class="form-group row d-flex justify-content-center">
-                                <button t-if="form == 'convenio'" type="button" id="btn_verificar_convenios" 
+                                <button t-if="form == 'convenio'" type="submit" id="btn_verificar_convenios" 
                                     class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
-                                <button t-else="" type="button" id="btn_verificar" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
+                                <button t-else="" type="submit" id="btn_verificar" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
                             </div>
                         </div>
-                        <div class="tab-pane fade" id="nav-nombres" role="tabpanel" aria-labelledby="nav-nombres-tab">
+                        <div t-if="form == 'convenio'" class="tab-pane fade" id="nav-nombres" role="tabpanel" aria-labelledby="nav-nombres-tab">
                             <div class="row form-group form-field wInput mx-auto">
                                 <label class="col-form-label" for="x_names">
                                     Ingrese sus nombres
@@ -82,15 +85,18 @@
                             <div class="form-group row d-flex justify-content-center">
                                 <small id="help_text" class="text-danger invisible" area-hidden="false">Helper-text</small>
                             </div>
+                            <div class="form-group row d-flex justify-content-center">
+                                <div class="g-recaptcha" data-sitekey="6Lf2UcMZAAAAAMBlukQO3XsknMUsIEnWI2GXuX0z"></div>
+                            </div>                            
                             <div id="msj_nombre" class="invisible mb-3" aria-hidden="true">
                                 <div class="alert alert-primary" role="alert"></div>
                             </div>
                             <div class="form-group row d-flex justify-content-center">
-                                <button type="button" id="btn_verificar_nombres" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
+                                <button type="submit" id="btn_verificar_nombres" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
                             </div>
                         </div>
                     </div>
-                </div>
+                </form>
                 <br/>
                 <t t-call="my_sample.textos_tramite"/>
              </t>

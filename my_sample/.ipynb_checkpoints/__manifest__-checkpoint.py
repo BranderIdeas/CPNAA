@@ -12,10 +12,7 @@
     'author': "Brander Ideas",
     'website': "http://www.branderideas.com",
 
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/13.0/odoo/addons/base/data/ir_module_category_data.xml
-    # for the full list
-    'category': 'Website',
+    'category': 'Extra Tools',
     'version': '0.1',
 
     # any module necessary for this one to work correctly
@@ -39,10 +36,14 @@
         'views/template_pdf.xml',
         'views/epayco.xml',
         'views/titulo_tramites.xml',
-        'views/epayco_confirmacion.xml'
+        'views/epayco_confirmacion.xml',
+        'views/inicio_cert_vigencia.xml',
+        'views/certificado_vigencia.xml',
+        'views/validacion_cert_de_vigencia.xml',
+        'reports/cert_vigencia.xml'
     ],
     # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
-    ],
+    'demo': [],
+    'application': True,
+    
 }

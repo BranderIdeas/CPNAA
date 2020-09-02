@@ -1,15 +1,17 @@
 from odoo import http
 from datetime import date, datetime, timedelta
+from random import choice
 import logging
-import base64
 import unicodedata
 import re
 import io
 import base64
 import json
 import sys
+import requests
+import dateutil.relativedelta
 
-# Intancia de logging para imprimir por consola
+# Instancia de logging para imprimir por consola
 _logger = logging.getLogger(__name__)
 
 meses = {
@@ -137,6 +139,7 @@ class MySample(http.Controller):
     @http.route('/recibo_pago', methods=["POST"], type="json", auth='public', website=True)
     def recibo_pago(self, **kw):
         data = kw.get('data')
+        _logger.info(data)
         tramite = http.request.env['x_cpnaa_procedure'].search([('id','=',int(data['id_tramite']))])
         numero_recibo = tramite.x_voucher_number
         if (not data['corte'] and numero_recibo) and (data['corte'] == tramite.x_origin_name and numero_recibo):
@@ -154,8 +157,6 @@ class MySample(http.Controller):
     # Envia la información necesaria para el recibo de pago o para el pago desde la pasarela
     @http.route('/tramite_fase_inicial', methods=["POST"], type="json", auth='public', website=True)
     def tramite_fase_inicial(self, **kw):
-        hoy = date.today()
-#         hoy = date(2020,8,25)
         data = kw.get('data')
         campos = ['id','x_studio_tipo_de_documento_1', 'x_studio_documento_1','x_service_ID','x_studio_correo_electrnico',
                   'x_user_celular','x_studio_pas_de_expedicin_1','x_studio_ciudad_de_expedicin','x_studio_direccin','x_studio_telfono',
@@ -168,31 +169,16 @@ class MySample(http.Controller):
             # Código del servicio para generar el código de barras del recibo
             codigo = http.request.env['x_cpnaa_service'].search([('id','=',tramites[0]['x_service_ID'][0])]).x_code
             if (tramites[0]['x_origin_type'][1] == 'CORTE'):
-                campos_corte = ['id','x_name','x_lim_pay_date']
-                corte_tramite = http.request.env['x_cpnaa_cut'].search_read([('x_name','=',tramites[0]['x_origin_name'])],campos_corte)[0]
-                fecha_limite_pago = corte_tramite['x_lim_pay_date']
-                if fecha_limite_pago < hoy:
-                    # Buscar y asignar nuevo corte si ya paso la fecha limite de pago
-                    cortes = http.request.env['x_cpnaa_cut'].search_read([],campos_corte)
-                    primer = True
-                    for corte in cortes:
-                        if corte['x_lim_pay_date'] >= hoy:
-                            if primer:
-                                fecha_limite_pago = corte['x_lim_pay_date']
-                                primer = False
-                            if fecha_limite_pago >= corte['x_lim_pay_date']:
-                                fecha_limite_pago = corte['x_lim_pay_date']
-                                nuevo_corte = corte
-                    tramites[0]['x_origin_name'] = nuevo_corte['x_name']
-                    return {'ok': True, 'tramite': tramites[0], 'codigo': codigo, 'corte': nuevo_corte}
-                else:
-                    return {'ok': True, 'tramite': tramites[0], 'codigo': codigo, 'corte': corte_tramite}
+                corte_vigente = self.buscar_corte(tramites[0]['x_origin_name'])
+                _logger.info(corte_vigente)
+                tramites[0]['x_origin_name'] = corte_vigente['x_name']
+                return {'ok': True, 'tramite': tramites[0], 'codigo': codigo, 'corte': corte_vigente}
             elif tramites[0]['x_grade_ID']:
                 grado = http.request.env['x_cpnaa_grade'].sudo().browse(tramites[0]['x_grade_ID'][0])
                 fecha_lim = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
                 return {'ok': True, 'tramite': tramites[0], 'codigo': codigo, 'grado': { 'id': grado.id, 'x_fecha_limite': fecha_lim }}
             else:
-                return {'ok': False, 'error': 'Tramite no existe'}
+                return {'ok': False, 'error': 'Ha ocurrido un error con el origen del trámite'}
         else:
             return {'ok': False , 'error': 'Tramite no existe'}
 
@@ -203,7 +189,7 @@ class MySample(http.Controller):
         datetime_str = datetime.strptime(data['fecha_pago'], '%Y-%m-%d %H:%M:%S')
         datetime_str = datetime_str + timedelta(hours=5)
         _logger.info(datetime_str)
-        id_user, error, tramite, pago_registrado, mailthread_registrado = False, False, False, False, False
+        id_user, error, tramite, pago_registrado, mailthread_registrado, origin_name = False, False, False, False, False, False
         try:
             tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',data["id_tramite"])])
             id_user = tramite.x_user_ID
@@ -211,9 +197,15 @@ class MySample(http.Controller):
                 if tramite.x_cycle_ID.x_order > 0:
                     raise Exception('Este pago ya fue registrado')
                 if tramite.x_cycle_ID.x_order == 0:
+                    if (tramite.x_origin_type.x_name == 'CORTE'):
+                        corte_vigente = self.buscar_corte(tramite.x_origin_name)
+                        origin_name = corte_vigente['x_name']
+                    else:
+                        origin_name = tramite.x_origin_name
                     ciclo_ID = http.request.env["x_cpnaa_cycle"].sudo().search(["&",("x_service_ID.id","=",tramite["x_service_ID"].id),("x_order","=",1)])
-                    update = {'x_cycle_ID': ciclo_ID.id,'x_radicacion_date': datetime_str, 'x_pay_datetime': datetime_str, 'x_pay_type': data['tipo_pago'], 
-                              'x_consignment_number': data['numero_pago'], 'x_bank': data['banco'], 'x_consignment_price': data['monto_pago']}
+                    update = {'x_cycle_ID': ciclo_ID.id,'x_radicacion_date': datetime_str, 'x_pay_datetime': datetime_str,
+                              'x_pay_type': data['tipo_pago'],'x_consignment_number': data['numero_pago'], 'x_bank': data['banco'],
+                              'x_consignment_price': data['monto_pago'],'x_origin_name': origin_name}
                     pago_registrado = http.request.env['x_cpnaa_procedure'].browse(tramite['id']).sudo().write(update)
                     if not pago_registrado:
                         raise Exception('No se puedo registrar el pago')
@@ -238,6 +230,30 @@ class MySample(http.Controller):
         if not pago_registrado:        
             return {'ok': False, 'error': error, 'id_user': id_user.id}
 
+    # Valida si la fecha limite de pago del corte caducó, de ser asi retorna el corte vigente
+    def buscar_corte(self, origin_name):
+        hoy = date.today()
+        campos_corte = ['id','x_name','x_lim_pay_date']
+        corte_tramite = http.request.env['x_cpnaa_cut'].search_read([('x_name','=',origin_name)],campos_corte)[0]
+        fecha_limite_pago = corte_tramite['x_lim_pay_date']
+        if fecha_limite_pago < hoy:
+            cortes = http.request.env['x_cpnaa_cut'].search_read([],campos_corte)
+            primer = True
+            nuevo_corte = False
+            for corte in cortes:
+                if corte['x_lim_pay_date'] >= hoy:
+                    # Obtener una fecha limite de pago posterior a hoy y comparar con las fechas limites para validar que sea la mas cercana
+                    if primer:
+                        fecha_limite_pago = corte['x_lim_pay_date']
+                        primer = False
+                        nuevo_corte = corte
+                    if fecha_limite_pago >= corte['x_lim_pay_date']:
+                        fecha_limite_pago = corte['x_lim_pay_date']
+                        nuevo_corte = corte
+            return nuevo_corte
+        else:
+            return corte_tramite
+        
     # Ruta que renderiza el inicio del trámite (usuarios ya graduados)
     @http.route('/cliente/tramite/<string:form>', auth='public', website=True)
     def inicio_tramite(self, form):
@@ -252,37 +268,139 @@ class MySample(http.Controller):
     def inicio_convenio(self):
         return http.request.render('my_sample.inicio_tramite', {'form': 'convenio', 'inicio_tramite': True })
     
+    # Ruta que renderiza el inicio del trámite certificado de vigencia virtual
+    @http.route('/tramites/certificado_de_vigencia', auth='public', website=True)
+    def inicio_cert_vigencia(self):
+        return http.request.render('my_sample.inicio_cert_vigencia', {})
+        
+    # Ruta que renderiza el validacion de autenticiadad del certificado de vigencia virtual
+    @http.route('/tramites/validacion_cert_de_vigencia', auth='public', website=True)
+    def validacion_cert_de_vigencia(self):
+        return http.request.render('my_sample.validacion_cert_de_vigencia', {})
+    
+    # Valida si existe un certificado con el codigo de seguridad recibido
+    @http.route('/verificar_autenticidad', methods=["POST"], type="json", auth='public', website=True)
+    def verificar_autenticidad(self, **kw):
+        data = kw.get('data')
+        _logger.info(data)
+        if self.validar_captcha(kw.get('token')):
+            campos = ['id','x_procedure_ID','create_date', 'x_consecutivo']
+            certificado = http.request.env['x_procedure_service'].search_read([('x_procedure_ID.x_studio_tipo_de_documento_1','=',int(data['tipo_doc'])),
+                                                                               ('x_procedure_ID.x_studio_documento_1','=',data['documento']),
+                                                                               ('x_validity_code','=',data['x_code'])],campos)
+            if certificado:
+                campos = ['id','x_studio_nombres','x_studio_apellidos', 'x_studio_tipo_de_documento_1', 'x_studio_documento_1']
+                profesional = http.request.env['x_cpnaa_procedure'].sudo().search_read([('id','=',certificado[0]['x_procedure_ID'][0])], campos)
+    #             tiempo_expiracion = http.request.env['x_cpnaa_service'].sudo().search([('id','=',certificado[0]['x_service_ID'][0])]).x_validity
+                certificado[0]['expiration_date'] = certificado[0]['create_date'] + dateutil.relativedelta.relativedelta(months=6)
+                return {'ok': True, 'mensaje': 'El Certificado se encuentra registrado en nuestra Base de Datos.', 
+                        'certificado': certificado[0], 'profesional': profesional}
+            else:
+                return {'ok': False, 'mensaje': 'El Certificado no se encuentra registrado en nuestra Base de Datos.' }
+        else:
+            return { 'ok': False, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página', 'error_catpcha': True }
+    
+    # Ruta que renderiza el resultado del trámite certificado de vigencia virtual
+    @http.route('/tramites/certificado_de_vigencia/<model("x_cpnaa_procedure"):tramite>', auth='public', website=True)
+    def certificado_vigencia(self, tramite):
+        if tramite:
+            return http.request.render('my_sample.certificado_vigencia', {'tramite': tramite})
+        else:
+            return http.request.redirect('/tramites/certificado_de_vigencia')
+    
+    # Valida si existe un trámite completo
+    @http.route('/verificar_certificado', methods=["POST"], type="json", auth='public', website=True)
+    def verificar_certificado(self, **kw):
+        data = kw.get('data')
+        if self.validar_captcha(kw.get('token')):
+            tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',data['tipo_doc']),
+                                                                          ('x_studio_documento_1','=',data['documento']),
+                                                                          ('x_cycle_ID.x_order','=',5)],['id','x_studio_carrera_1'])
+            _logger.info(tramites)
+            if tramites:
+                return {'ok': True, 'mensaje': 'Si existen registros para este tipo y número de documento', 'tramites': tramites }
+            else:
+                return {'ok': False, 'mensaje': 'No existen registros para este tipo y número de documento', 'tramites': tramites }
+        else:
+            return { 'ok': False, 'id': False, 'convenio': False, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página' }
+    
+    # Enviar el certificado de vigencia al email y lo retorna al navegador para su descarga
+    @http.route('/enviar_certificado_vigencia', methods=["POST"], type="json", auth='public', website=True)
+    def enviar_certificado_vigencia(self, **kw):
+        tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',kw.get('id_tramite'))])
+        template_obj = http.request.env['mail.template'].sudo().search_read([('id','=',37)])[0]
+        certTemplate = http.request.env['x_cpnaa_template'].sudo().search([('id','=',13)])
+        consecutivo = int(http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Consecutivo Certificado de Vigencia')]).x_value) + 1
+        certificado = http.request.env['x_procedure_service'].sudo().create({
+            'x_doc_gen': certTemplate.x_html_content,
+            'x_procedure_ID': tramite.id,
+            'x_service_ID': tramite.x_service_ID.id,
+            'x_consecutivo': consecutivo,
+            'x_validity_code': self.generar_aleatorio(7),
+            'x_name': 'CERTIFICADO-'+tramite.x_studio_nombres+'-'+tramite.x_studio_apellidos,
+            'x_email': kw.get('email')
+        })
+        if certificado:
+            http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Consecutivo Certificado de Vigencia')]).write({'x_value': str(consecutivo)})
+        pdf, _ = http.request.env.ref('my_sample.cert_vigencia').sudo().render_qweb_pdf([certificado.id])
+        pdf64 = base64.b64encode(pdf)
+        pdfStr = pdf64.decode('ascii')
+        cert = http.request.env['ir.attachment'].sudo().create({
+            'name': 'Certificado',
+            'type': 'binary',
+            'datas': pdf64,
+            'mimetype': 'application/x-pdf'
+        })
+        body = template_obj['body_html']
+        if template_obj:
+            mail_values = {
+                'subject': template_obj['subject'],
+                'attachment_ids': [cert.id],
+                'body_html': body,
+                'email_to': kw.get('email'),
+                'email_from': template_obj['email_from'],
+           }
+        try:
+            http.request.env['mail.mail'].sudo().create(mail_values).send()
+            return {'ok': True, 'mensaje': 'Se ha completado su solicitud exitosamente', 
+                    'cert': {'pdf':pdfStr, 'headers': {'Content-Type', 'application/pdf'}}}
+        except:
+            _logger.info(sys.exc_info())
+            return {'ok': False, 'mensaje': 'No se podido completar su solicitud', 'cert': False}
+    
     # Valida tipo y número de documento, valida si es un usuario nuevo, si tiene trámite o si es un graduando
     @http.route('/validar_tramites', methods=["POST"], type="json", auth='public', website=True)
     def validar_tramites(self, **kw):
         hoy = date.today()
-#         hoy= datetime.strptime('24062020', '%d%m%Y').date()
         data = kw.get('data')
-        por_nombre = False
-        user = http.request.env['x_cpnaa_user'].search([('x_document_type_ID','=',int(data['doc_type'])),('x_document','=',data['doc'])])
-        graduando = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select','=',int(data['doc_type'])),
-                                                                        ('x_documento','=',data['doc']),('x_origin_type','=','CONVENIO')])
-        grado = http.request.env['x_cpnaa_grade'].sudo().browse(graduando.x_grado_ID.id)
-        if grado:
-            if grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay) >= hoy:
-                _logger.info(grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay))
+        if self.validar_captcha(kw.get('token')):
+            por_nombre = False
+            user = http.request.env['x_cpnaa_user'].search([('x_document_type_ID','=',int(data['doc_type'])),('x_document','=',data['doc'])])
+            graduando = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select','=',int(data['doc_type'])),
+                                                                            ('x_documento','=',data['doc']),('x_origin_type','=','CONVENIO')])
+            grado = http.request.env['x_cpnaa_grade'].sudo().browse(graduando.x_grado_ID.id)
+            if grado:
+                if grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay) >= hoy:
+                    _logger.info(grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay))
+                else:
+                    grado = False
+            matricula = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1','=',int(data['doc_type'])),('x_studio_documento_1','=',data['doc']),
+                                                                      ('x_cycle_ID.x_order','=',5), ('x_service_ID.x_name','ilike','MATR')])
+            if len(user) > 1:
+                user = user[0]
+            if len(graduando) > 1:
+                graduando = graduando[0]
+            if (matricula):
+                return { 'ok': True, 'id': user.id, 'matricula': True }
+            elif (user):
+                return { 'ok': True, 'id': user.id, 'convenio': False }
+            elif (grado):
+                return { 'ok': True, 'id': graduando.id, 'convenio': True }
             else:
-                grado = False
-        matricula = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1','=',int(data['doc_type'])),('x_studio_documento_1','=',data['doc']),
-                                                                  ('x_cycle_ID.x_order','=',5), ('x_service_ID.x_name','ilike','MATR')])
-        if len(user) > 1:
-            user = user[0]
-        if len(graduando) > 1:
-            graduando = graduando[0]
-        if (matricula):
-            return { 'ok': True, 'id': user.id, 'matricula': True }
-        elif (user):
-            return { 'ok': True, 'id': user.id, 'convenio': False }
-        elif (grado):
-            return { 'ok': True, 'id': graduando.id, 'convenio': True }
+                return { 'ok': False, 'id': False, 'convenio': False }
         else:
-            return { 'ok': False, 'id': False, 'convenio': False }
-    
+            return { 'ok': False, 'id': False, 'convenio': False, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página' }
+        
     # Busca al graduando de convenios en la tabla de egresados, puede ser por documento o por nombres y apellidos 
     @http.route('/validar_estudiante', methods=["POST"], type="json", auth='public', website=True)
     def validar_estudiante(self, **kw):
@@ -774,3 +892,15 @@ class MySample(http.Controller):
             return {'ok': True, 'message': 'Todo OK' }
         else:
             return {'ok': False, 'error': error}
+        
+    def validar_captcha(self, token):
+        base_url = 'https://www.google.com/recaptcha/api/siteverify?response=';
+        secret = '&secret=6Lf2UcMZAAAAAPUtz3_vPL7H-z8j8cQ1if9fT1Cn';
+        response = requests.post(base_url + token + secret)
+        _logger.info(response.json()['success'])
+        return response.json()['success']
+    
+    def generar_aleatorio(self, longitud):
+        valores = '0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+        p = ''
+        return p.join([choice(valores) for i in range(longitud)])

@@ -57,7 +57,7 @@ odoo.define('website.pagos', function(require) {
                 tax: "0",
                 country: "co",
                 lang: "es",
-                external: false,
+                external: true,
                 response: `${urlBase}/pagos/confirmacion`,
 
                 //Atributos cliente
@@ -71,7 +71,8 @@ odoo.define('website.pagos', function(require) {
                 methodsDisable: ["SP","CASH","DP"]
 
             }
-            handler.open(dataTran)
+            console.log(dataTran);
+            handler.open(dataTran);
         },
         buscar_numero_recibo: async function() {
             let corte = dataPDF.corte ? dataPDF.corte.x_name : false;
@@ -91,7 +92,7 @@ odoo.define('website.pagos', function(require) {
             return numero_recibo;
         },
         downloadPDF: function() {
-            const linkSource = $('#pdfFrame').attr('src');
+                const linkSource = $('#pdfFrame').attr('src');
             const downloadLink = document.createElement("a");
             const fileName = "recibo_cpnaa.pdf";
 
@@ -152,13 +153,14 @@ odoo.define('website.pagos', function(require) {
         };
 //         console.log(dataPDF.tramite);
         try {
+            console.log(invoiceData);
             generatePDF(invoiceData);
             $('#modal-recibo-pdf').modal({ keyboard: false, backdrop: 'static' });
             $('#modal-recibo-pdf').modal('show');
             pagos.downloadPDF();
         } catch (e) {
             console.error('Error al generar recibo PDF: '+e);
-            console.log(invoiceData);
+            console.log(invoiceData); 
             validaciones.alert_error_toast('No hemos podido generar tu recibo PDF.', 'center');
         }
         

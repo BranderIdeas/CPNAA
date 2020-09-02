@@ -319,6 +319,31 @@ odoo.define('website.tramites', function(require) {
                 console.warn(err);
             }
         },
+        validar_campos_nombres: function(e, _this){
+            data.nombres = $('#x_names').val().length < 1 ? '' 
+                : validaciones.quitarAcentos($('#x_names').val().toUpperCase().replace(/\s\s+/g, ' '));
+            data.apellidos = $('#x_lastnames').val().length < 1 ? ''
+                : validaciones.quitarAcentos($('#x_lastnames').val().toUpperCase().replace(/\s\s+/g, ' '));
+            $('#x_names').val(data.nombres);
+            $('#x_lastnames').val(data.apellidos);
+            if(data.nombres.length > 1 && data.apellidos.length > 1){
+                $('#btn_verificar_nombres').removeAttr('disabled');
+                if(e.key == "Enter" || e.type == "click"){
+                    $('#btn_verificar_nombres').attr('disabled', 'disabled');
+                    data.nombres = data.nombres.trim();
+                    data.apellidos = data.apellidos.trim();
+                    data.doc = '';
+                    data.doc_type = '';
+                    $('#doc').val('');
+                    $('#doc_type').val('');
+                    $('#x_names').val(data.nombres);
+                    $('#x_lastnames').val(data.apellidos);
+                    _this.validar_convenios();
+                }
+            }else{
+                $('#btn_verificar_nombres').attr('disabled', 'disabled');
+            }
+        },
         habilitarBtn: function(campos_validos){
             if (campos_validos) {
                 $('#btn_verificar').removeAttr('disabled');
@@ -396,13 +421,13 @@ odoo.define('website.tramites', function(require) {
     // Inicio de trámite convenios input nombres
     $('#x_names').on('keyup', function(e) {
         e.preventDefault();
-        validaciones.validar_campos_nombres(e, tramites);
+        tramites.validar_campos_nombres(e, tramites);
     });
             
     // Inicio de trámite convenios input apellidos
     $('#x_lastnames').on('keyup', function(e) {
         e.preventDefault();
-        validaciones.validar_campos_nombres(e, tramites);
+        tramites.validar_campos_nombres(e, tramites);
     });
     
     // Inicio del trámite por convenio boton de enviar por nombres
@@ -411,7 +436,7 @@ odoo.define('website.tramites', function(require) {
         $('#doc_type').val('');
         data.doc = '';
         data.doc_type = '';
-        validaciones.validar_campos_nombres(e, tramites);
+        tramites.validar_campos_nombres(e, tramites);
     });
         
     // Inicio del trámite por convenios boton de enviar por documento

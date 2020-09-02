@@ -515,6 +515,31 @@ odoo.define('website.validations', function(require) {
                 $('#help_text').addClass('invisible');
             },1500);
         },
+        dateTimeToString: function(fecha){ // 'YYYY-mm-dd 00:00:00'
+            try{
+                fechaHora = new Date(fecha);
+                let dia = '';
+                meses = [
+                    "Enero",
+                    "Febrero",
+                    "Marzo",
+                    "Abril",
+                    "Mayo",
+                    "Junio",
+                    "Julio",
+                    "Agosto",
+                    "Septiembre",
+                    "Octubre",
+                    "Noviembre",
+                    "Diciembre",
+                ]
+                fechaHora.getDate() < 10 ? dia = `0${fechaHora.getDate()}` : dia = fechaHora.getDate();
+                return `${dia} de ${meses[fechaHora.getMonth()]} de ${fechaHora.getFullYear()}`;
+            }catch (e){
+                console.log(e)
+                return 'Formato de fecha incorrecto';
+            }
+        }
     });
 
     const validaciones = new Validaciones();

@@ -62,11 +62,11 @@ odoo.define('website.vigencia', function(require) {
         insertarDatos: function(data){
             console.log(data);
             $('#numero_cert').text(data.certificado.x_consecutivo);
-            $('#fecha_expedicion').text(data.certificado.create_date);
+            $('#fecha_expedicion').text(validaciones.dateTimeToString(data.certificado.create_date));
             $('#tipo_documento_prof').text(data.profesional[0].x_studio_tipo_de_documento_1[1]);
             $('#documento_prof').text(data.profesional[0].x_studio_documento_1);
             $('#nombres_prof').text(data.profesional[0].x_studio_nombres+' '+data.profesional[0].x_studio_apellidos);
-            $('#fecha_vencimiento').text(data.certificado.expiration_date);
+            $('#fecha_vencimiento').text(validaciones.dateTimeToString(data.certificado.expiration_date));
         },
         generar_certificado: function(email, _this){
             rpc.query({
@@ -138,7 +138,7 @@ odoo.define('website.vigencia', function(require) {
                 vigencia.habilitarBtn(false, 'btn_vigencia_auth');
                 validaciones.mostrar_helper_inicio('x_code_vigencia','El código único de seguridad es requerido');
             }
-        }
+        },
     })
     
     const vigencia = new Vigencia();

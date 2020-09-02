@@ -290,7 +290,7 @@ class MySample(http.Controller):
         _logger.info(data)
         if self.validar_captcha(kw.get('token')):
             campos = ['id','x_procedure_ID','create_date', 'x_consecutivo']
-            certificado = http.request.env['x_procedure_service'].search_read([('x_procedure_ID.x_studio_tipo_de_documento_1','=',int(data['tipo_doc'])),
+            certificado = http.request.env['x_procedure_service'].sudo().search_read([('x_procedure_ID.x_studio_tipo_de_documento_1','=',int(data['tipo_doc'])),
                                                                                ('x_procedure_ID.x_studio_documento_1','=',data['documento']),
                                                                                ('x_validity_code','=',data['x_code'])],campos)
             if certificado:

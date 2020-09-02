@@ -4,8 +4,8 @@
         model="x_procedure_service"
         string="Certificado de Vigencia"
         report_type="qweb-pdf"
-        name="studio_customization.studio_report_docume_6b1bd506-20a0-47f9-818c-5b49c9017a56"
-        file="studio_customization.studio_report_docume_6b1bd506-20a0-47f9-818c-5b49c9017a56"
+        name="studio_customization.studio_report_docume_549185df-e62c-474f-9118-48b6f6eeba6a"
+        file="studio_customization.studio_report_docume_549185df-e62c-474f-9118-48b6f6eeba6a"
         attachment_use="True"
     />
 </odoo>

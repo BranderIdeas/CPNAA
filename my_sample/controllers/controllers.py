@@ -69,6 +69,7 @@ class MySample(http.Controller):
         except:
             tb = sys.exc_info()[2]
             resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }
+            _logger.info(sys.exc_info())
             return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
         else:
             return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
@@ -189,7 +190,7 @@ class MySample(http.Controller):
         datetime_str = datetime.strptime(data['fecha_pago'], '%Y-%m-%d %H:%M:%S')
         datetime_str = datetime_str + timedelta(hours=5)
         _logger.info(datetime_str)
-        id_user, error, tramite, pago_registrado, mailthread_registrado, origin_name = False, False, False, False, False, False
+        id_user, error, tramite, pago_registrado, mailthread_registrado, origin_name, grado = False, False, False, False, False, False, False
         try:
             tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',data["id_tramite"])])
             id_user = tramite.x_user_ID
@@ -202,6 +203,7 @@ class MySample(http.Controller):
                         origin_name = corte_vigente['x_name']
                     else:
                         origin_name = tramite.x_origin_name
+                        grado = http.request.env['x_cpnaa_grade'].sudo().browse(tramite.x_grade_ID.id)
                     ciclo_ID = http.request.env["x_cpnaa_cycle"].sudo().search(["&",("x_service_ID.id","=",tramite["x_service_ID"].id),("x_order","=",1)])
                     update = {'x_cycle_ID': ciclo_ID.id,'x_radicacion_date': datetime_str, 'x_pay_datetime': datetime_str,
                               'x_pay_type': data['tipo_pago'],'x_consignment_number': data['numero_pago'], 'x_bank': data['banco'],
@@ -219,6 +221,7 @@ class MySample(http.Controller):
                 body = 'Trámite de cliente '+tramite.x_full_name+' realizo el pago y ha sido recibido en fase de verificación'
                 mailthread_registrado = self.mailthread_tramite(tramite.id, tramite.x_studio_nombres, tramite.x_studio_apellidos,
                                                                 subject, body, tramite.x_user_ID.x_partner_ID.id)
+            self.grado_check_pagos(grado)
         except:
             if pago_registrado:
                 error = 'Se registro el pago pero no se escribio el mailthread'+'\nTrámite ID: '+str(tramite.id)+'\n'+str(sys.exc_info())
@@ -229,6 +232,13 @@ class MySample(http.Controller):
             return {'ok': True, 'message': 'Trámite actualizado con exito', 'error': error}
         if not pago_registrado:        
             return {'ok': False, 'error': error, 'id_user': id_user.id}
+        
+    def grado_check_pagos(self, grado):
+        _logger.info(grado)
+        if len(grado.x_childs_ID) == len(grado.x_childs_procedure):
+          grado.x_phase_2 = True
+        else:
+          grado.x_phase_2 = False
 
     # Valida si la fecha limite de pago del corte caducó, de ser asi retorna el corte vigente
     def buscar_corte(self, origin_name):
@@ -737,11 +747,14 @@ class MySample(http.Controller):
         id_grado = data['grado']
         fecha = data['fecha']
         guardados = 0
+        grado = False
         try:
             if not id_grado:
                 grado = http.request.env['x_cpnaa_grade'].sudo().create({'x_phase_1': True, 'x_carrera_ID': id_carrera, 
                                          'x_date': fecha, 'x_agreement_ID': id_convenio, 'x_studio_universidad': id_universidad})
                 id_grado = grado['id']
+            else:
+                grado = http.request.env['x_cpnaa_grade'].sudo().browse(id_grado)
             for reg in registros:
                 carrera_registro = id_carrera
                 genero = self.validar_genero(reg['f_gender'])
@@ -758,6 +771,7 @@ class MySample(http.Controller):
                     'x_grado_ID': id_grado, 'x_carrera_select': carrera_registro, 'x_universidad_select': id_universidad, 
                     'x_origin_type': 'CONVENIO', 'x_fecha_radicacion_universidad': hoy})
                 guardados = guardados + 1
+            self.grado_check_pagos(grado)
         except IOError:
             _logger.info(IOError)
             return {'ok': False, 'error': 'Ha ocurrido un error al intentar guardar los registros, vuelve a intentarlo'}

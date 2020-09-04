@@ -57,7 +57,7 @@ odoo.define('website.pagos', function(require) {
                 tax: "0",
                 country: "co",
                 lang: "es",
-                external: true,
+                external: "false",
                 response: `${urlBase}/pagos/confirmacion`,
 
                 //Atributos cliente
@@ -71,7 +71,6 @@ odoo.define('website.pagos', function(require) {
                 methodsDisable: ["SP","CASH","DP"]
 
             }
-            console.log(dataTran);
             handler.open(dataTran);
         },
         buscar_numero_recibo: async function() {

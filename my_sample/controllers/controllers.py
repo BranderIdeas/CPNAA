@@ -519,8 +519,17 @@ class MySample(http.Controller):
     def list_tramites(self, persona):
         tramites = http.request.env['x_cpnaa_procedure'].sudo().search([('x_user_ID','=',persona[0].id),('x_cycle_ID.x_order','<','5')])
         form = 'inscripciontt'
-        solicitud_diploma, rechazo, rechazos = False, False, []
+        solicitud_diploma, rechazo, rechazos, pago_vencido = False, False, [], False
         if len(tramites)>0:
+            if tramites[0].x_origin_type.x_name == 'CONVENIO' and tramites[0].x_cycle_ID.x_order == 0:
+                grado = http.request.env['x_cpnaa_grade'].sudo().browse(tramites.x_grade_ID.id)
+                hoy = date.today()
+                _logger.info(hoy)
+                if grado:
+                    fecha_maxima = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
+                    _logger.info(fecha_maxima)
+                    if fecha_maxima < hoy:
+                        pago_vencido = True
             if (tramites[0].x_service_ID.x_name.find('MATR') != -1):
                 form = 'matricula'
             if (tramites[0].x_service_ID.x_name.find('LICENCIA') != -1):
@@ -528,6 +537,10 @@ class MySample(http.Controller):
             rechazos = http.request.env['x_cpnaa_refuse_procedure'].sudo().search_read([('x_procedure_ID','=',tramites[0].id)],
                                                                                        ['x_observation','x_refuse_ID','x_corrected'])
             if tramites[0].x_cycle_ID.x_order == 4 and tramites[0].x_origin_type.x_name == 'CONVENIO' and not tramites[0].x_CD:
+                result = http.request.env['mail.message'].sudo().search_read([('res_id','=',tramites[0].id),('subject','=','Solicitud de cargue de Diploma')])
+                if len(result) > 0:
+                    solicitud_diploma = True
+            if tramites[0].x_origin_type.x_name == 'CONVENIO' and not tramites[0].x_CD:
                 result = http.request.env['mail.message'].sudo().search_read([('res_id','=',tramites[0].id),('subject','=','Solicitud de cargue de Diploma')])
                 if len(result) > 0:
                     solicitud_diploma = True
@@ -540,7 +553,8 @@ class MySample(http.Controller):
             'rechazo': rechazo,
             'persona': persona,
             'form': form,
-            'diploma': solicitud_diploma
+            'diploma': solicitud_diploma,
+            'pago_vencido': pago_vencido
         })
     
     # Retorna los datos del trámite para el formulario de edición

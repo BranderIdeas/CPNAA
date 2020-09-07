@@ -150,11 +150,31 @@
                                         Para continuar con el trámite cargue la imágen del diploma en formato PDF, tamaño máximo 800Kb.
                                     </span>
                                 </div>
-                            </div>                            
+                            </div>      
+                            <div t-if="pago_vencido">
+                                <div class="row justify-content-md-center">
+                                    <span id="mssg_result" class="alert alert-danger" role="alert">
+                                        Ya ha pasado la fecha limite para que puedas realizar el pago
+                                    </span>
+                                </div>
+                            </div>
+                            <div t-if="diploma">
+                                <div class="row justify-content-md-center">
+                                    <span id="mssg_result" class="alert alert-warning" role="alert">
+                                        Para continuar con el trámite cargue la imágen del diploma en formato PDF, tamaño máximo 800Kb.
+                                    </span>
+                                </div>
+                            </div>  
                             <div class="row float-right mb-4">
                                 <button id="btn-atras" class="btn btn-primary btn-lg btn-stadium mr-3">Atras</button>
                                 <td>
-                                <a t-if="rechazo or tramites[0].x_cycle_ID[0].x_order == 0" class="btn btn-primary btn-lg btn-stadium ml-3"
+                                <a t-if="rechazo or tramites[0].x_cycle_ID[0].x_order == 0 and tramites[0].x_origin_type.x_name != 'CONVENIO'"
+                                   class="btn btn-primary btn-lg btn-stadium ml-3"
+                                    t-attf-href="/tramite/{{form}}/edicion/[{{persona.x_document_type_ID[0].id}}:{{persona.x_document}}]">
+                                    Actualizar Registro
+                                </a>
+                                <a t-if="rechazo or (tramites[0].x_cycle_ID[0].x_order == 0 and tramites[0].x_origin_type.x_name == 'CONVENIO' and not pago_vencido)"
+                                   class="btn btn-primary btn-lg btn-stadium ml-3"
                                     t-attf-href="/tramite/{{form}}/edicion/[{{persona.x_document_type_ID[0].id}}:{{persona.x_document}}]">
                                     Actualizar Registro
                                 </a>
@@ -164,7 +184,10 @@
                                     </label>
                                     <input id="inputDiploma" type="file" style='display:none;' accept=".pdf"/>
                                 </div>
-                                <button t-if="tramites[0].x_cycle_ID[0].x_order == 0"
+                                <button t-if="tramites[0].x_cycle_ID[0].x_order == 0 and tramites[0].x_origin_type.x_name == 'CONVENIO' and not pago_vencido"
+                                    id="btn-pagar" class="btn btn-primary btn-lg btn-stadium ml-3">Pagar
+                                </button>
+                                <button t-if="tramites[0].x_cycle_ID[0].x_order == 0 and tramites[0].x_origin_type.x_name != 'CONVENIO'"
                                     id="btn-pagar" class="btn btn-primary btn-lg btn-stadium ml-3">Pagar</button>
                                 <a t-if="tramites[0].x_cycle_ID[0].x_order &gt; 0 and tramites[0].x_cycle_ID[0].x_order &lt; 5 and not rechazo and not diploma" 
                                     href="https://cpnaa.gov.co/calendario-de-matriculas-d65/"

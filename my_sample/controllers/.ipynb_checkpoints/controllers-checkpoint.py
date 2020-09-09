@@ -318,7 +318,8 @@ class MySample(http.Controller):
     # Ruta que renderiza el resultado del trámite certificado de vigencia virtual
     @http.route('/tramites/certificado_de_vigencia/<model("x_cpnaa_procedure"):tramite>', auth='public', website=True)
     def certificado_vigencia(self, tramite):
-        if tramite:
+        _logger.info(tramite.x_legal_status)
+        if tramite and tramite.x_legal_status != 'SANCIONADO':
             return http.request.render('my_sample.certificado_vigencia', {'tramite': tramite})
         else:
             return http.request.redirect('/tramites/certificado_de_vigencia')
@@ -327,17 +328,24 @@ class MySample(http.Controller):
     @http.route('/verificar_certificado', methods=["POST"], type="json", auth='public', website=True)
     def verificar_certificado(self, **kw):
         data = kw.get('data')
+        sancionado = False
         if self.validar_captcha(kw.get('token')):
             tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',data['tipo_doc']),
                                                                           ('x_studio_documento_1','=',data['documento']),
-                                                                          ('x_cycle_ID.x_order','=',5)],['id','x_studio_carrera_1'])
-            _logger.info(tramites)
+                                                                          ('x_cycle_ID.x_order','=',5)],
+                                                                          ['id','x_studio_carrera_1','x_legal_status'])
             if tramites:
-                return {'ok': True, 'mensaje': 'Si existen registros para este tipo y número de documento', 'tramites': tramites }
+                mensaje = 'Si existen registros para este tipo y número de documento'
+                for tramite in tramites:
+                    _logger.info(tramite)
+                    if tramite['x_legal_status'] == 'SANCIONADO':
+                        mensaje = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','MENSAJE PROFESIONAL SANCIONADO')]).x_value
+                        tramite['mensaje'] = mensaje
+                return {'ok': True, 'mensaje': 'Si existen registros', 'tramites': tramites }
             else:
                 return {'ok': False, 'mensaje': 'No existen registros para este tipo y número de documento', 'tramites': tramites }
         else:
-            return { 'ok': False, 'id': False, 'convenio': False, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página' }
+            return { 'ok': False, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página' }
     
     # Enviar el certificado de vigencia al email y lo retorna al navegador para su descarga
     @http.route('/enviar_certificado_vigencia', methods=["POST"], type="json", auth='public', website=True)

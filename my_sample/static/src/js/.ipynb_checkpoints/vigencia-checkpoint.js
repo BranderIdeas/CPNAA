@@ -12,13 +12,13 @@ odoo.define('website.vigencia', function(require) {
         },
         validar_email: function(input, _this){
             let entrada = validaciones.quitarAcentos(input.val().trim().toLowerCase().replace(/\s+/g, ' '));
-            validaciones.validar_input_resultados(entrada, 'email', input.id, validaciones);
             input.val(entrada);
+            return validaciones.validar_email(input.val(), entrada);
         },
         class_invalido: function(input){
-            input.addClass('invalido');
+            input.addClass('is-invalid');
             setTimeout(()=>{
-                input.removeClass('invalido');
+                input.removeClass('is-invalid');
             },1500);
         },
         verificar_certificado: function(token, data, _this){
@@ -104,17 +104,29 @@ odoo.define('website.vigencia', function(require) {
                     div_msj.removeClass('invisible').attr('aria-hidden',false);
                     div_msj.find('div').text(response.mensaje);
                 } else if (response.tramites.length == 1){
-                    $(location).attr('href','/tramites/certificado_de_vigencia/'+response.tramites[0].id);
+                    if(response.tramites[0].mensaje){
+                        div_msj.removeClass('invisible').attr('aria-hidden',false);
+                        div_msj.find('div').removeClass('alert-primary').addClass('alert-info');
+                        let texto = `<h5 class="text-center">${response.tramites[0].mensaje}</h5>
+                                        <a href="https://cpnaa.gov.co/">
+                                        <h5 class="text-center">Ir a sancionados</h5>
+                                    </a>`;
+                        div_msj.find('div').html(texto);
+                    }else{
+                        $(location).attr('href','/tramites/certificado_de_vigencia/'+response.tramites[0].id);
+                    }
                 } else if (response.tramites.length > 1){
                     div_msj.removeClass('invisible').attr('aria-hidden',false);
                     div_msj.find('div').removeClass('alert-primary').addClass('alert-info');
                     let texto = '<h5 class="text-center">Se han encontrado varias coincidencias, por favor selecciona</h5>';
-                    console.log(response);
                     response.tramites.forEach((tram)=>{
-                        let enlace = `/tramites/certificado_de_vigencia/${tram.id}`;
-                        texto += `<a class="card card-link" href="${enlace}">
-                                    <div class="card-header">
+                        let mensaje = tram.x_legal_status == 'SANCIONADO' ? tram.mensaje : 'Seleccione para generar certificado';
+                        let enlace = tram.x_legal_status == 'SANCIONADO' ? 'https://cpnaa.gov.co/profesionales-sancionados-y-amonestaciones/' 
+                                                                         : `/tramites/certificado_de_vigencia/${tram.id}`;
+                        texto += `<a class="card card-link fw700" href="${enlace}">
+                                    <div class="card-header results-vigencia">
                                         PROFESIÓN: ${tram.x_studio_carrera_1[1]}
+                                        <h5>${mensaje}</h5>
                                     </div>
                                   </a></br>`;
                     })
@@ -125,7 +137,6 @@ odoo.define('website.vigencia', function(require) {
             const linkSource = $('#pdfFrameVigencia').attr('src');
             const downloadLink = document.createElement("a");
             const fileName = "certificado_de_vigencia.pdf";
-
             downloadLink.href = linkSource;
             downloadLink.download = fileName;
             downloadLink.click();
@@ -193,10 +204,10 @@ odoo.define('website.vigencia', function(require) {
         if(el.val().length < 1){
            vigencia.class_invalido(el);
            validaciones.mostrar_alerta_vacio('correo electrónico');
+           return;
         }
         let valido = vigencia.validar_email(el, vigencia); 
-        if(!el.hasClass('invalido')){
-            console.log(el.val());
+        if(valido){
             vigencia.generar_certificado(el.val(), vigencia);
             mostrarSpinner();
         }else{

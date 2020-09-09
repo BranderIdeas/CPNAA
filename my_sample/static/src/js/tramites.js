@@ -465,7 +465,7 @@ odoo.define('website.tramites', function(require) {
     
     // Validaciones de tipo de datos en los input del formulario
     $('#tramiteForm').on('change', async function(e){
-        let valido = await validaciones.validar_formatos(e);
+        let valido = await validaciones.validar_formatos(e.target);
         if (valido){
             if($(e.target).is('select')){
                 $(e.target).removeClass('is-invalid');
@@ -489,7 +489,7 @@ odoo.define('website.tramites', function(require) {
         e.preventDefault();
         $('#btn-registrar').attr('disabled', true);
         $('#btn-actualizar').attr('disabled', true);
-        let valido = await validaciones.validar_formulario();
+        let valido = await validaciones.validar_formulario(validaciones);
         if (valido){
             mostrarSpinner();
             tramites.enviar_data();
@@ -497,7 +497,7 @@ odoo.define('website.tramites', function(require) {
             $('#mssg_result').text('').removeClass('alert alert-danger');
             setTimeout(()=>{
                 ocultarSpinner();
-                $('#mssg_result').addClass('alert alert-danger').text('Por favor, verifica el formulario los campos marcados en rojo son requeridos');
+                $('#mssg_result').addClass('alert alert-danger').text('Por favor, verifica en el formulario los campos marcados como requeridos *');
                 $('#btn-registrar').removeAttr('disabled');
                 $('#btn-actualizar').removeAttr('disabled');
             },400);

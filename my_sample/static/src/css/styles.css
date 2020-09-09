@@ -332,6 +332,10 @@ modal-body.pdfViewer {
     text-decoration: none !important;
     color: #cccccc !important;
 }
+results-vigencia:hover {
+    text-decoration: none;
+    opacity: 0.7;
+}
 .price{
     color: #cc0000 !important;
     font-size: 1rem !important;

@@ -81,7 +81,7 @@ odoo.define('website.validations', function(require) {
             if (!tipos_validos.some(t => t == entrada)) {
                 Toast.fire({
                     icon: 'error',
-                    title: `<br/>No es válido, por favor ingrese: "CC" para Cédula de Ciudadanía,
+                    title: `<br/>Por favor ingrese: "CC" para Cédula de Ciudadanía,
                            "CE" para Cédula de Extranjería o "PA" para Pasaporte.<br/><br/> `,
                     confirmButtonText: 'Ocultar',
                 })
@@ -103,14 +103,14 @@ odoo.define('website.validations', function(require) {
             const regex = /^[0-9]*$/;
             if (!regex.test(entrada)) {
                 Toast.fire({
-                    title: `<br/>No es válido, ingrese solo números.<br/><br/> `,
+                    title: `<br/>Ingrese solo números para el teléfono celular.<br/><br/> `,
                     icon: 'error',
                     confirmButtonText: 'Ocultar',
                 })
                 return false;
             }else if(entrada.length < 10){
                 Toast.fire({
-                    title: `<br/>No es válido, mínimo 10 caracteres para el télefono célular.<br/><br/> `,
+                    title: `<br/>Ingrese mínimo 10 caracteres para el télefono celular.<br/><br/> `,
                     icon: 'error',
                     confirmButtonText: 'Ocultar',
                 })
@@ -122,7 +122,7 @@ odoo.define('website.validations', function(require) {
             const regex = /^[0-9]*$/;
             if (!regex.test(entrada)) {
                 Toast.fire({
-                    title: `<br/>No es válido, ingrese solo números.<br/><br/> `,
+                    title: `<br/>Ingrese solo números para este campo.<br/><br/> `,
                     icon: 'error',
                     confirmButtonText: 'Ocultar',
                 })
@@ -135,7 +135,7 @@ odoo.define('website.validations', function(require) {
             const regex = /^[a-zA-ZÑñ ]*$/;
             if (!regex.test(entrada)) {
                 Toast.fire({
-                    title: `<br/>No es válido, solo se permiten letras, evite números, tildes ó caracteres especiales.<br/><br/> `,
+                    title: `<br/>Solo se permiten letras, evite números, tildes ó caracteres especiales para nombres y apellidos.<br/><br/> `,
                     icon: 'error',
                     confirmButtonText: 'Ocultar',
                 })
@@ -148,7 +148,7 @@ odoo.define('website.validations', function(require) {
             const regex = /^[0-9a-zA-ZÑñ\-#() ]*$/;
             if (!regex.test(entrada)) {
                 Toast.fire({
-                    title: `<br/>No es válido, evite tildes y caracteres como \;'&<>"% <br/><br/> `,
+                    title: `<br/>Evite tildes y caracteres como \;'&<>"% para la dirección<br/><br/> `,
                     icon: 'error',
                     confirmButtonText: 'Ocultar',
                 })
@@ -161,7 +161,7 @@ odoo.define('website.validations', function(require) {
             const regex = /^[0-9a-zA-Z]*$/;
             if (!regex.test(entrada)) {
                 Toast.fire({
-                    title: `<br/>No es válido, solo se permiten números y letras para ${text}, no ingreses caracteres especiales.<br/><br/> `,
+                    title: `<br/>Solo se permiten números y letras para ${text}, no ingreses caracteres especiales.<br/><br/> `,
                     icon: 'error',
                     confirmButtonText: 'Ocultar',
                 })
@@ -174,14 +174,14 @@ odoo.define('website.validations', function(require) {
             let regex = /^[0-9a-zA-Z ]*$/;
             if (!regex.test(entrada)) {
                 Toast.fire({
-                    title: `<br/>No es válido, solo se permiten números y letras para el télefono fijo.<br/><br/> `,
+                    title: `<br/>Solo se permiten números y letras para el télefono fijo.<br/><br/> `,
                     icon: 'error',
                     confirmButtonText: 'Ocultar',
                 })
                 return false;
             }else if(entrada.length < 7){
                 Toast.fire({
-                    title: `<br/>No es válido, mínimo 7 caracteres para el télefono fijo.<br/><br/> `,
+                    title: `<br/>Ingrese mínimo 7 caracteres para el télefono fijo.<br/><br/> `,
                     icon: 'error',
                     confirmButtonText: 'Ocultar',
                 })
@@ -193,7 +193,7 @@ odoo.define('website.validations', function(require) {
             let generos_validos = ['M', 'F', 'm', 'f'];
             if (!generos_validos.some(t => t == entrada)) {
                 Toast.fire({
-                    title: `<br/>No es válido, por favor ingrese "M" para Masculino o "F" para Femenino.<br/><br/> `,
+                    title: `<br/>Por favor ingrese "M" para Masculino o "F" para Femenino.<br/><br/> `,
                     icon: 'error',
                     confirmButtonText: 'Ocultar',
                 })
@@ -210,7 +210,7 @@ odoo.define('website.validations', function(require) {
             } else {
                 if (!regex.test(entrada)) {
                     Toast.fire({
-                    title: `<br/>No es válido, por favor ingrese una dirección de correo electrónico válida.<br/><br/> `,
+                    title: `<br/>El formato de la dirección de correo electrónico no es válido.<br/><br/> `,
                         icon: 'error',
                         confirmButtonText: 'Ocultar',
                     })
@@ -316,8 +316,7 @@ odoo.define('website.validations', function(require) {
                 return false;
             }
         },
-        validar_formatos: async function validar_formatos(e){
-            let elem = e.target;
+        validar_formatos: async function validar_formatos(elem){
             if(elem.classList.contains('o-letters')){
                 let valid = validaciones.validar_solo_letras(elem.value);
                 if(!valid){
@@ -327,18 +326,17 @@ odoo.define('website.validations', function(require) {
                     elem.classList.remove('is-invalid');
                     elem.value = elem.value.trim().toUpperCase().replace(/\s\s+/g, ' ');
                 }            
-            } 
-            if (elem.classList.contains('v-celular')){
-                let valor = elem.value.trim().replace(/\s+/g, '');
-                let valid = validaciones.validar_celular(valor);
+            }
+            if (elem.classList.contains('v-address')){
+                let valid = validaciones.validar_direccion(elem.value);
                 if(!valid){
                     elem.classList.add('is-invalid');
                     return valid;
                 }else{
                     elem.classList.remove('is-invalid');
-                    elem.value = valor;
+                    elem.value = elem.value.trim().toUpperCase().replace(/\s\s+/g, ' ');
                 }
-            } 
+            }            
             if (elem.classList.contains('v-email')){
                 let valor = elem.value.trim().toLowerCase().replace(/\s+/g, '');
                 let valid = validaciones.validar_email(valor);
@@ -357,19 +355,9 @@ odoo.define('website.validations', function(require) {
                 }
                 return valid;
             } 
-            if (elem.classList.contains('v-address')){
-                let valid = validaciones.validar_direccion(elem.value);
-                if(!valid){
-                    elem.classList.add('is-invalid');
-                    return valid;
-                }else{
-                    elem.classList.remove('is-invalid');
-                    elem.value = elem.value.trim().toUpperCase().replace(/\s\s+/g, ' ');
-                }
-            } 
-            if (elem.classList.contains('v-alfanum')){
-                let valor = elem.value.trim().toUpperCase().replace(/\s+/g, '');
-                let valid = validaciones.validar_alfanum(valor, 'el documento Ministerio de Educación');
+            if (elem.classList.contains('v-celular')){
+                let valor = elem.value.trim().replace(/\s+/g, '');
+                let valid = validaciones.validar_celular(valor);
                 if(!valid){
                     elem.classList.add('is-invalid');
                     return valid;
@@ -377,7 +365,7 @@ odoo.define('website.validations', function(require) {
                     elem.classList.remove('is-invalid');
                     elem.value = valor;
                 }
-            } 
+            }            
             if (elem.classList.contains('v-telefono')){
                 if(elem.value.length > 0){
                     let valid = validaciones.validar_telefono(elem.value);
@@ -390,11 +378,22 @@ odoo.define('website.validations', function(require) {
                     }
                 }
             }
+            if (elem.classList.contains('v-alfanum')){
+                let valor = elem.value.trim().toUpperCase().replace(/\s+/g, '');
+                let valid = validaciones.validar_alfanum(valor, 'el documento Ministerio de Educación');
+                if(!valid){
+                    elem.classList.add('is-invalid');
+                    return valid;
+                }else{
+                    elem.classList.remove('is-invalid');
+                    elem.value = valor;
+                }
+            }
 
             return true;
 
         },
-        validar_formulario: async function validar_formulario(){
+        validar_formulario: async function validar_formulario(_this){
             let formSample = document.forms[0];
             let elems = formSample.elements;
             let formValido = true;
@@ -442,8 +441,10 @@ odoo.define('website.validations', function(require) {
                             $('[for="' + elems[i].name + '"]').removeClass('invalido-form'); 
                         }
                     }
+                    if(!_this.validar_formatos(elems[i])){
+                        return false;
+                    }
                 }
-
             }
             let inputEmail = $('[name="x_email"]');
             if(inputEmail.val().length > 0 && formValido){
@@ -455,7 +456,6 @@ odoo.define('website.validations', function(require) {
                 }
                 formValido= valido;
             }
-            console.log(errores);
             return formValido;
         },
         mostrar_helper_inicio: function(campo, msg) {

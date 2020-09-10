@@ -7,9 +7,6 @@ odoo.define('website.vigencia', function(require) {
     const validaciones = new Validaciones();
         
     const Vigencia = Class.extend({
-        traer_data: function() {
-            console.log('Vigencia');
-        },
         validar_email: function(input, _this){
             let entrada = validaciones.quitarAcentos(input.val().trim().toLowerCase().replace(/\s+/g, ' '));
             input.val(entrada);
@@ -26,7 +23,6 @@ odoo.define('website.vigencia', function(require) {
                 route: '/verificar_certificado',
                 params: {'data': data, 'token': token}
             }).then(function(response){
-                console.log(response);
                 _this.mostrar_resultado(response);
             }).catch(function(e){
                 console.log('No se ha podido completar su solicitud');
@@ -37,7 +33,6 @@ odoo.define('website.vigencia', function(require) {
                 route: '/verificar_autenticidad',
                 params: {'data': data, 'token': token}
             }).then(function(response){
-                console.log(response);
                 if(response.ok){
                     $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
                     $('#msj_result').find('div').removeClass('alert-danger').addClass('alert alert-info')
@@ -60,7 +55,6 @@ odoo.define('website.vigencia', function(require) {
             });
         },
         insertarDatos: function(data){
-            console.log(data);
             $('#numero_cert').text(data.certificado.x_consecutivo);
             $('#fecha_expedicion').text(validaciones.dateTimeToString(data.certificado.create_date));
             $('#tipo_documento_prof').text(data.profesional[0].x_studio_tipo_de_documento_1[1]);
@@ -108,7 +102,7 @@ odoo.define('website.vigencia', function(require) {
                         div_msj.removeClass('invisible').attr('aria-hidden',false);
                         div_msj.find('div').removeClass('alert-primary').addClass('alert-info');
                         let texto = `<h5 class="text-center">${response.tramites[0].mensaje}</h5>
-                                        <a href="https://cpnaa.gov.co/">
+                                        <a href="https://cpnaa.gov.co/profesionales-sancionados-y-amonestaciones/">
                                         <h5 class="text-center">Ir a sancionados</h5>
                                     </a>`;
                         div_msj.find('div').html(texto);
@@ -153,7 +147,6 @@ odoo.define('website.vigencia', function(require) {
     })
     
     const vigencia = new Vigencia();
-    vigencia.traer_data();
     
     // Muestra los resultados para el cert de vigencia si no hay coincidencias o si existen varias
     // Si solo hay una coincidencia lo dirige al formulario de generar certificado
@@ -170,7 +163,6 @@ odoo.define('website.vigencia', function(require) {
                 $(this).attr('disabled', 'disabled');
                 validaciones.ocultar_helper(false);
             }else{
-                console.log('Valida captcha');
                 $(this).removeAttr('disabled');
                 validaciones.mostrar_helper_inicio(false,'Por favor, realiza la validación');
             }
@@ -240,7 +232,6 @@ odoo.define('website.vigencia', function(require) {
                 $(this).attr('disabled', 'disabled');
                 validaciones.ocultar_helper(false);
             }else{
-                console.log('Valida captcha');
                 $(this).removeAttr('disabled');
                 validaciones.mostrar_helper_inicio(false,'Por favor, realiza la validación');
             }
@@ -256,7 +247,6 @@ odoo.define('website.vigencia', function(require) {
         }
         let valido = vigencia.validar_email(el, vigencia); 
         if(!el.hasClass('invalido')){
-            console.log(el.val());
             vigencia.generar_certificado(el.val(), vigencia);
             mostrarSpinner();
         }else{

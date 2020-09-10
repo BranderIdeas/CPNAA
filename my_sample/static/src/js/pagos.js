@@ -150,9 +150,7 @@ odoo.define('website.pagos', function(require) {
             amount: dataPDF.tramite.x_rate,
             local_code: "7709998454712"
         };
-//         console.log(dataPDF.tramite);
         try {
-            console.log(invoiceData);
             generatePDF(invoiceData);
             $('#modal-recibo-pdf').modal({ keyboard: false, backdrop: 'static' });
             $('#modal-recibo-pdf').modal('show');
@@ -183,7 +181,6 @@ odoo.define('website.pagos', function(require) {
     })
 
     if(location.href.indexOf(`/pagos/[`) != -1){
-        console.log('<-->')
         var pagos = new Pagos();
         pagos.traer_data(pagos);
         $('#epayco').click(pagos.iniciar_pago);
@@ -238,7 +235,6 @@ odoo.define('website.pagos', function(require) {
                     datosTramite['monto_pago'] = transaction.data.x_amount;
                     datosTramite['tipo_pago'] = transaction.data.x_type_payment;
                     datosTramite['id_tramite'] = transaction.data.x_extra1;
-//                     console.log(datosTramite);    
                     if(transaction.data.x_response === 'Aceptada'){
                         rpc.query({
                             route: '/tramite_fase_verificacion',

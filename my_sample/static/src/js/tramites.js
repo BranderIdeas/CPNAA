@@ -58,7 +58,6 @@ odoo.define('website.tramites', function(require) {
                 route: '/validar_estudiante',
                 params: {'data': data, 'token': token}
             }).then(function(response){
-                console.log(response);
                 if (response.error_captcha){
                     div_msj.removeClass('invisible').attr('aria-hidden',false);
                     div_msj.find('div').text(response.mensaje);
@@ -85,7 +84,6 @@ odoo.define('website.tramites', function(require) {
                     div_msj.removeClass('invisible').attr('aria-hidden',false);
                     div_msj.find('div').removeClass('alert-primary').addClass('alert-info');
                     let texto = '<h5 class="text-center">Se han encontrado varias coincidencias, por favor selecciona</h5>';
-                    console.log(response);
                     response.graduandos.forEach((grad)=>{
                         let enlace = grad.id_user_tramite ? `/cliente/${grad.id_user_tramite}/tramites` : `/tramite/convenios/${grad.graduando.id}`;
                         texto += `<a class="card card-link" href=${urlBase}${enlace}>
@@ -250,7 +248,6 @@ odoo.define('website.tramites', function(require) {
                 route: '/get_data_edicion',
                 params: {'data': data}
             }).then(function(response){
-//                 console.log(response);
                 $('#x_expedition_country').val(response.data.x_expedition_country[0]);
                 $('#x_expedition_state').val(response.data.x_expedition_state[0]);
                 $('#x_expedition_city').val(response.data.x_expedition_city[0]);
@@ -339,7 +336,6 @@ odoo.define('website.tramites', function(require) {
             if(data.nombres.length > 1 && data.apellidos.length > 1){
                 $('#btn_verificar_nombres').removeAttr('disabled');
                 if(token){
-                    console.log('TK');
                     _this.validar_convenios(token);
                 }
             }else{
@@ -377,7 +373,6 @@ odoo.define('website.tramites', function(require) {
                     $('#btn_verificar').attr('disabled', 'disabled');
                 }
             }else{
-                console.log('Valida captcha');
                 $('#btn_verificar').removeAttr('disabled');
                 validaciones.mostrar_helper(false,'Por favor, realiza la validación');
             }
@@ -401,7 +396,6 @@ odoo.define('website.tramites', function(require) {
                     $('#btn_verificar_convenios').attr('disabled', 'disabled');
                 }
             }else{
-                console.log('Valida captcha');
                 $('#btn_verificar_convenios').removeAttr('disabled');
                 validaciones.mostrar_helper(false,'Por favor, realiza la validación');
             }
@@ -417,7 +411,6 @@ odoo.define('website.tramites', function(require) {
                 tramites.validar_campos_nombres(tramites, result);
                 $('#btn_verificar_nombres').attr('disabled', 'disabled');
             }else{
-                console.log('Valida captcha');
                 $('#btn_verificar_nombres').removeAttr('disabled');
                 validaciones.mostrar_helper(false,'Por favor, realiza la validación');
             }
@@ -480,7 +473,7 @@ odoo.define('website.tramites', function(require) {
                 $(e.target).removeClass('is-invalid');
             }
         }else{
-            console.log('HAY DATOS NO VALIDOS');
+            console.warn('Formulario Invalido');
         }
     });
     

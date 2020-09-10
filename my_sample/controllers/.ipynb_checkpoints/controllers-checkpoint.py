@@ -1,5 +1,5 @@
 from odoo import http
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from random import choice
 import logging
 import unicodedata
@@ -10,6 +10,7 @@ import json
 import sys
 import requests
 import dateutil.relativedelta
+
 
 # Instancia de logging para imprimir por consola
 _logger = logging.getLogger(__name__)
@@ -430,6 +431,7 @@ class MySample(http.Controller):
         _logger.info(kw)
         if self.validar_captcha(kw.get('token')):
             hoy = date.today()
+            ahora = datetime.now() - timedelta(hours=5)
             data = kw.get('data')
             doc_type = data['doc_type']
             fecha_maxima, graduandos, definitivos = '', [], []
@@ -450,8 +452,11 @@ class MySample(http.Controller):
                     id_grado = grado.id
                     if grado:
                         fecha_maxima = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
-                        if fecha_maxima >= hoy:
-                            _logger.info(fecha_maxima)
+                        hora_maxima = datetime.combine(fecha_maxima + timedelta(days=1), datetime.min.time())
+                        _logger.info(ahora)
+                        _logger.info(hora_maxima)
+                        if hora_maxima > ahora:
+                            _logger.info(hora_maxima)
                         else:
                             id_grado = False
                         tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',graduando['x_tipo_documento_select'][0]),
@@ -531,12 +536,12 @@ class MySample(http.Controller):
         if len(tramites)>0:
             if tramites[0].x_origin_type.x_name == 'CONVENIO' and tramites[0].x_cycle_ID.x_order == 0:
                 grado = http.request.env['x_cpnaa_grade'].sudo().browse(tramites.x_grade_ID.id)
-                hoy = date.today()
-                _logger.info(hoy)
+                ahora = datetime.now() - timedelta(hours=5)
+                _logger.info(ahora)
                 if grado:
                     fecha_maxima = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
-                    _logger.info(fecha_maxima)
-                    if fecha_maxima < hoy:
+                    fecha_maxima = datetime.combine(fecha_maxima+timedelta(days=1), datetime.min.time())
+                    if fecha_maxima < ahora:
                         pago_vencido = True
             if (tramites[0].x_service_ID.x_name.find('MATR') != -1):
                 form = 'matricula'

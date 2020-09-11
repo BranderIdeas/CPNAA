@@ -327,8 +327,6 @@ odoo.define('website.tramites', function(require) {
                 : validaciones.quitarAcentos($('#x_names').val().toUpperCase().replace(/\s\s+/g, ' '));
             data.apellidos = $('#x_lastnames').val().length < 1 ? ''
                 : validaciones.quitarAcentos($('#x_lastnames').val().toUpperCase().replace(/\s\s+/g, ' '));
-            data.nombres = data.nombres.trim();
-            data.apellidos = data.apellidos.trim();
             data.doc = '';
             data.doc_type = '';
             $('#x_names').val(data.nombres);
@@ -336,6 +334,8 @@ odoo.define('website.tramites', function(require) {
             if(data.nombres.length > 1 && data.apellidos.length > 1){
                 $('#btn_verificar_nombres').removeAttr('disabled');
                 if(token){
+                    data.nombres = data.nombres.trim();
+                    data.apellidos = data.apellidos.trim();
                     _this.validar_convenios(token);
                 }
             }else{
@@ -490,7 +490,7 @@ odoo.define('website.tramites', function(require) {
             $('#mssg_result').text('').removeClass('alert alert-danger');
             setTimeout(()=>{
                 ocultarSpinner();
-                $('#mssg_result').addClass('alert alert-danger').text('Por favor, verifica en el formulario los campos marcados como requeridos *');
+                $('#mssg_result').addClass('alert alert-danger').text('Por favor, verifica en el formulario los campos no válidos o marcados como requeridos *');
                 $('#btn-registrar').removeAttr('disabled');
                 $('#btn-actualizar').removeAttr('disabled');
             },400);

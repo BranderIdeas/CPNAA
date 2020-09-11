@@ -178,7 +178,10 @@ class MySample(http.Controller):
             elif tramites[0]['x_grade_ID']:
                 grado = http.request.env['x_cpnaa_grade'].sudo().browse(tramites[0]['x_grade_ID'][0])
                 fecha_lim = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
-                return {'ok': True, 'tramite': tramites[0], 'codigo': codigo, 'grado': { 'id': grado.id, 'x_fecha_limite': fecha_lim }}
+                ok = True
+                if not self.validar_fecha_limite(fecha_lim):
+                    ok = False
+                return {'ok': ok, 'tramite': tramites[0], 'codigo': codigo, 'grado': { 'id': grado.id, 'x_fecha_limite': fecha_lim }}
             else:
                 return {'ok': False, 'error': 'Ha ocurrido un error con el origen del trámite'}
         else:
@@ -190,7 +193,7 @@ class MySample(http.Controller):
         data = kw.get('data')
         datetime_str = datetime.strptime(data['fecha_pago'], '%Y-%m-%d %H:%M:%S')
         datetime_str = datetime_str + timedelta(hours=5)
-        _logger.info(datetime_str)
+        _logger.info('Hora del pago UTC: '+str(datetime_str))
         id_user, error, tramite, pago_registrado, mailthread_registrado, origin_name, grado = False, False, False, False, False, False, False
         try:
             tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',data["id_tramite"])])
@@ -243,16 +246,15 @@ class MySample(http.Controller):
 
     # Valida si la fecha limite de pago del corte caducó, de ser asi retorna el corte vigente
     def buscar_corte(self, origin_name):
-        hoy = date.today()
         campos_corte = ['id','x_name','x_lim_pay_date']
         corte_tramite = http.request.env['x_cpnaa_cut'].search_read([('x_name','=',origin_name)],campos_corte)[0]
         fecha_limite_pago = corte_tramite['x_lim_pay_date']
-        if fecha_limite_pago < hoy:
+        if not self.validar_fecha_limite(fecha_limite_pago):
             cortes = http.request.env['x_cpnaa_cut'].search_read([],campos_corte)
             primer = True
             nuevo_corte = False
             for corte in cortes:
-                if corte['x_lim_pay_date'] >= hoy:
+                if self.validar_fecha_limite(corte['x_lim_pay_date']):
                     # Obtener una fecha limite de pago posterior a hoy y comparar con las fechas limites para validar que sea la mas cercana
                     if primer:
                         fecha_limite_pago = corte['x_lim_pay_date']
@@ -395,7 +397,6 @@ class MySample(http.Controller):
     # Valida tipo y número de documento, valida si es un usuario nuevo, si tiene trámite o si es un graduando
     @http.route('/validar_tramites', methods=["POST"], type="json", auth='public', website=True)
     def validar_tramites(self, **kw):
-        hoy = date.today()
         data = kw.get('data')
         if self.validar_captcha(kw.get('token')):
             por_nombre = False
@@ -404,8 +405,8 @@ class MySample(http.Controller):
                                                                             ('x_documento','=',data['doc']),('x_origin_type','=','CONVENIO')])
             grado = http.request.env['x_cpnaa_grade'].sudo().browse(graduando.x_grado_ID.id)
             if grado:
-                if grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay) >= hoy:
-                    _logger.info(grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay))
+                if self.validar_fecha_limite(grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)):
+                    _logger.info('Graduando reportado por IES con plazo vencido => ['+data['doc_type']+':'+data['doc']+']')
                 else:
                     grado = False
             matricula = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1','=',int(data['doc_type'])),('x_studio_documento_1','=',data['doc']),
@@ -430,19 +431,15 @@ class MySample(http.Controller):
     def validar_estudiante(self, **kw):
         _logger.info(kw)
         if self.validar_captcha(kw.get('token')):
-            hoy = date.today()
-            ahora = datetime.now() - timedelta(hours=5)
             data = kw.get('data')
-            doc_type = data['doc_type']
             fecha_maxima, graduandos, definitivos = '', [], []
-            if doc_type == '':
+            if data['doc_type'] == '':
                 graduandos = http.request.env['x_procedure_temp'].sudo().search_read([('x_nombres','=',data['nombres']),
                                                                                 ('x_apellidos','=',data['apellidos']),
                                                                                 ('x_grado_ID','!=',False),
                                                                                 ('x_origin_type','=','CONVENIO')])
             else:
-                doc_type = int(data['doc_type'])
-                graduandos = http.request.env['x_procedure_temp'].sudo().search_read([('x_tipo_documento_select','=',doc_type),
+                graduandos = http.request.env['x_procedure_temp'].sudo().search_read([('x_tipo_documento_select','=',int(data['doc_type'])),
                                                                                       ('x_grado_ID','!=',False),
                                                                                       ('x_documento','=',data['doc']),
                                                                                       ('x_origin_type','=','CONVENIO')])
@@ -452,11 +449,8 @@ class MySample(http.Controller):
                     id_grado = grado.id
                     if grado:
                         fecha_maxima = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
-                        hora_maxima = datetime.combine(fecha_maxima + timedelta(days=1), datetime.min.time())
-                        _logger.info(ahora)
-                        _logger.info(hora_maxima)
-                        if hora_maxima > ahora:
-                            _logger.info(hora_maxima)
+                        if self.validar_fecha_limite(fecha_maxima):
+                            _logger.info('Grado vigente hasta: '+str(fecha_maxima))
                         else:
                             id_grado = False
                         tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',graduando['x_tipo_documento_select'][0]),
@@ -501,11 +495,14 @@ class MySample(http.Controller):
         form = 'inscripciontt'
         if (cliente.x_carrera_select.x_level_ID.x_name == 'PROFESIONAL'):
             form = 'matricula'
-        hay_tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',cliente.x_tipo_documento_select.id),
+        tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',cliente.x_tipo_documento_select.id),
                                                                            ('x_studio_documento_1','=',cliente.x_documento),
                                                                            ('x_cycle_ID.x_order','<','5')])
-        if hay_tramite:
-            return http.request.redirect('/cliente/'+str(hay_tramite.x_user_ID.id)+'/tramites')
+        grado = http.request.env['x_cpnaa_grade'].sudo().browse(cliente.x_grado_ID.id)
+        if not self.validar_fecha_limite(grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)):
+            return http.request.redirect('/cliente/tramite/'+form)
+        if tramite:
+            return http.request.redirect('/cliente/'+str(tramite.x_user_ID.id)+'/tramites')
         else:
             return http.request.render('my_sample.formulario_tramites', {'cliente': cliente, 'form': form, 'origen': 2})
     
@@ -831,7 +828,17 @@ class MySample(http.Controller):
             return {'ok': False, 'message': 'Ningún registro válido en el archivo'}
         else:
             return {'ok': True, 'results': results, 'fecha_grado': data['fecha_grado'], }
-        
+                                             
+    # Valida la fecha limite con la fecha tmz -5
+    def validar_fecha_limite(self, fecha_maxima):
+        ahora = datetime.now() - timedelta(hours=5)
+        hora_maxima = datetime.combine(fecha_maxima + timedelta(days=1), datetime.min.time())
+        _logger.info(ahora)
+        _logger.info(hora_maxima)
+        if hora_maxima > ahora:
+            return True
+        else:
+            return False
         
     """ FUNCIONES DE VALIDACIÓN DE DATOS CARGA CSV CONVENIOS """
     

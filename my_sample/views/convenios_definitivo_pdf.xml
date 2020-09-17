@@ -36,9 +36,6 @@
                                     <div id="txtIns" class="accordion-body collapse">
                                         <div class="accordion-inner fondo-gray">
                                             <ul>
-<!--                                                 <li>Debe seleccionar la fecha en la que se realizará la ceremonia de grado</li> -->
-<!--                                                 <li>Debe seleccionar la profesión para la cual se realizarán los grados</li>
-                                                <li>Puede realizar tantos cargues de archivos PDF, como profesiones a graduar</li> -->
                                                 <li>En el archivo PDF solamente debe incluir la información de los graduandos correspondientes a la 
                                                     profesión y fecha de grado seleccionadas</li>
                                                 <li>Solamente se admiten archivos con extensión .pdf</li>

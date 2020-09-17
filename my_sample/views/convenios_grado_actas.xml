@@ -14,14 +14,12 @@
                         <h5 class="titulo medio">Fecha de Grado: <t t-esc="grado.x_date.strftime('%d-%m-%Y')" /></h5>
                         <h5 class="titulo inferior">Cargue de Diplomas de Grado en PDF</h5>
                         <div class="alert alert-block alert-dark"><strong>Importante!</strong><br/>
-                            <p>Utilice el siguiente formulario para cargar los archivos PDF correspondientes a las Actas de Grado y al control de entrega 
-                                de las tarjetas profesionales. Tenga en cuenta, que en caso del PDF de las Actas de Grado, debe incluir todas las Actas de 
-                                Grado en un solo archivo PDF.
+                            <p>Utilice el siguiente formulario para cargar en archivo PDF los diplomas. Tenga en cuenta que debe incluir 
+                                todos los diplomas en un solo archivo PDF,  el peso máximo del archivo es de 5 megas.
                             </p>
                         </div>
                         <div>
-                            Utilice el formulario para cargar el archivo PDF de las Actas de Grado, consulte las recomendaciones para evitar fallas o errores en el 
-                            proceso de carga de su archivo:
+                            Consulte las recomendaciones para evitar fallas o errores en el proceso de carga de su archivo:
                         <div style="clear:both; height:15px;"></div>
                             <div class="accordion" id="recomendaciones">
                                 <div class="accordion-group">
@@ -33,14 +31,7 @@
                                     <div id="txtIns" class="accordion-body collapse">
                                         <div class="accordion-inner fondo-gray">
                                             <ul>
-                                                <li>Solamente se admiten archivos con extensión .pdf</li>
-<!--                                                 <li>Debe seleccionar la fecha en la que se realizó la ceremonia de grado</li> -->
-<!--                                                 <li>Debe seleccionar la profesión para la cual carga los PDF</li> -->
-                                                <li>Un solo archivo PDF debe contener todas las Actas de Grado</li>
-<!--                                                 <li>Puede realizar tantos cargues de archivos PDF, como profesiones graduadas</li> -->
-                                                <li>Si en el proceso se generan errores, el sistema le mostrará un mensaje en pantalla.</li>
-                                                <li>Una vez cargados los archivos y procesados, el indicador del cargue en el cuadro de mando 
-                                                    cambiará a verde independiente de futuros cargues de información para el mismo convenio.</li>
+                                                <li>Un solo archivo PDF debe contener todas los diplomas</li>
                                             </ul>
                                         </div>
                                     </div>

@@ -168,12 +168,12 @@
                             <div class="row float-right mb-4">
                                 <button id="btn-atras" class="btn btn-primary btn-lg btn-stadium mr-3">Atras</button>
                                 <td>
-                                <a t-if="rechazo or tramites[0].x_cycle_ID[0].x_order == 0 and tramites[0].x_origin_type.x_name != 'CONVENIO'"
+                                <a t-if="rechazo or (tramites[0].x_cycle_ID[0].x_order == 0 and tramites[0].x_origin_type.x_name != 'CONVENIO')"
                                    class="btn btn-primary btn-lg btn-stadium ml-3"
                                     t-attf-href="/tramite/{{form}}/edicion/[{{persona.x_document_type_ID[0].id}}:{{persona.x_document}}]">
                                     Actualizar Registro
                                 </a>
-                                <a t-if="rechazo or (tramites[0].x_cycle_ID[0].x_order == 0 and tramites[0].x_origin_type.x_name == 'CONVENIO' and not pago_vencido)"
+                                <a t-if="tramites[0].x_cycle_ID[0].x_order == 0 and tramites[0].x_origin_type.x_name == 'CONVENIO' and not pago_vencido"
                                    class="btn btn-primary btn-lg btn-stadium ml-3"
                                     t-attf-href="/tramite/{{form}}/edicion/[{{persona.x_document_type_ID[0].id}}:{{persona.x_document}}]">
                                     Actualizar Registro

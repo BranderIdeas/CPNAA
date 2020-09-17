@@ -456,6 +456,19 @@ odoo.define('website.convenios', function(require) {
         }  
     });
     
+    $('#archivo_pdf_actas').change((ev) => {
+        const input = $('#archivo_pdf_actas');
+        const file = input[0].files[0];
+        const ext = input.val().split('.').pop();
+        if(file){
+            if (file.size/1024/1024 > 5 || ext != 'pdf'){
+                validaciones.alert_error_toast( "El documento debe ser formato PDF y no exceder los 5mb.", 'top');
+                input.val('');
+                return;
+            }         
+        }
+    })
+    
     $('#btn_archivo_actas').on('click', async (e) => {   
         e.preventDefault();
         let archivo_pdf_actas = $('#archivo_pdf_actas')[0].files[0];

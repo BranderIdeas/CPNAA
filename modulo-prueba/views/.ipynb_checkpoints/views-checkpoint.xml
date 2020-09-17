@@ -1,11 +1,11 @@
 <odoo>
-  <data>
+<!--   <data> -->
     <!-- explicit list view definition -->
 
     <record model="ir.ui.view" id="crm_inherit">
       <field name="name">crm.lead.inherit</field>
       <field name="model">crm.lead</field>
-      <field name="inherit_id">crm.crm_lead_view_form</field>
+      <field name="inherit_id" ref="crm.crm_lead_view_form"/>
       <field name="arch" type="xml">
         <field name="tag_ids" position="after">
             <field name="personalizado"/>
@@ -55,5 +55,5 @@
     <menuitem name="Server to list" id="modulo-prueba" parent="modulo-prueba.menu_2"
               action="modulo-prueba.action_server"/>
 -->
-  </data>
+<!--   </data> -->
 </odoo>

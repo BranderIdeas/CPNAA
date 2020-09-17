@@ -19,7 +19,7 @@
                             </p>
                         </div>
                         <div>
-                            Consulte las recomendaciones para evitar fallas o errores en el proceso de carga de su archivo:
+                            Consulte las recomendaciones para evitar fallas o errores en el proceso de carga de su archivo.
                         <div style="clear:both; height:15px;"></div>
                             <div class="accordion" id="recomendaciones">
                                 <div class="accordion-group">
@@ -30,8 +30,8 @@
                                     </div>
                                     <div id="txtIns" class="accordion-body collapse">
                                         <div class="accordion-inner fondo-gray">
-                                            <ul>
-                                                <li>Un solo archivo PDF debe contener todas los diplomas</li>
+                                            <ul class="mt-2">
+                                                <li>Un solo archivo PDF debe contener todos los diplomas.</li>
                                             </ul>
                                         </div>
                                     </div>

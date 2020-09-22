@@ -59,9 +59,11 @@ odoo.define('website.consulta', function(require) {
                 let sr = 'EL SR';
                 let identificado = 'Identificado';
                 let registrado = 'registrado';
+                let de = ', de ';
                 let expedicion = tramite.x_studio_ciudad_de_expedicin[1];
-                if (expedicion == 'NO APLICA' && tramite.x_studio_pas_de_expedicin_1){
-                    expedicion = tramite.x_studio_pas_de_expedicin_1[1];
+                if (expedicion == 'NO APLICA'){
+                    expedicion = tramite.x_studio_pas_de_expedicin_1 ? tramite.x_studio_pas_de_expedicin_1[1] : ' ';
+                    if (expedicion = ' ') { de = ''; }
                 }
                 if(tramite.x_studio_gnero[0] === 2){
                     sr = 'LA SRA';
@@ -71,7 +73,7 @@ odoo.define('website.consulta', function(require) {
                 div_results.removeClass('invisible').attr('aria-hidden',false);
                 let texto = `<b>${sr} ${tramite.x_studio_nombres} ${tramite.x_studio_apellidos} </b><br/>
                              ${identificado} con ${_this.capitalize(tramite.x_studio_tipo_de_documento_1[1])}: 
-                             ${tramite.x_studio_documento_1} de ${_this.capitalize(expedicion)},  
+                             ${tramite.x_studio_documento_1}${de}${_this.capitalize(expedicion)},  
                              Se encuentra ${registrado} como `;
                 response.tramites.forEach((tram, idx)=>{
                     let text_final = (response.tramites.length - 1) === idx ? ', en el CPNAA.' : ' y ';

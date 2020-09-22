@@ -169,7 +169,7 @@ class MySample(http.Controller):
                     tramite['x_female_career'] = http.request.env['x_cpnaa_career'].sudo().search([('id','=',tramite['x_studio_carrera_1'][0])]).x_female_name
                     tramite['x_resolution_number'] = http.request.env['x_cpnaa_resolution'].sudo().search([
                         ('id','=',tramite['x_resolution_ID'][0])]).x_consecutive
-                    if tramite['x_origin_type'][1] == 'CONVENIO':
+                    if tramite['x_origin_type'] and tramite['x_origin_type'][1] == 'CONVENIO':
                         tramite['x_resolution_date'] = tramite['x_studio_fecha_de_resolucin']
                     else:
                         tramite['x_resolution_date'] = tramite['x_fecha_resolucion_corte']

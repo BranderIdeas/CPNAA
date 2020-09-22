@@ -40,6 +40,7 @@
         'views/inicio_cert_vigencia.xml',
         'views/certificado_vigencia.xml',
         'views/consulta_registro.xml',
+        'views/formulario_denuncia.xml',
         'views/validacion_cert_de_vigencia.xml',
         'reports/cert_vigencia.xml'
     ],

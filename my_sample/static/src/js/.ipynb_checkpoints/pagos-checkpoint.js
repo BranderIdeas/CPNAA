@@ -9,7 +9,7 @@ odoo.define('website.pagos', function(require) {
     let urlBase = `${location.href.split(':')[0]}://${location.hostname}`;
     let key = '9e73b510f7dfd7568b5e876a970962cb';
     let mode = true;
-    if(urlBase.indexOf('cpnaa-developing') === -1){
+    if(urlBase.indexOf('.dev.odoo.com') === -1){
         mode = false;
         key = '57d20fccb29db60eb4e1be5ff866548f';
         urlBase = 'https://oficinavirtual.cpnaa.gov.co';

@@ -104,19 +104,28 @@ odoo.define('website.consulta', function(require) {
         },
         quitarConvenio: function(cadena) {
             return cadena.toLowerCase().split(' ').filter( (x) => x.indexOf('convenio') === -1 ).join(' ');
+        },
+        validar_formatos: function(_this){
+            data.doc = $('#doc_consulta').val().toUpperCase();
+            data.doc_type = $('#doc_type_consulta').val();
+            $('#doc_consulta').val(data.doc);
+            let valido = validaciones.validar_campos_inicial(validaciones, 'doc_consulta', 'doc_type_consulta');
+            _this.habilitarBtn(valido, 'btn_consulta_documento');
         }
     })
     
     const consulta = new Consulta();
     
+    // Inicio del input tipo de documento
+    $('#doc_type_consulta').change(function(e) {
+        e.preventDefault();
+        consulta.validar_formatos(consulta);
+    });
+    
     // Inicio del input número de documento
     $('#doc_consulta').on('keyup change', function(e) {
         e.preventDefault();
-        data.doc = $('#doc_consulta').val().toUpperCase();
-        data.doc_type = $('#doc_type').val();
-        $('#doc_consulta').val(data.doc);
-        let valido = validaciones.validar_campos_inicial(validaciones, 'doc_consulta', 'doc_type');
-        consulta.habilitarBtn(valido, 'btn_consulta_documento');
+        consulta.validar_formatos(consulta);
     });
         
     // Inicio del input número de tarjeta profesional

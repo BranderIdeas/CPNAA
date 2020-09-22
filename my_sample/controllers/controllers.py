@@ -126,22 +126,27 @@ class MySample(http.Controller):
     # Ruta que renderiza página de respuesta de pasarela de pagos
     @http.route('/pagos/respuesta', auth='public', website=True)
     def respuesta_epayco(self):
-        return  http.request.render('my_sample.respuesta_pago', {})
+        return http.request.render('my_sample.respuesta_pago', {})
     
     # Ruta que renderiza página de confirmación de pasarela de pagos
     @http.route('/pagos/confirmacion', auth='public', website=True)
     def epayco_confirmacion(self):
-        return  http.request.render('my_sample.epayco_confirmacion', {})
+        return http.request.render('my_sample.epayco_confirmacion', {})
+    
+    # Ruta que renderiza página de formulario de denuncias
+    @http.route('/denuncias/formulario', auth='public', website=True)
+    def formulario_denuncia(self):
+        return http.request.render('my_sample.formulario_denuncia', {})
     
     # Ruta que renderiza página de consulta de registro por documento
     @http.route('/consulta_online/por_documento', auth='public', website=True)
     def consulta_por_documento(self):
-        return  http.request.render('my_sample.consulta_registro', {'form': 'por_documento'})
+        return http.request.render('my_sample.consulta_registro', {'form': 'por_documento'})
         
     # Ruta que renderiza página de consulta de registro por numero de tarjeta
     @http.route('/consulta_online/por_numero', auth='public', website=True)
     def consulta_por_numero(self):
-        return  http.request.render('my_sample.consulta_registro', {'form': 'por_numero'})
+        return http.request.render('my_sample.consulta_registro', {'form': 'por_numero'})
         
     # Realiza la consulta del registro online por documento o numero de tarjeta
     @http.route('/realizar_consulta', methods=["POST"], type="json", auth='public', website=True)
@@ -200,7 +205,7 @@ class MySample(http.Controller):
                 update = {'x_voucher_number': numero_recibo,'x_origin_name': data['corte']}
             http.request.env['x_cpnaa_parameter'].browse(consecutivo.id).sudo().write({'x_value':str(numero_recibo)})
             http.request.env['x_cpnaa_procedure'].browse(tramite.id).sudo().write(update)
-        return  {'ok': True, 'numero_recibo': str(numero_recibo)}
+        return {'ok': True, 'numero_recibo': str(numero_recibo)}
     
     # Envia la información necesaria para el recibo de pago o para el pago desde la pasarela
     @http.route('/tramite_fase_inicial', methods=["POST"], type="json", auth='public', website=True)

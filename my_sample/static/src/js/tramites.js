@@ -12,7 +12,7 @@ odoo.define('website.tramites', function(require) {
     }
     
     let urlBase = `${location.href.split(':')[0]}://${location.hostname}`;
-    if(urlBase.indexOf('cpnaa-developing') === -1){
+    if(urlBase.indexOf('.dev.odoo.com') === -1){
         urlBase = 'https://oficinavirtual.cpnaa.gov.co';
     }
     

@@ -68,7 +68,7 @@
                             <label class="col-form-label" for="numero_tarjeta">
                                 Ingrese el número de Matrícula o Certificado de Inscripción Profesional
                             </label>
-                            <input type="text" class="form-control" name="numero_tarjeta" id="numero_tarjeta" maxlength="20"
+                            <input type="text" class="form-control" name="numero_tarjeta" id="numero_tarjeta" maxlength="25"
                                 required="required" />
                         </div>
                         <div class="form-group row d-flex justify-content-center">

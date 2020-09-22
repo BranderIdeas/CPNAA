@@ -159,18 +159,17 @@ class MySample(http.Controller):
             if data['numero_tarjeta'] != '':
                 tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_enrollment_number','=',data['numero_tarjeta']),
                                                                               ('x_cycle_ID.x_order','=',5)],campos)
-                _logger.info('tramites')
-                _logger.info(tramites)
             else:
                 tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',data['doc_type']),
                                                                               ('x_studio_documento_1','=',data['doc']),
                                                                               ('x_cycle_ID.x_order','=',5)],campos)
+            _logger.info(tramites)
             if tramites:
                 for tramite in tramites:
                     tramite['x_female_career'] = http.request.env['x_cpnaa_career'].sudo().search([('id','=',tramite['x_studio_carrera_1'][0])]).x_female_name
                     tramite['x_resolution_number'] = http.request.env['x_cpnaa_resolution'].sudo().search([
                         ('id','=',tramite['x_resolution_ID'][0])]).x_consecutive
-                    if tramite['x_origin_type'] == 'CONVENIO':
+                    if tramite['x_origin_type'][1] == 'CONVENIO':
                         tramite['x_resolution_date'] = tramite['x_studio_fecha_de_resolucin']
                     else:
                         tramite['x_resolution_date'] = tramite['x_fecha_resolucion_corte']

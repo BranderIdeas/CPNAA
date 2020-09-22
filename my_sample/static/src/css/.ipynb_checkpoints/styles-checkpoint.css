@@ -32,6 +32,11 @@
     margin-bottom: 0px;
 }
 
+.nav-link.active:hover{
+    color: #FFFFFF !important;
+    text-decoration: underline !important;
+}
+
 .medio{
     height: 30px !important;
 }

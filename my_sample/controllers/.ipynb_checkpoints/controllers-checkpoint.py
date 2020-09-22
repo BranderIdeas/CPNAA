@@ -132,7 +132,51 @@ class MySample(http.Controller):
     @http.route('/pagos/confirmacion', auth='public', website=True)
     def epayco_confirmacion(self):
         return  http.request.render('my_sample.epayco_confirmacion', {})
-            
+    
+    # Ruta que renderiza página de consulta de registro por documento
+    @http.route('/consulta_online/por_documento', auth='public', website=True)
+    def consulta_por_documento(self):
+        return  http.request.render('my_sample.consulta_registro', {'form': 'por_documento'})
+        
+    # Ruta que renderiza página de consulta de registro por numero de tarjeta
+    @http.route('/consulta_online/por_numero', auth='public', website=True)
+    def consulta_por_numero(self):
+        return  http.request.render('my_sample.consulta_registro', {'form': 'por_numero'})
+        
+    # Realiza la consulta del registro online por documento o numero de tarjeta
+    @http.route('/realizar_consulta', methods=["POST"], type="json", auth='public', website=True)
+    def realizar_consulta(self, **kw):
+        data = kw.get('data')
+        _logger.info(data)
+        tramites = []
+        if self.validar_captcha(kw.get('token')):
+            ahora = datetime.now() - timedelta(hours=5)
+            hora_consulta = ahora.strftime('%Y-%m-%d %H:%M:%S')
+            campos = ['id','x_studio_tipo_de_documento_1', 'x_studio_documento_1','x_service_ID',
+                      'x_studio_pas_de_expedicin_1','x_studio_ciudad_de_expedicin','x_resolution_ID',
+                      'x_studio_ciudad_de_expedicin','x_studio_carrera_1','x_studio_gnero',
+                      'x_studio_nombres','x_studio_apellidos','x_enrollment_number']
+            if data['numero_tarjeta'] != '':
+                tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_enrollment_number','=',data['numero_tarjeta']),
+                                                                              ('x_cycle_ID.x_order','=',5)],campos)
+                _logger.info('tramites')
+                _logger.info(tramites)
+            else:
+                tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',data['doc_type']),
+                                                                              ('x_studio_documento_1','=',data['doc']),
+                                                                              ('x_cycle_ID.x_order','=',5)],campos)
+            if tramites:
+                for tramite in tramites:
+                    tramite['x_female_career'] = http.request.env['x_cpnaa_career'].sudo().search([('id','=',tramite['x_studio_carrera_1'][0])]).x_female_name
+                    resolucion = http.request.env['x_cpnaa_resolution'].sudo().search([('id','=',tramite['x_resolution_ID'][0])])
+                    tramite['x_resolution_number'] = resolucion.x_consecutive
+                    tramite['x_resolution_date'] = resolucion.x_date
+                return {'ok': True, 'mensaje': 'Usuario registrado', 'tramites': tramites, 'hora_consulta': hora_consulta }
+            else:
+                return {'ok': False, 'mensaje': 'El usuario no esta registrado', 'hora_consulta': hora_consulta }
+        else:
+            return { 'ok': True, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página', 'error_captcha': True }                    
+    
     """
     Valida si el trámite tiene recibo de pago, si es necesario actualiza el consecutivo de los recibos
     Si es convenios o si aún esta vigente el corte le devuelve el mismo número de recibo

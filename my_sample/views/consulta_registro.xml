@@ -1,0 +1,107 @@
+<odoo>
+    <data>
+        <template id="consulta_registro">
+            <t t-call="website.layout">
+            <t t-set="additional_title">Consulta Online</t>
+            <h1 class="formTitle mt-5 mb-5">
+                <font>CONSULTA DE MATRICULADOS EN LÍNEA</font>
+            </h1>
+            <form t-if="form == 'por_documento'" class="container formSection mt-3">
+                <nav>
+                    <ul class="nav nav-tabs mb-3 mt-0 wInput mx-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/consulta_online/por_documento"> Buscar por Documento </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/consulta_online/por_numero">
+                                Buscar por Matrícula o Certificado de Inscripción Profesional
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div>
+                    <div>
+                        <div class="row form-group form-field wInput mx-auto">
+                            <label class="col-form-label" for="x_document_type_ID"> Tipo de Documento </label>
+                            <select class="form-control" name="x_document_type_ID" id="doc_type" required="required">
+                                <option value="1">CÉDULA DE CIUDADANÍA</option>
+                                <option value="2">CÉDULA DE EXTRANJERÍA</option>
+                                <option value="5">PASAPORTE</option>
+                            </select>
+                        </div>
+                        <div class="row form-group form-field wInput mx-auto">
+                            <label class="col-form-label" for="x_document"> Documento </label>
+                            <input type="text" class="form-control" name="doc_consulta" id="doc_consulta" maxlength="45"
+                                required="required" />
+                        </div>
+                        <div class="form-group row d-flex justify-content-center">
+                            <small id="help_text" class="text-danger invisible" area-hidden="false">Helper-text</small>
+                        </div>
+                        <div class="form-group row d-flex justify-content-center">
+                            <div class="g-recaptcha" data-sitekey="6Lf2UcMZAAAAAMBlukQO3XsknMUsIEnWI2GXuX0z"></div>
+                        </div>
+                        <div class="form-group row d-flex justify-content-center">
+                            <button type="submit" id="btn_consulta_documento" class="btn btn-primary btn-lg mb-1 btn-stadium"
+                                disabled="1">
+                                Consultar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <form t-if="form == 'por_numero'" class="container formSection mt-3">
+                <nav>
+                    <ul class="nav nav-tabs mb-3 mt-0 wInput mx-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/consulta_online/por_documento"> Buscar por Documento </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/consulta_online/por_numero">
+                                Buscar por Matrícula o Certificado de Inscripción Profesional
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div>
+                    <div>
+                        <div class="row form-group form-field wInput mx-auto">
+                            <label class="col-form-label" for="numero_tarjeta">
+                                Ingrese el número de Matrícula o Certificado de Inscripción Profesional
+                            </label>
+                            <input type="text" class="form-control" name="numero_tarjeta" id="numero_tarjeta" maxlength="20"
+                                required="required" />
+                        </div>
+                        <div class="form-group row d-flex justify-content-center">
+                            <small id="help_text" class="text-danger invisible" area-hidden="false">Helper-text</small>
+                        </div>
+                        <div class="form-group row d-flex justify-content-center">
+                            <div class="g-recaptcha" data-sitekey="6Lf2UcMZAAAAAMBlukQO3XsknMUsIEnWI2GXuX0z"></div>
+                        </div>
+                        <div class="form-group row d-flex justify-content-center">
+                            <button type="submit" id="btn_consulta_numero" class="btn btn-primary btn-lg mb-1 btn-stadium"
+                                disabled="1">
+                                Consultar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <br />
+            <div id="results" class="container formSection mt-3 invisible" aria-hidden="true">
+                <h2 class="sectionName">Datos Profesionales</h2>
+                <div id="data_result" class="container mx-auto alert-info p-3 text-justify" style="border-radius: 15px;">
+                </div>
+                <h5 id="hora_consulta" class="my-4"></h5>
+                <div class="container mx-auto alert-info p-3 mb-5" style="border-radius: 15px;">
+                    <a href="https://cpnaa.gov.co/profesionales-sancionados-y-amonestaciones/" target="_blank">
+                        Consulte en este enlace los profesionales sancionados
+                    </a><br />
+                    <a href="https://cpnaa.gov.co/certificado-vigencia-profesional-digital/" target="_blank">
+                        Obtenga en este enlace el certificado de vigencia profesional
+                    </a>
+                </div>
+            </div>
+            </t>
+        </template>
+    </data>
+</odoo>

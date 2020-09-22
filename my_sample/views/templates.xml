@@ -76,9 +76,11 @@
                 <script language="javascript" type="text/javascript">
                     window.onload = function(){
                         if(location.href.indexOf('/edicion/') === -1){
-                            document.querySelector("#status").style.display = "none";
-                            document.querySelector("#preloader").style.display = "none";
-                            document.querySelector("body").style.overflow = "visible";
+                            if(document.querySelector("#status") != null){
+                                document.querySelector("#status").style.display = "none";
+                                document.querySelector("#preloader").style.display = "none";
+                                document.querySelector("body").style.overflow = "visible";                    
+                            }
                         }
                     }
                 </script>

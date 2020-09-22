@@ -152,10 +152,10 @@ class MySample(http.Controller):
         if self.validar_captcha(kw.get('token')):
             ahora = datetime.now() - timedelta(hours=5)
             hora_consulta = ahora.strftime('%Y-%m-%d %H:%M:%S')
-            campos = ['id','x_studio_tipo_de_documento_1', 'x_studio_documento_1','x_service_ID',
+            campos = ['id','x_studio_tipo_de_documento_1', 'x_studio_documento_1','x_service_ID','x_origin_type',
                       'x_studio_pas_de_expedicin_1','x_studio_ciudad_de_expedicin','x_resolution_ID',
-                      'x_studio_ciudad_de_expedicin','x_studio_carrera_1','x_studio_gnero',
-                      'x_studio_nombres','x_studio_apellidos','x_enrollment_number']
+                      'x_studio_ciudad_de_expedicin','x_studio_carrera_1','x_studio_gnero','x_studio_fecha_de_resolucin',
+                      'x_studio_nombres','x_studio_apellidos','x_enrollment_number','x_fecha_resolucion_corte']
             if data['numero_tarjeta'] != '':
                 tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_enrollment_number','=',data['numero_tarjeta']),
                                                                               ('x_cycle_ID.x_order','=',5)],campos)
@@ -168,9 +168,12 @@ class MySample(http.Controller):
             if tramites:
                 for tramite in tramites:
                     tramite['x_female_career'] = http.request.env['x_cpnaa_career'].sudo().search([('id','=',tramite['x_studio_carrera_1'][0])]).x_female_name
-                    resolucion = http.request.env['x_cpnaa_resolution'].sudo().search([('id','=',tramite['x_resolution_ID'][0])])
-                    tramite['x_resolution_number'] = resolucion.x_consecutive
-                    tramite['x_resolution_date'] = resolucion.x_date
+                    tramite['x_resolution_number'] = http.request.env['x_cpnaa_resolution'].sudo().search([
+                        ('id','=',tramite['x_resolution_ID'][0])]).x_consecutive
+                    if tramite['x_origin_type'] == 'CONVENIO':
+                        tramite['x_resolution_date'] = tramite['x_studio_fecha_de_resolucin']
+                    else:
+                        tramite['x_resolution_date'] = tramite['x_fecha_resolucion_corte']
                 return {'ok': True, 'mensaje': 'Usuario registrado', 'tramites': tramites, 'hora_consulta': hora_consulta }
             else:
                 return {'ok': False, 'mensaje': 'El usuario no esta registrado', 'hora_consulta': hora_consulta }

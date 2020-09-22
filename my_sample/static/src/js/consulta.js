@@ -45,7 +45,6 @@ odoo.define('website.consulta', function(require) {
             
         },
         mostrar_resultado: function(response, elem, _this){
-            console.log(response);
             let div_results = $('#results');
             if (response.error_captcha){
                 grecaptcha.reset();
@@ -60,8 +59,10 @@ odoo.define('website.consulta', function(require) {
                 let sr = 'EL SR';
                 let identificado = 'Identificado';
                 let registrado = 'registrado';
-                let expedicion = tramite.x_studio_pas_de_expedicin_1[1] != 'COLOMBIA' 
-                               ? tramite.x_studio_pas_de_expedicin_1[1] : tramite.x_studio_ciudad_de_expedicin[1] ;
+                let expedicion = tramite.x_studio_ciudad_de_expedicin[1];
+                if (expedicion == 'NO APLICA' && tramite.x_studio_pas_de_expedicin_1){
+                    expedicion = tramite.x_studio_pas_de_expedicin_1[1];
+                }
                 if(tramite.x_studio_gnero[0] === 2){
                     sr = 'LA SRA';
                     identificado = 'Identificada';
@@ -89,7 +90,15 @@ odoo.define('website.consulta', function(require) {
             }, 800);
         },
         capitalize: function(cadena) {
-            return cadena.trim().toLowerCase().replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
+            if(cadena.indexOf('BOGOTA') === 0){
+                cadena = cadena.split(' ');
+                cadena[0] = cadena[0].toLowerCase().replace(/^\w/, (c) => c.toUpperCase());
+                return cadena.join(' ');
+            }else if(cadena){
+                return cadena.trim().toLowerCase().replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
+            }else{
+                return '';
+            }
         },
         quitarConvenio: function(cadena) {
             return cadena.toLowerCase().split(' ').filter( (x) => x.indexOf('convenio') === -1 ).join(' ');

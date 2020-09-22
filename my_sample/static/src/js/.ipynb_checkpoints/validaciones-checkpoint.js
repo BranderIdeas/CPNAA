@@ -516,7 +516,8 @@ odoo.define('website.validations', function(require) {
         },
         dateTimeToString: function(fecha){ // 'YYYY-mm-dd 00:00:00'
             try{
-                fechaHora = new Date(fecha);
+                if (fecha.length == 10) { fecha = fecha + ' 01:00:00'; }
+                let fechaHora = new Date(fecha);
                 let dia = '';
                 meses = [
                     "Enero",

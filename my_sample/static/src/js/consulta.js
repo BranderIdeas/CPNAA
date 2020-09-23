@@ -123,13 +123,13 @@ odoo.define('website.consulta', function(require) {
     });
     
     // Inicio del input número de documento
-    $('#doc_consulta').on('keyup change', function(e) {
+    $('#doc_consulta').on('input', function(e) {
         e.preventDefault();
         consulta.validar_formatos(consulta);
     });
         
     // Inicio del input número de tarjeta profesional
-    $('#numero_tarjeta').on('keyup change', function(e) {
+    $('#numero_tarjeta').on('input', function(e) {
         e.preventDefault();
         data.numero_tarjeta = $('#numero_tarjeta').val().toUpperCase();
         $('#numero_tarjeta').val(data.numero_tarjeta);

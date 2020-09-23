@@ -23,6 +23,10 @@ odoo.define('website.vigencia', function(require) {
                 route: '/verificar_certificado',
                 params: {'data': data, 'token': token}
             }).then(function(response){
+                if (response.error_captcha){
+                    grecaptcha.reset();
+                    return;
+                } 
                 _this.mostrar_resultado(response);
             }).catch(function(e){
                 console.log('No se ha podido completar su solicitud');
@@ -33,6 +37,10 @@ odoo.define('website.vigencia', function(require) {
                 route: '/verificar_autenticidad',
                 params: {'data': data, 'token': token}
             }).then(function(response){
+                if (response.error_captcha){
+                    grecaptcha.reset();
+                    return;
+                }
                 if(response.ok){
                     $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
                     $('#msj_result').find('div').removeClass('alert-danger').addClass('alert alert-info')
@@ -170,7 +178,7 @@ odoo.define('website.vigencia', function(require) {
     });
     
     // Validar formatos de datos
-    $('#x_document').on('keyup', function(){
+    $('#x_document').on('keyup change input', function(){
         let valido = validaciones.validar_campos_inicial(validaciones, 'x_document', 'x_document_type');
         vigencia.habilitarBtn(valido, 'btn_enviar_vigencia');
         if($('#btn_vigencia_auth').length > 0){
@@ -208,7 +216,7 @@ odoo.define('website.vigencia', function(require) {
     })
     
     // Validar formatos de datos validacion de autenticidad
-    $('#x_code_vigencia').on('keyup', function(){
+    $('#x_code_vigencia').on('keyup change input', function(){
         let valido = validaciones.validar_campos_inicial(validaciones, 'x_document', 'x_document_type');
         if(valido){
             vigencia.validar_input_codigo(valido);

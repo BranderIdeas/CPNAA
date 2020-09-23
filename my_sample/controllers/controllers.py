@@ -138,6 +138,43 @@ class MySample(http.Controller):
     def formulario_denuncia(self):
         return http.request.render('my_sample.formulario_denuncia', {})
     
+    # Activa la automatización para la creación y seguimiento del trámite
+    @http.route('/registrar_denuncia', methods=["POST"], auth='public', website=True)
+    def registrar_denuncia(self, **kw):
+        resp, borrar, evidence_files = {}, [], []
+        _logger.info(kw)
+        for key, value in kw.items():
+            if type(value) != str:
+                borrar.append(key)
+                evidence_files.append(value)
+        for key in borrar:
+            del kw[key]
+        kw['x_complaint_issues_ID'] = kw['x_complaint_issues_ID'].split(',')
+        try:
+            consecutivo = http.request.env['x_cpnaa_consecutive'].search([('x_name','=','DENUNCIAS')])
+            kw['x_name'] = 'DENUNCIA-'+str(consecutivo.x_value + 1)
+            denuncia = http.request.env['x_cpnaa_complaint'].sudo().create(kw)
+            if denuncia:
+                count = 0
+                for ev in evidence_files:
+                    count += 1
+                    file = base64.b64encode(ev.read())
+                    evidence = {'x_complaint_ID': denuncia.id, 'x_file': file, 'x_name': 'PRUEBA-'+str(count)+'-'+denuncia.x_name}
+                    ext = str(ev.filename.split('.')[-1]).lower()
+                    if ext == 'pdf':
+                        http.request.env['x_evidence_files_pdf'].sudo().create(evidence)
+                    else:
+                        http.request.env['x_evidence_files_img'].sudo().create(evidence)
+                http.request.env['x_cpnaa_consecutive'].browse(consecutivo.id).sudo().write({'x_value':consecutivo.x_value + 1})
+            resp = { 'ok': True, 'message': 'Denuncia '+ kw['x_name'] +'guardada con exito' }
+        except:
+            tb = sys.exc_info()[2]
+            resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }
+            _logger.info(sys.exc_info())
+            return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
+        else:
+            return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
+    
     # Ruta que renderiza página de consulta de registro por documento
     @http.route('/consulta_online/por_documento', auth='public', website=True)
     def consulta_por_documento(self):
@@ -367,7 +404,7 @@ class MySample(http.Controller):
             else:
                 return {'ok': False, 'mensaje': 'El Certificado no se encuentra registrado en nuestra Base de Datos.' }
         else:
-            return { 'ok': False, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página', 'error_catpcha': True }
+            return { 'ok': False, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página', 'error_captcha': True }
     
     # Ruta que renderiza el resultado del trámite certificado de vigencia virtual
     @http.route('/tramites/certificado_de_vigencia/<model("x_cpnaa_procedure"):tramite>', auth='public', website=True)
@@ -399,7 +436,7 @@ class MySample(http.Controller):
             else:
                 return {'ok': False, 'mensaje': 'No existen registros para este tipo y número de documento', 'tramites': tramites }
         else:
-            return { 'ok': False, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página' }
+            return { 'ok': False, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página', 'error_captcha': True  }
     
     # Enviar el certificado de vigencia al email y lo retorna al navegador para su descarga
     @http.route('/enviar_certificado_vigencia', methods=["POST"], type="json", auth='public', website=True)
@@ -475,7 +512,8 @@ class MySample(http.Controller):
             else:
                 return { 'ok': False, 'id': False, 'convenio': False }
         else:
-            return { 'ok': False, 'id': False, 'convenio': False, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página' }
+            return { 'ok': False, 'id': False, 'convenio': False, 'error_captcha': True,
+                    'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página' }
         
     # Busca al graduando de convenios en la tabla de egresados, puede ser por documento o por nombres y apellidos 
     @http.route('/validar_estudiante', methods=["POST"], type="json", auth='public', website=True)

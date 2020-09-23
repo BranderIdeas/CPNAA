@@ -1,6 +1,6 @@
 <odoo>
     <data>
-        <template id="certificado_vigencia">
+        <template id="politica_datos">
             
         </template>
     </data>

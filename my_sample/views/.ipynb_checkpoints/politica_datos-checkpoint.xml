@@ -1,0 +1,56 @@
+<odoo>
+    <data>
+        <template id="politica_datos">
+            <div class="modal fade" id="policyModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl" role="document">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title formTitle">POLÍTICA PROTECCIÓN DE DATOS PERSONALES</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                        <div class="row">
+                            <div class="col-md-12">
+                            <ol>
+                                <li>
+                                <p class="lead"><b>OBJETO</b><br/>Establecer las medidas generales para garantizar los niveles de seguridad y privacidad adecuados para la protección de datos personales, con el fin de evitar posibles adulteraciones, pérdidas, consultas, usos o accesos no autorizados.</p>
+                                </li>
+                                <li>
+                                <p class="lead"><b>ALCANCE</b><br/>Aplica a los datos personales registrados en cualquier base de datos del Consejo Profesional Nacional de Arquitectura y sus profesiones Auxiliares cuyo titular sea una persona natural.<br/><br/></p>
+                                </li>
+                                <li>
+                                <p class="lead"><b>DEFINICIONES<br/></b>DATO BIOMETRICO<br/>DATO PERSONAL<br/>HABEAS DATA<br/></p>
+                                </li>
+                                <li>
+                                <p class="lead">
+                                    <b>CONDICIONES GENERALES</b><br/>El CPNAA informa a los titulares de los datos acerca de los mecanismos establecidos para la autorización del tratamiento de los datos personales los cuales incluyen: medios técnicos, orales o por medio de conductas inequívocas que permitan determinar el otorgamiento de la autorización por parte del Titular. Los Responsables del tratamiento de datos conservan el registro de la autorización de tratamiento de datos personales.<br/><br/>Los trabajadores y terceros de la Entidad sólo recopilan la cantidad mínima de datos personales requerida para cumplir con los propósitos del CPNAA o los requerimientos de los interesados. Dicho recaudo sólo se realiza una vez que se obtiene la respectiva autorización por parte del Titular de los datos. <br/><br/>
+                                    Los responsables de las bases de datos adoptan las medidas necesarias para garantizar la seguridad de los datos de carácter personal y así evitar su destrucción, alteración, pérdida o tratamiento no autorizado. Estas medidas incluyen los mecanismos de seguridad físicos y lógicos más adecuados, de acuerdo con el desarrollo tecnológico, de tal forma se garantiza la protección de la información almacenada y el secreto profesional. <br/><br/>
+                                    Las bases de datos que contienen datos personales, son administradas de tal modo que se garantiza el respeto a derechos fundamentales como la intimidad, el buen nombre, y en especial, el Habeas Data de los Titulares de los datos.<br/><br/>
+                                    Ningún trabajador o tercero debe retirar o transmitir información que contenga datos personales sin la debida autorización expresa del Responsable de la base de datos o el registro de información; y en caso de que se facilite información a terceros, se garantiza el buen uso y se cuenta con el debido consentimiento para el tratamiento de los datos conforme a su finalidad por parte el Titular de los datos. Los mecanismos de transferencia se realizan a través de las políticas y procedimientos de seguridad y privacidad descritas las políticas de seguridad de la información de la Entidad.<br/><br/>
+                                    Los responsables y encargados del tratamiento de los datos personales sólo pueden recolectar, almacenar, usar o circular dichos datos durante el tiempo establecido para cumplir las finalidades que se justificaron en el tratamiento. Por lo tanto, una vez se cumpla con los objetivos y las finalidades del tratamiento, el Responsable y el Encargado deben suprimir los datos personales que tengan en su posesión de una forma segura. <br/><br/>
+                                    Los trabajadores o contratistas de la Entidad no pueden realizar el tratamiento de datos personales de niños, niñas y adolescentes, excepto cuando se trate de datos públicos. En este caso, la Entidad respeta los intereses y los derechos fundamentales, conforme a una autorización previa del representante legal de cualquiera de ellos. <br/><br/>
+                                    En el caso de que no sea posible poner a disposición del Titular de la información las políticas de tratamiento, los responsables del tratamiento de datos informan por medio de un Aviso de Privacidad al Titular sobre la existencia de las políticas y la forma en la cual puede acceder a las mismas, en el momento en el que se vaya a realizar la recolección de datos personales.<br/><br/>
+                                    Los trabajadores o terceros que tengan acceso a datos personales tratados y administrados por la Entidad, deben cumplir con la política de protección de datos personales, haciendo uso de los controles y medidas establecidas para la protección de la información conforme a su nivel de clasificación. <br/><br/>El Responsable de las bases de datos que contengan información personal, debe asegurar que antes de realizar cualquier tratamiento de los datos, la Entidad cuenta con las autorizaciones de los Titulares y los mecanismos de control para la protección de la información.<br/><br/>
+                                    Los trabajadores o terceros deben evitar el acceso a los datos personales para los cuales no se encuentren autorizados y en caso de que observen violación o fallas de los mecanismos de control de seguridad y privacidad, estos hechos deberán ser reportados al Profesional Especializado Código 02 Grado 04 de la Oficina Administrativa y Financiera para determinar las acciones de tratamiento del evento de seguridad. <br/><br/>
+                                    En caso de que se requiera realizar transferencia de datos personales, se deberá efectuar de acuerdo con el Procedimiento de Recepción y/o Transferencia de Información de la Entidad. <br/><br/>Se debe realizar la actualización periódica de las listas de acceso de las personas y trabajadores autorizados para efectuar cualquier tipo de tratamiento frente a los datos personales. Así mismo se identificarán, de acuerdo con los niveles de clasificación, los mecanismos apropiados para garantizar la seguridad de los datos de carácter personal y evitar su alteración, pérdida, tratamiento o acceso no autorizado. <br/><br/>
+                                    Una vez se cumpla el plazo de tiempo del tratamiento de los datos personales, el Responsable de los mismos, deberá velar porque sean eliminados de forma segura, para evitar su recuperación <br/><br/>
+                                    <b>DEFINICIONES</b><br/>
+                                    <b>DATO BIOMETRICO</b>: Parámetros físicos únicos de cada persona que comprueban su identidad y se evidencian cuando la persona o una parte de ella interacciona con el sistema (ej. huella digital o voz). <br/>
+                                    <b>DATO PERSONAL</b>: Es cualquier pieza de información vinculada a una o varias personas determinadas o determinables o que puedan asociarse con una persona natural o jurídica. Los datos personales pueden ser públicos, semiprivados o privados. Ley 1266/2008 <br/>
+                                    <b>HABEAS DATA:</b> Derecho a acceder a la información personal que se encuentre en archivos o bases de datos; implica la posibilidad de ser informado acerca de los datos registrados sobre sí mismo y la facultad de corregirlos. <br/>
+                                </p>
+                                </li>
+                            </ol>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </data>
+</odoo>

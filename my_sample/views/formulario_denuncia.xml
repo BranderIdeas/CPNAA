@@ -92,12 +92,13 @@
                                 <div class="row">
                                     <div class="row col-md-6 form-group form-field o_website_form_required">
                                         <div class="col-md-6">
-                                            <label class="col-form-label o_fake_editable" for="x_facts_state_ID">
+                                            <label class="col-form-label o_fake_editable" for="x_complaint_state_ID">
                                                 Departamento
                                             </label>
                                         </div>
                                         <div class="col-md-6">
-                                        <select class="form-control o_website_form_input i_required" name="x_facts_state_ID">
+                                        <select class="child_place-x_complaint_city_ID form-control 
+                                                       o_website_form_input i_required" name="x_complaint_state_ID">
                                             <option value="">Seleccione...</option>
                                             <t t-foreach="request.env['x_cpnaa_state'].search([('x_name','!=','NO APLICA')],order='x_name')" t-as="expedition_state">
                                             <option t-att-value="expedition_state.id">
@@ -109,12 +110,12 @@
                                     </div>
                                     <div class="row col-md-6 form-group form-field o_website_form_required">
                                         <div class="col-md-6">
-                                        <label class="col-form-label o_fake_editable" for="x_facts_city_ID">
+                                            <label class="col-form-label o_fake_editable" for="x_complaint_city_ID">
                                                 Ciudad
                                             </label>
                                         </div>
                                         <div class="col-md-6">
-                                        <select class="form-control o_website_form_input i_required" name="x_facts_city_ID">
+                                        <select class="form-control o_website_form_input i_required" name="x_complaint_city_ID" id="x_complaint_city_ID">
                                             <option value="">Seleccione...</option>
                                             <t t-foreach="request.env['x_cpnaa_city'].search([('x_name','!=','NO APLICA')],order='x_name')" t-as="expedition_city">
                                                 <option t-att-value="expedition_city.id" style="display: none;" t-att-data-state_id="expedition_city.x_state_ID.id">
@@ -274,10 +275,9 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                     </div>
                                 </div>
                             </div>
-<!--                             <div class="formSection">
+                            <div class="formSection">
                                 <h2 class="sectionName">Datos de la Queja</h2>  
-                                <div class="row col-md-12 form-group form-field o_fake_not_editable">
-                                <div class="m-3">
+                                    <div class="row col-md-12 form-group form-field o_fake_not_editable">
                                     <div class="col-md-2">
                                         <label class="col-form-label o_fake_editable" for="x_complaint_issues_ID">
                                             Asunto
@@ -285,8 +285,8 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                     </div>
                                     <div class="col-md-10 mb-3">
                                         <div class="o_website_form_flex">
-                                            <t t-foreach="request.env['x_cpnaa_complaint_issues'].search([])" t-as="complaint_issue">
-                                            <div class="checkbox o_website_form_flex_item mb-2">
+                                            <t t-foreach="request.env['x_cpnaa_complaint_issues'].sudo().search([])" t-as="complaint_issue">
+                                            <div class="checkbox o_website_form_flex_item mb-2 px-1">
                                             <label>
                                                 <input type="checkbox" class="o_website_form_input" name="x_complaint_issues_ID" t-att-value="complaint_issue.id"/>
                                                 <span class="o_fake_editable">
@@ -296,6 +296,7 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                             </div>
                                             </t>
                                         </div>                                        
+                                    </div>
                                     </div>
                                     <div class="row col-md-12 form-group form-field">
                                         <div class="col-md-4">
@@ -308,7 +309,7 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="row col-md-12 form-group form-field o_fake_not_editable my-2">
+                                        <div class="row col-md-12 form-group form-field o_fake_not_editable m-2 pb-3">
                                             <div class="form-check form-check-inline">
                                             <label>Indique el lugar donde ocurrieron los hechos:</label>
                                             </div>
@@ -322,7 +323,7 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row col-md-12">
                                         <div class="row col-md-6 form-group form-field o_website_form_required">
                                             <div class="col-md-6">
                                                 <label class="col-form-label o_fake_editable" for="x_facts_state_ID">
@@ -330,7 +331,8 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                                 </label>
                                             </div>
                                             <div class="col-md-6">
-                                            <select class="form-control o_website_form_input i_required" name="x_facts_state_ID">
+                                            <select class="child_place-x_facts_city_ID form-control 
+                                                           o_website_form_input i_required" name="x_facts_state_ID">
                                                 <option value="">Seleccione...</option>
                                                 <t t-foreach="request.env['x_cpnaa_state'].search([('x_name','!=','NO APLICA')],order='x_name')"
                                                     t-as="expedition_state">
@@ -348,7 +350,7 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                                 </label>
                                             </div>
                                             <div class="col-md-6">
-                                            <select class="form-control o_website_form_input i_required" name="x_facts_city_ID">
+                                            <select class="form-control o_website_form_input i_required" name="x_facts_city_ID" id="x_facts_city_ID">
                                                 <option value="">Seleccione...</option>
                                                 <t t-foreach="request.env['x_cpnaa_city'].search([('x_name','!=','NO APLICA')],order='x_name')" t-as="expedition_city">
                                                     <option t-att-value="expedition_city.id" style="display: none;" t-att-data-state_id="expedition_city.x_state_ID.id">
@@ -393,8 +395,6 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                                         class="form-control o_website_form_input" name="x_facts_narration"/>
                                         </div>                                            
                                     </div>
-                                </div>
-                                </div>
                             </div>
                             <div class="formSection">
                                 <h2 class="sectionName">Adjuntar Pruebas</h2>                                    
@@ -449,9 +449,26 @@ Bajo la gravedad de juramento me permito manifestar que los hechos narrados en e
                                 <div class="col-md-2">
                                     <button id="enviar_denuncia" class="btn btn-primary btn-lg btn-stadium">Registrar</button>
                                 </div>
-                            </div> -->
+                            </div>
                         </div> 
                         </form>
+                        <t t-call="my_sample.politica_datos"/>
+                        <div class="modal fade" id="viewerModalEvidence" tabindex="-1" role="dialog" 
+                             aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-xl" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header pdfViewer">
+                                        <h3 class="modal-title formTitle">Previsualización de archivo</h3>
+                                    </div>
+                                    <div class="modal-body pdfViewer">
+                                        <iframe id="pdfPreview" src="#" height="800" width="100%"></iframe>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary btn-lg btn-stadium" data-dismiss="modal">Cerrar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </section>
                 </div>
             </t>

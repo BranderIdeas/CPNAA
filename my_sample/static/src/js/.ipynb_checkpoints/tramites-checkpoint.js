@@ -12,7 +12,7 @@ odoo.define('website.tramites', function(require) {
     }
     
     let urlBase = `${location.href.split(':')[0]}://${location.hostname}`;
-    if(urlBase.indexOf('cpnaa-developing') === -1){
+    if(urlBase.indexOf('.dev.odoo.com') === -1){
         urlBase = 'https://oficinavirtual.cpnaa.gov.co';
     }
     
@@ -172,7 +172,7 @@ odoo.define('website.tramites', function(require) {
         label_input_file: function(elem) {
             $("#preview-"+elem.id).hide();
             let idname = $(elem).attr('id');
-            if ($(elem).hasClass('btn-file')) {
+            if ($(elem).hasClass('btn-file') && $(elem).hasClass('file-tramites')) {
                 if($(elem)[0].files[0]){
 
                   let filename = $(elem).val().split('\\').pop();

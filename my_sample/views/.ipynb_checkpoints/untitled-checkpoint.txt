@@ -1,27 +1,7 @@
 <odoo>
     <data>
-        <template id="info_tramites" name="Información Trámites">
-              <table class="table table-bordered">
-                <tbody>
-                    <td>
-                      <p class="text-center">
-                        <img class="img-fluid o_we_custom_image" src="/web/image/4083/Cuadro1.png" data-original-title="" title="" aria-describedby="tooltip660146"/>
-                        <br/>
-                      </p>
-                    </td>
-                  </tr>
-                  <tr>
-                      <td>
-                        <p class="text-center">
-                        <img class="img-fluid o_we_custom_image" src="/web/image/4084/Cuadro%202.png" data-original-title="" title="" aria-describedby="tooltip660146"/>
-                        <br/>
-                        </p>
-                      </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
+        <template id="politica_datos">
+            
         </template>
     </data>
 </odoo>

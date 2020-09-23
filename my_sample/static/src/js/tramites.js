@@ -172,7 +172,7 @@ odoo.define('website.tramites', function(require) {
         label_input_file: function(elem) {
             $("#preview-"+elem.id).hide();
             let idname = $(elem).attr('id');
-            if ($(elem).hasClass('btn-file')) {
+            if ($(elem).hasClass('btn-file') && $(elem).hasClass('file-tramites')) {
                 if($(elem)[0].files[0]){
 
                   let filename = $(elem).val().split('\\').pop();

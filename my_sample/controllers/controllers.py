@@ -166,7 +166,7 @@ class MySample(http.Controller):
                     else:
                         http.request.env['x_evidence_files_img'].sudo().create(evidence)
                 http.request.env['x_cpnaa_consecutive'].browse(consecutivo.id).sudo().write({'x_value':consecutivo.x_value + 1})
-            resp = { 'ok': True, 'message': 'Denuncia '+ kw['x_name'] +'guardada con exito' }
+            resp = { 'ok': True, 'message': 'Denuncia '+ denuncia.x_name +' registrada con exito' }
         except:
             tb = sys.exc_info()[2]
             resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }

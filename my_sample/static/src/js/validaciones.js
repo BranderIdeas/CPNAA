@@ -108,7 +108,7 @@ odoo.define('website.validations', function(require) {
                     confirmButtonText: 'Ocultar',
                 })
                 return false;
-            }else if(entrada.length < 10){
+            }else if(entrada.length > 0 && entrada.length < 10){
                 Toast.fire({
                     title: `<br/>Ingrese mínimo 10 caracteres para el télefono celular.<br/><br/> `,
                     icon: 'error',
@@ -322,7 +322,7 @@ odoo.define('website.validations', function(require) {
             const inputDoc = $("input[name='"+nameInput+"']");
             const tipo_doc = selectTipoDoc.val();
             const documento = inputDoc.val().trim().toUpperCase().replace(/\s+/g, ' ');
-            if (documento.length < 4) {
+            if (documento.length > 0 && documento.length < 4) {
                 _this.alert_error_toast('Ingrese por lo menos 4 caracteres', 'top');
                 valido = false;
             } else if (tipo_doc == 1) {
@@ -528,7 +528,7 @@ odoo.define('website.validations', function(require) {
             if (documento.length < 1) {
                 _this.mostrar_helper_inicio(id_input_doc, 'El documento es requerido');
                 valido = false;
-            } else if (documento.length < 4) {
+            } else if (documento.length > 0 && documento.length < 4) {
                 _this.mostrar_helper_inicio(id_input_doc, 'Ingrese por lo menos 4 caracteres');
                 valido = false;
             } else if (tipo_doc == 1) {

@@ -316,7 +316,7 @@ odoo.define('website.tramites', function(require) {
                          } else {
                                 ocultarSpinner();
                                 console.log('ERROR: '+request.status + request.statusText);
-                                $('#mssg_result').addClass('alert alert-danger').text('No hemos podido completar la solicitud en este momento, inténtelo nuevamente');
+                                $('#mssg_result').addClass('alert alert-danger').text('No hemos podido completar la solicitud en este momento');
                          }
                     }
                 }

@@ -149,7 +149,8 @@
                                             </label>
                                         </div>
                                         <div class="col-md-6">
-                                            <input type="text" class="form-control o_website_form_input v-celular" name="x_complainant_celular"/>
+                                            <input type="text" class="form-control o_website_form_input v-celular i_required" 
+                                                   name="x_complainant_celular"/>
                                         </div>
                                     </div>
                                 </div>
@@ -161,7 +162,8 @@
                                             </label>
                                         </div>
                                         <div class="col-md-6">
-                                            <input type="text" class="form-control o_website_form_input v-email" name="x_complainant_email"/>
+                                            <input type="text" class="form-control o_website_form_input v-email i_required" 
+                                                   name="x_complainant_email"/>
                                         </div>
                                     </div>
                                     <div class="row col-md-6 form-group form-field o_fake_not_editable">

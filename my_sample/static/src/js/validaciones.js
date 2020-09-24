@@ -108,7 +108,7 @@ odoo.define('website.validations', function(require) {
                     confirmButtonText: 'Ocultar',
                 })
                 return false;
-            }else if(entrada.length > 0 && entrada.length < 10){
+            }else if(entrada.length < 10){
                 Toast.fire({
                     title: `<br/>Ingrese mínimo 10 caracteres para el télefono celular.<br/><br/> `,
                     icon: 'error',
@@ -316,56 +316,9 @@ odoo.define('website.validations', function(require) {
                 return false;
             }
         },
-        validar_tipoDoc: function(nameSelect, nameInput, _this){
-            let valido = true;
-            const selectTipoDoc = $("select[name='"+nameSelect+"']");
-            const inputDoc = $("input[name='"+nameInput+"']");
-            const tipo_doc = selectTipoDoc.val();
-            const documento = inputDoc.val().trim().toUpperCase().replace(/\s+/g, ' ');
-            if (documento.length > 0 && documento.length < 4) {
-                _this.alert_error_toast('Ingrese por lo menos 4 caracteres', 'top');
-                valido = false;
-            } else if (tipo_doc == 1) {
-                // Solo numeros
-                let regex = /^[0-9]*$/;
-                inputDoc.attr('maxlength', '11');
-                if (!regex.test(documento)) {
-                    _this.alert_error_toast('Ingrese solo números, no incluya espacios, letras, puntos ó caracteres especiales', 'top');
-                    valido = false;
-                } else {
-                    valido = true;
-                }
-                if (documento.length > 11) {
-                    _this.alert_error_toast('Verifica tu número de documento', 'top');
-                    valido = false;
-                }
-            } else if (tipo_doc != 1) {
-                // Solo numeros y letras
-                let regex = /^[0-9a-zA-Z]*$/;
-                inputDoc.attr('maxlength', '45');
-                if (!regex.test(documento)) {
-                    _this.alert_error_toast('Ingrese solo números ó letras, no incluya espacios, puntos ó caracteres especiales', 'top');
-                    valido = false;
-                } else {
-                    valido = true;
-                }
-            }
-            if(!valido){
-                inputDoc.addClass('is-invalid');
-                selectTipoDoc.addClass('is-invalid');
-            }else{
-                inputDoc.removeClass('is-invalid');
-                selectTipoDoc.removeClass('is-invalid');
-                inputDoc.val(documento);
-            }     
-            return valido;
-        },
-        validar_formatos: async function validar_formatos(elem, _this){
-            if(elem.classList.contains('upper')){
-                elem.value = elem.value.trim().toUpperCase().replace(/\s\s+/g, ' ');           
-            }
+        validar_formatos: async function validar_formatos(elem){
             if(elem.classList.contains('o-letters')){
-                let valid = _this.validar_solo_letras(elem.value);
+                let valid = validaciones.validar_solo_letras(elem.value);
                 if(!valid){
                     elem.classList.add('is-invalid');
                     return valid;
@@ -374,30 +327,24 @@ odoo.define('website.validations', function(require) {
                     elem.value = elem.value.trim().toUpperCase().replace(/\s\s+/g, ' ');
                 }            
             }
-            if(elem.classList.contains('v-document')){
-                let valid = _this.validar_tipoDoc(elem.dataset.type_doc, elem.name, _this);
-            }
-            if(elem.classList.contains('v-document_type')){
-                let valid = _this.validar_tipoDoc(elem.name, elem.dataset.input_doc, _this);
-            }
             if (elem.classList.contains('v-address')){
-                let valid = _this.validar_direccion(elem.value);
+                let valid = validaciones.validar_direccion(elem.value);
                 if(!valid){
                     elem.classList.add('is-invalid');
                     return valid;
                 }else{
                     elem.classList.remove('is-invalid');
-                    elem.value = elem.value.trim().toUpperCase().replace(/\s+/g, ' ');
+                    elem.value = elem.value.trim().toUpperCase().replace(/\s\s+/g, ' ');
                 }
             }            
             if (elem.classList.contains('v-email')){
                 let valor = elem.value.trim().toLowerCase().replace(/\s+/g, '');
-                let valid = _this.validar_email(valor);
+                let valid = validaciones.validar_email(valor);
                 if(!valid){
                     elem.classList.add('is-invalid');
                     return valid;
                 }else{
-                    valid = await _this.validar_email_unico(valor)
+                    valid = await validaciones.validar_email_unico(valor)
                     if(!valid){
                         elem.classList.add('is-invalid');
                         elem.focus();
@@ -409,7 +356,7 @@ odoo.define('website.validations', function(require) {
             } 
             if (elem.classList.contains('v-celular')){
                 let valor = elem.value.trim().replace(/\s+/g, '');
-                let valid = _this.validar_celular(valor);
+                let valid = validaciones.validar_celular(valor);
                 if(!valid){
                     elem.classList.add('is-invalid');
                     return valid;
@@ -420,7 +367,7 @@ odoo.define('website.validations', function(require) {
             }            
             if (elem.classList.contains('v-telefono')){
                 if(elem.value.length > 0){
-                    let valid = _this.validar_telefono(elem.value);
+                    let valid = validaciones.validar_telefono(elem.value);
                     if(!valid){
                         elem.classList.add('is-invalid');
                         return valid;
@@ -432,7 +379,7 @@ odoo.define('website.validations', function(require) {
             }
             if (elem.classList.contains('v-alfanum')){
                 let valor = elem.value.trim().toUpperCase().replace(/\s+/g, '');
-                let valid = _this.validar_alfanum(valor, 'el documento Ministerio de Educación');
+                let valid = validaciones.validar_alfanum(valor, 'el documento Ministerio de Educación');
                 if(!valid){
                     elem.classList.add('is-invalid');
                     return valid;
@@ -492,20 +439,18 @@ odoo.define('website.validations', function(require) {
                 }
             }
             let inputEmail = $('[name="x_email"]');
-            if(inputEmail.length > 0 ){
-                if(inputEmail.val().length > 0 && formValido){
-                    let valido = await validaciones.validar_email_unico(inputEmail.val());
-                    if(!valido){
-                        inputEmail.focus();
-                        errores.push(inputEmail.attr('name'));
-                        inputEmail.addClass('is-invalid');
-                        formValido= false;
-                    }
+            if(inputEmail.val().length > 0 && formValido){
+                let valido = await validaciones.validar_email_unico(inputEmail.val());
+                if(!valido){
+                    inputEmail.focus();
+                    errores.push(inputEmail.attr('name'));
+                    inputEmail.addClass('is-invalid');
+                    formValido= false;
                 }
             }
             if(formValido){
                 for (let i = 0; i < elems.length; i++) {
-                    let formatosValidos = await _this.validar_formatos(elems[i], _this);
+                    let formatosValidos = await _this.validar_formatos(elems[i]);
                     if(!formatosValidos){
                         formValido= false;
                     }
@@ -528,7 +473,7 @@ odoo.define('website.validations', function(require) {
             if (documento.length < 1) {
                 _this.mostrar_helper_inicio(id_input_doc, 'El documento es requerido');
                 valido = false;
-            } else if (documento.length > 0 && documento.length < 4) {
+            } else if (documento.length < 4) {
                 _this.mostrar_helper_inicio(id_input_doc, 'Ingrese por lo menos 4 caracteres');
                 valido = false;
             } else if (tipo_doc == 1) {
@@ -558,13 +503,6 @@ odoo.define('website.validations', function(require) {
                     _this.ocultar_helper(id_input_doc);
                     valido = true;
                 }
-            }
-            return valido;
-        },
-        validarCheckboxsRequired: function(nameElems, nombreCampo, _this){
-            let valido = $('input[name="'+nameElems+'"]:checked').length > 0 ? true : false;
-            if(!valido){
-               _this.alert_error_toast(`Selecciona por lo menos un ${nombreCampo}`, 'top');
             }
             return valido;
         },

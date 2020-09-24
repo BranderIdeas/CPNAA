@@ -178,8 +178,8 @@ odoo.define('website.denuncia', function(require) {
     $('#denunciaForm').submit(async function(e){
         e.preventDefault();
         $('#enviar_denuncia').attr('disabled', true);
-        let valido = validaciones.validarCheckboxsRequired('x_complaint_issues_ID', 'asunto', validaciones);
-        if (valido){ valido = await validaciones.validar_formulario(validaciones); }
+        let valido = await validaciones.validar_formulario(validaciones);
+        if (valido) { valido = validaciones.validarCheckboxsRequired('x_complaint_issues_ID', 'asunto', validaciones); }
         if (valido){
             mostrarSpinner();
             denuncia.enviar_denuncia();

@@ -182,7 +182,7 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                 </div>
                             </div>
                             <div class="formSection">
-                                <h2 class="sectionName">Datos del Implicado</h2>
+                                <h2 class="sectionName">Datos del Arquitecto Implicado</h2>
                                 <div class="row">                                
                                     <div class="row col-md-6 form-group form-field o_website_form_required">
                                         <div class="col-md-6">
@@ -286,7 +286,10 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                             </div>
                             <div class="formSection">
                                 <h2 class="sectionName">Datos de la Queja</h2>  
-                                    <div class="row col-md-12 form-group form-field o_fake_not_editable o_website_form_required">
+                                    <div class="row col-md-12 form-group form-field mb-0 o_website_form_required">
+                                    <div class="row col-md-12 ml-0 pb-3">
+                                        <label>Seleccione los asuntos que generan la queja</label>
+                                    </div>                                        
                                     <div class="col-md-2">
                                         <label class="col-form-label o_fake_editable" for="x_complaint_issues_ID">
                                             Asunto
@@ -317,16 +320,17 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                             <input type="text" class="form-control o_website_form_input" name="x_complaint_issues_other"/>
                                         </div>
                                     </div>
+                                    <hr style="border-top: 1px solid #CCCCCC !important;"/>
                                     <div class="row">
                                         <div class="row col-md-12 form-group form-field o_fake_not_editable m-2 pb-3">
-                                            <div class="form-check form-check-inline">
+                                            <div class="row col-md-12">
                                             <label>Indique el lugar donde ocurrieron los hechos:</label>
                                             </div>
-                                            <div class="form-check form-check-inline mx-5">
+                                            <div class="form-check form-check-inline mr-5 mt-4">
                                                 <input class="form-check-input" type="radio" id="radio_rural" name="x_facts_rural" value="1" checked="1"/>
                                                 <label class="form-check-label" for="radio_rural">Rural</label>
                                             </div>
-                                            <div class="form-check form-check-inline mx-5">
+                                            <div class="form-check form-check-inline mr-5 mt-4">
                                                 <input class="form-check-input" type="radio" id="radio_urban" name="x_facts_rural" value="2"/>
                                                 <label class="form-check-label" for="radio_urban">Urbano</label>
                                             </div>
@@ -369,11 +373,11 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                             </select>
                                             </div>
                                         </div>
-                                    </div>                                            
+                                    </div>
+                                    <hr style="border-top: 1px solid #CCCCCC !important;"/>
                                     <div class="row mx-3">
                                         <label class="text-justify my-3">
-                                        A continuación, haga una narración clara y concisa de los hechos materia de su queja, especificando
-                                        circunstancias de tiempo (fecha), modo y lugar de ocurrencia de los mismos:
+                                        <b>Hechos materia de su queja disciplinaria:</b> a continuación, haga una narración clara y concisa de los hechos materia de su queja, especificando circunstancias de tiempo (fecha), modo y lugar de ocurrencia de los mismos:
                                         </label>
                                         <label class="text-justify mb-3">
                                         Tenga en cuenta que:

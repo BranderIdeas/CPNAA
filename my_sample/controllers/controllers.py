@@ -151,7 +151,7 @@ class MySample(http.Controller):
             del kw[key]
         kw['x_complaint_issues_ID'] = kw['x_complaint_issues_ID'].split(',')
         try:
-            consecutivo = http.request.env['x_cpnaa_consecutive'].search([('x_name','=','DENUNCIAS')])
+            consecutivo = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=','DENUNCIAS')])
             kw['x_name'] = 'DENUNCIA-'+str(consecutivo.x_value + 1)
             denuncia = http.request.env['x_cpnaa_complaint'].sudo().create(kw)
             if denuncia:
@@ -166,7 +166,7 @@ class MySample(http.Controller):
                     else:
                         http.request.env['x_evidence_files_img'].sudo().create(evidence)
                 http.request.env['x_cpnaa_consecutive'].browse(consecutivo.id).sudo().write({'x_value':consecutivo.x_value + 1})
-            resp = { 'ok': True, 'message': 'Su queja ha sido registrada con el consecutivo'+ denuncia.x_name +' exitosamente.' }
+            resp = { 'ok': True, 'message': 'Su queja ha sido registrada con el consecutivo '+ denuncia.x_name +' exitosamente.' }
         except:
             tb = sys.exc_info()[2]
             resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }

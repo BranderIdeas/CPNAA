@@ -122,6 +122,7 @@ odoo.define('website.denuncia', function(require) {
 	$("#tableFiles").click((e) => {
 		if (e.target.classList.contains("previewEvidence")) {
 			const idx = e.target.id.split("-").pop();
+            $("#pdfPreview").attr("src", "");
 			$("#viewerModalEvidence").on("show.bs.modal", function (e) {
 				let reader = new FileReader();
 				reader.onload = function (e) {

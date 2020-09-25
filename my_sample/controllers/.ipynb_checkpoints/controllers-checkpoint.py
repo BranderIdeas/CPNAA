@@ -487,7 +487,7 @@ class MySample(http.Controller):
     def validar_tramites(self, **kw):
         data = kw.get('data')
         if self.validar_captcha(kw.get('token')):
-            result, por_nombre, matricula, certificado = {}, False, False, False
+            result, por_nombre, matricula, certificado, tramite_en_curso = {}, False, False, False, False
             user = http.request.env['x_cpnaa_user'].search([('x_document_type_ID','=',int(data['doc_type'])),('x_document','=',data['doc'])])
             graduando = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select','=',int(data['doc_type'])),
                                                                             ('x_documento','=',data['doc']),('x_origin_type','=','CONVENIO')])
@@ -498,12 +498,13 @@ class MySample(http.Controller):
                 else:
                     grado = False
             tramites = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1','=',int(data['doc_type'])),
-                                                                     ('x_studio_documento_1','=',data['doc']),
-                                                                     ('x_cycle_ID.x_order','=',5)])
+                                                                     ('x_studio_documento_1','=',data['doc'])])
             for tramite in tramites:
-                if tramite.x_service_ID.x_name.find('MATR') != -1:
+                if tramite.x_cycle_ID.x_order < 5:
+                    tramite_en_curso = True
+                if tramite.x_service_ID.x_name.find('MATR') != -1 and tramite.x_cycle_ID.x_order == 5:
                     matricula = True
-                if tramite.x_service_ID.x_name.find('CERT') != -1:
+                if tramite.x_service_ID.x_name.find('CERT') != -1 and tramite.x_cycle_ID.x_order == 5:
                     certificado = True
                     result = {'carrera': tramite.x_studio_carrera_1.x_name, 'tipo_documento': tramite.x_studio_tipo_de_documento_1.x_name, 
                               'documento': tramite.x_studio_documento_1 }
@@ -511,6 +512,8 @@ class MySample(http.Controller):
                 user = user[-1]
             if len(graduando) > 1:
                 graduando = graduando[-1]
+            if (tramite_en_curso):
+                return { 'ok': True, 'id': user.id, 'tramite_en_curso': tramite_en_curso }
             if (matricula or certificado):
                 return { 'ok': True, 'id': user.id, 'matricula': matricula, 'certificado': certificado, 'result': result }
             elif (user):
@@ -591,10 +594,10 @@ class MySample(http.Controller):
                 tramite_en_curso = True if tramite.x_cycle_ID.x_order < 5 else False
         if tramite_en_curso:
             return http.request.redirect('/cliente/'+str(tramite.x_user_ID.id)+'/tramites/')                
-        elif origen in validos and tipo_doc in doc_validos and not matricula:
-            return http.request.render('my_sample.formulario_tramites', {'tipo_doc': tipo_doc, 'documento':documento, 'form': origen, 'origen': 1})
-        elif matricula:
+        elif matricula and origen == 'matricula':
             return http.request.redirect('/cliente/tramite/'+origen)
+        elif origen in validos and tipo_doc in doc_validos:
+            return http.request.render('my_sample.formulario_tramites', {'tipo_doc': tipo_doc, 'documento':documento, 'form': origen, 'origen': 1})
         
     # Renderiza el formulario para trámites por convenios, valida si ya hay trámite en curso y lo redirige al estado del tramite
     @http.route('/tramite/convenios/<model("x_procedure_temp"):cliente>', auth='public', website=True)

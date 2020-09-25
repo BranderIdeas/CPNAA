@@ -34,15 +34,16 @@ odoo.define('website.tramites', function(require) {
                 params: {'data': data, 'token': token}
             }).then(function(response){
                 console.log(response);
+                resetCaptcha();
                 if (response.error_captcha){
-                    resetCaptcha()
                     return;
                 }                
                 if(response.convenio){
                     $(location).attr('href','/tramite/convenios/'+ response.id);
                 } else if(response.id && data.origen == 'matricula'){
-                    resetCaptcha();
-                    if (response.matricula){
+                    if (response.tramite_en_curso){
+                         $(location).attr('href','/cliente/'+ response.id +'/tramites');
+                    } else if (response.matricula){
                         $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
                         $('#text_message').text(`Usted ya posee Matricula Profesional de Arquitecto`);
                         $('#btn-result').attr('href','https://cpnaa.gov.co/').text('Contactar con el CPNAA');

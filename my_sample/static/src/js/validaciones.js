@@ -492,18 +492,6 @@ odoo.define('website.validations', function(require) {
                     }
                 }
             }
-            let inputEmail = $('[name="x_email"]');
-            if(inputEmail.length > 0 ){
-                if(inputEmail.val().length > 0 && formValido){
-                    let valido = await validaciones.validar_email_unico(inputEmail.val());
-                    if(!valido){
-                        inputEmail.focus();
-                        errores.push(inputEmail.attr('name'));
-                        inputEmail.addClass('is-invalid');
-                        formValido= false;
-                    }
-                }
-            }
             if(formValido){
                 for (let i = 0; i < elems.length; i++) {
                     let formatosValidos = await _this.validar_formatos(elems[i], _this);

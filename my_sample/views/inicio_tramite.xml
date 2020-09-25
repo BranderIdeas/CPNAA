@@ -34,7 +34,10 @@
                             </div>
                             <div class="form-group row d-flex justify-content-center">
                                 <div class="g-recaptcha" data-sitekey="6Lf2UcMZAAAAAMBlukQO3XsknMUsIEnWI2GXuX0z"></div>
-                            </div>                            
+                            </div>           
+                            <div class="form-group row d-flex justify-content-center">
+                                <button type="submit" id="btn_verificar" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
+                            </div>
                             <div id="msj_result" class="invisible mb-3 text-center" aria-hidden="true">
                                 <div id="text_message" class="alert alert-info d-flex justify-content-center" role="alert">
                                 </div>
@@ -45,9 +48,6 @@
                             </div>
                             <div id="msj_documento" class="invisible mb-3 text-center" aria-hidden="true">
                                 <div class="alert alert-primary" role="alert"></div>
-                            </div>
-                            <div class="form-group row d-flex justify-content-center">
-                                <button type="submit" id="btn_verificar" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
                             </div>
                         </div>
                     </div>
@@ -96,23 +96,22 @@
                             </div>
                             <div class="form-group row d-flex justify-content-center">
                                 <div class="g-recaptcha" data-sitekey="6Lf2UcMZAAAAAMBlukQO3XsknMUsIEnWI2GXuX0z"></div>
-                            </div>                            
-                            <div id="msj_matricula" class="invisible mb-3 text-center" aria-hidden="true">
-                                <div class="alert alert-primary d-flex justify-content-center" role="alert">
-                                    Usted ya posee Matricula Profesional de Arquitecto
-                                </div>
-                                <div class="d-flex justify-content-center">
-                                    <a id="btn-cancelar" type="button" class="btn btn-light">Cancelar</a>
-                                    <a href="https://cpnaa.gov.co/" type="button" class="btn btn-light">Contactar con el CPNAA</a>
-                                </div>
-                            </div>
-                            <div id="msj_documento" class="invisible mb-3 text-center" aria-hidden="true">
-                                <div class="alert alert-primary" role="alert"></div>
-                            </div>
+                            </div> 
                             <div class="form-group row d-flex justify-content-center">
                                 <button type="submit" id="btn_verificar_convenios" 
                                     class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar
                                 </button>
+                            </div>
+                            <div id="msj_result" class="invisible mb-3 text-center" aria-hidden="true">
+                                <div id="text_message" class="alert alert-info d-flex justify-content-center" role="alert">
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <a id="btn-cancelar" type="button" class="btn btn-light">Cancelar</a>
+                                    <a id="btn-result" href="#" type="button" class="btn btn-light"></a>
+                                </div>
+                            </div>                            
+                            <div id="msj_documento" class="invisible mb-3 text-center" aria-hidden="true">
+                                <div class="alert alert-primary" role="alert"></div>
                             </div>
                         </div>
                     </div>
@@ -151,12 +150,12 @@
                             </div>
                             <div class="form-group row d-flex justify-content-center">
                                 <div class="g-recaptcha" data-sitekey="6Lf2UcMZAAAAAMBlukQO3XsknMUsIEnWI2GXuX0z"></div>
-                            </div>                            
-                            <div id="msj_nombre" class="invisible mb-3 text-center" aria-hidden="true">
-                                <div class="alert alert-primary" role="alert"></div>
                             </div>
                             <div class="form-group row d-flex justify-content-center">
                                 <button type="submit" id="btn_verificar_nombres" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
+                            </div>
+                            <div id="msj_nombre" class="invisible mb-3 text-center" aria-hidden="true">
+                                <div class="alert alert-primary" role="alert"></div>
                             </div>
                         </div>
                     </div>                    

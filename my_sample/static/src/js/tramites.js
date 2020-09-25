@@ -33,16 +33,27 @@ odoo.define('website.tramites', function(require) {
                 route: '/validar_tramites',
                 params: {'data': data, 'token': token}
             }).then(function(response){
+                console.log(response);
+                if (response.error_captcha){
+                    resetCaptcha()
+                    return;
+                }                
                 if(response.convenio){
                     $(location).attr('href','/tramite/convenios/'+ response.id);
-                } 
-//                 else if(response.id){
-//                     if (response.matricula){
-//                         $('#msj_matricula').removeClass('invisible').attr('aria-hidden',false);
-//                     } else {
-//                         $(location).attr('href','/cliente/'+ response.id +'/tramites');
-//                     }
-//                 }
+                } else if(response.id && data.origen == 'matricula'){
+                    resetCaptcha();
+                    if (response.matricula){
+                        $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
+                        $('#text_message').text(`Usted ya posee Matricula Profesional de Arquitecto`);
+                        $('#btn-result').attr('href','https://cpnaa.gov.co/').text('Contactar con el CPNAA');
+                    } else if (response.certificado){
+                        $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
+                        $('#text_message').text(`El documento ${validaciones.capitalizeFromUpper(response.result.tipo_documento)}: ${response.result.documento}, ya se encuentra registrado con la profesión auxiliar ${validaciones.capitalizeFromUpper(response.result.carrera)}, desea continuar para tramitar su matrícula profesional de arquitectura, por primer vez.`);
+                        $('#btn-result').attr('href','/tramite/matricula/['+data.doc_type+':'+data.doc+']').text('Tramitar Matrícula Profesional');
+                    } else {
+                        $(location).attr('href','/cliente/'+ response.id +'/tramites');
+                    }
+                }
                 else {
                     $(location).attr('href','/tramite' + origen+'/['+data.doc_type+':'+data.doc+']');
                 }
@@ -60,6 +71,7 @@ odoo.define('website.tramites', function(require) {
                 params: {'data': data, 'token': token}
             }).then(function(response){
                 if (response.error_captcha){
+                    resetCaptcha();
                     div_msj.removeClass('invisible').attr('aria-hidden',false);
                     div_msj.find('div').text(response.mensaje);
                     return;
@@ -312,7 +324,7 @@ odoo.define('website.tramites', function(require) {
                          } else {
                                 ocultarSpinner();
                                 console.log('ERROR: '+request.status + request.statusText);
-                                $('#mssg_result').addClass('alert alert-danger').text('No hemos podido completar la solicitud en este momento, inténtelo nuevamente');
+                                $('#mssg_result').addClass('alert alert-danger').text('No hemos podido completar la solicitud en este momento');
                          }
                     }
                 }
@@ -425,7 +437,7 @@ odoo.define('website.tramites', function(require) {
     });
 
     // Inicio del trámite input número de documento
-    $('#doc').on('keyup', function(e) {
+    $('#doc').on('keyup change input', function(e) {
         e.preventDefault();
         data.doc = $('#doc').val().toUpperCase();
         data.doc_type = $('#doc_type').val();
@@ -443,12 +455,12 @@ odoo.define('website.tramites', function(require) {
     });
         
     // Inicio de trámite convenios input nombres
-    $('#x_names').on('keyup', function(e) {
+    $('#x_names').on('keyup change input', function(e) {
         tramites.validar_campos_nombres(tramites, false);
     });
             
     // Inicio de trámite convenios input apellidos
-    $('#x_lastnames').on('keyup', function(e) {
+    $('#x_lastnames').on('keyup change input', function(e) {
         tramites.validar_campos_nombres(tramites, false);
     });
     
@@ -459,7 +471,7 @@ odoo.define('website.tramites', function(require) {
     
     // Validaciones de tipo de datos en los input del formulario
     $('#tramiteForm').on('change', async function(e){
-        let valido = await validaciones.validar_formatos(e.target);
+        let valido = await validaciones.validar_formatos(e.target, validaciones);
         if (valido){
             if($(e.target).is('select')){
                 $(e.target).removeClass('is-invalid');
@@ -491,7 +503,7 @@ odoo.define('website.tramites', function(require) {
             $('#mssg_result').text('').removeClass('alert alert-danger');
             setTimeout(()=>{
                 ocultarSpinner();
-                $('#mssg_result').addClass('alert alert-danger').text('Por favor, verifica en el formulario los campos no válidos o marcados como requeridos *');
+                $('#mssg_result').addClass('alert alert-danger').text('Por favor, verifica en el formulario los campos no válidos y/o requeridos *');
                 $('#btn-registrar').removeAttr('disabled');
                 $('#btn-actualizar').removeAttr('disabled');
             },400);
@@ -561,7 +573,7 @@ odoo.define('website.tramites', function(require) {
     });
     
     // Carga las opciones para el autocomplete de las universidades
-    $('#universidades').on('keyup paste', async function(e){
+    $('#universidades').on('keyup change input', async function(e){
         let tipoUniversidad = $('#x_institution_type_ID').val();
         if(e.target.value.length > 1){
            let consulta = await tramites.data_autocomplete_univ(e.target.value, tipoUniversidad);
@@ -613,7 +625,7 @@ odoo.define('website.tramites', function(require) {
     });
     
     // Carga las opciones para el autocomplete de las carreras
-    $('#carreras').on('keyup paste', async function(e){
+    $('#carreras').on('keyup change input', async function(e){
         let nivelProf = $('#x_level_ID').val();
         let genero = $('#x_gender_ID').val() != '' ? $('#x_gender_ID').val() : '1';
         if(e.target.value.length > 1){
@@ -721,6 +733,12 @@ odoo.define('website.tramites', function(require) {
     $("select[class*=child-place]").change(function(){
           tramites.combinar_select(this, 'child-place-');
     }).change();
+    
+    function resetCaptcha(){
+        grecaptcha.reset();
+        $('#btn_verificar').removeAttr('disabled');
+        $('#btn_verificar_convenios').removeAttr('disabled');
+    }
   
     // Opciones para idioma e inicializar el datepicker
 	$.datepicker.regional['es'] = {

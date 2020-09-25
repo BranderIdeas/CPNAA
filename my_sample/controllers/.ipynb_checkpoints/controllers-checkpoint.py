@@ -487,7 +487,7 @@ class MySample(http.Controller):
     def validar_tramites(self, **kw):
         data = kw.get('data')
         if self.validar_captcha(kw.get('token')):
-            por_nombre = False
+            result, por_nombre, matricula, certificado = {}, False, None, None
             user = http.request.env['x_cpnaa_user'].search([('x_document_type_ID','=',int(data['doc_type'])),('x_document','=',data['doc'])])
             graduando = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select','=',int(data['doc_type'])),
                                                                             ('x_documento','=',data['doc']),('x_origin_type','=','CONVENIO')])
@@ -497,14 +497,25 @@ class MySample(http.Controller):
                     _logger.info('Graduando reportado por IES con plazo vencido => ['+data['doc_type']+':'+data['doc']+']')
                 else:
                     grado = False
-            matricula = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1','=',int(data['doc_type'])),('x_studio_documento_1','=',data['doc']),
-                                                                      ('x_cycle_ID.x_order','=',5), ('x_service_ID.x_name','ilike','MATR')])
+            tramite = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1','=',int(data['doc_type'])),
+                                                                    ('x_studio_documento_1','=',data['doc']),
+                                                                    ('x_cycle_ID.x_order','=',5)])[0]
+            if len(tramite) == 1:
+                matricula = True if tramite.x_service_ID.x_name.find('MATR') != -1 else False
+                certificado = True if tramite.x_service_ID.x_name.find('CERT') != -1 else False
+            if certificado:
+                result = {'carrera': tramite.x_studio_carrera_1.x_name, 'tipo_documento': tramite.x_studio_tipo_de_documento_1.x_name, 
+                        'documento': tramite.x_studio_documento_1 }
+            if len(tramite) > 1:
+                return { 'ok': True, 'id': user.id, 'varios_tramites': True }
             if len(user) > 1:
                 user = user[0]
             if len(graduando) > 1:
                 graduando = graduando[0]
             if (matricula):
-                return { 'ok': True, 'id': user.id, 'matricula': True }
+                return { 'ok': True, 'id': user.id, 'matricula': matricula }
+            if (certificado):
+                return { 'ok': True, 'id': user.id, 'certificado': certificado, 'result': result }
             elif (user):
                 return { 'ok': True, 'id': user.id, 'convenio': False }
             elif (grado):
@@ -564,20 +575,24 @@ class MySample(http.Controller):
     def formulario_tramites(self, origen, tipo_doc, documento):
         validos = ['matricula','inscripciontt','licencia']
         doc_validos = ['1','2','5']
-        servicio = 'MATRICULA PROFESIONAL'
+        servicio = 'MATRÍCULA PROFESIONAL'
         if tipo_doc == '1' and not self.validar_solo_numeros(documento):
             return http.request.redirect('/cliente/tramite/'+origen)
         if origen == validos[1]:
-            servicio = 'CERTIFICADO DE INSCRIPCION PROFESIONAL'
+            servicio = 'CERTIFICADO DE INSCRIPCIÓN PROFESIONAL'
         if origen == validos[2]:
             servicio = 'LICENCIA TEMPORAL ESPECIAL'
-#         mismo_tramite = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
-#                                                                       ('x_studio_documento_1','=',documento),('x_service_ID.x_name','like',servicio)])
-        if origen in validos and tipo_doc in doc_validos: #and not mismo_tramite
+        tramite = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
+                                                                      ('x_studio_documento_1','=',documento)])
+        matricula = True if tramite.x_service_ID.x_name == 'MATRÍCULA PROFESIONAL' else False
+        tramite_en_curso = True if tramite.x_cycle_ID.x_order < 5 else False
+        if origen in validos and tipo_doc in doc_validos and not matricula:
             return http.request.render('my_sample.formulario_tramites', {'tipo_doc': tipo_doc, 'documento':documento, 'form': origen, 'origen': 1})
-        else:
-            return http.request.redirect('/cliente/tramite/'+origen) # redireccionar_lista_tramites
-    
+        elif matricula:
+            return http.request.redirect('/cliente/tramite/'+origen)
+        elif tramite_en_curso:
+            return http.request.redirect('/cliente/'+tramite.x_user_ID.id+'tramites/')
+        
     # Renderiza el formulario para trámites por convenios, valida si ya hay trámite en curso y lo redirige al estado del tramite
     @http.route('/tramite/convenios/<model("x_procedure_temp"):cliente>', auth='public', website=True)
     def formulario_convenio(self, cliente):

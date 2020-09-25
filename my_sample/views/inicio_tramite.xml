@@ -54,14 +54,14 @@
                 </form>
                 <form t-if="form == 'convenio' and not por_nombre" id="validar_convenios_doc" class="container formSection mt-3">
                     <nav>
-                        <ul class="nav nav-tabs mb-3 mt-0 wInput mx-auto">
+                        <ul class="nav nav-tabs tabradius mb-3 mt-0 wInput mx-auto">
                             <li class="nav-item">
-                                <a class="nav-link active" href="/convenios/tramite">
+                                <a class="nav-link tabradius active" href="/convenios/tramite">
                                     Buscar por Documento
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/convenios/tramite/por_nombre">
+                                <a class="nav-link tabradius" href="/convenios/tramite/por_nombre">
                                     Buscar por Nombres y Apellidos
                                 </a>
                             </li>
@@ -118,14 +118,14 @@
                 </form>
                 <form t-if="form == 'convenio' and por_nombre" id="validar_convenios_nombre" class="container formSection mt-3">
                     <nav>
-                        <ul class="nav nav-tabs mb-3 mt-0 wInput mx-auto">
+                        <ul class="nav nav-tabs tabradius mb-3 mt-0 wInput mx-auto">
                             <li class="nav-item">
-                                <a class="nav-link" href="/convenios/tramite">
+                                <a class="nav-link tabradius" href="/convenios/tramite">
                                     Buscar por Documento
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link active" href="/convenios/tramite/por_nombre">
+                                <a class="nav-link tabradius active" href="/convenios/tramite/por_nombre">
                                     Buscar por Nombres y Apellidos
                                 </a>
                             </li>

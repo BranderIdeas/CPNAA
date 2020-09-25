@@ -37,6 +37,24 @@
     text-decoration: underline !important;
 }
 
+.nav-link.tabradius {
+    border-top: 1px solid #ccc !important;
+    border-right: 1px solid #ccc !important;
+    border-left: 1px solid #ccc !important;
+    border-top-left-radius: 1rem !important;
+    border-top-right-radius: 1rem !important;
+}
+.nav-link.tabradius.active {
+    border-top: 1px solid #ccc !important;
+    border-right: 1px solid #ccc !important;
+    border-left: 1px solid #ccc !important;
+    border-top-left-radius: 1rem !important;
+    border-top-right-radius: 1rem !important;
+}
+.nav-tabs.tabradius {
+    border-bottom: 1px solid #ccc !important;
+}
+
 .medio{
     height: 30px !important;
 }

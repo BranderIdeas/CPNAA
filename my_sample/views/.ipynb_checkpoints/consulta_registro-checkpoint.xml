@@ -8,12 +8,12 @@
             </h1>
             <form t-if="form == 'por_documento'" class="container formSection mt-3">
                 <nav>
-                    <ul class="nav nav-tabs mb-3 mt-0 wInput mx-auto">
+                    <ul class="nav nav-tabs tabradius mb-3 mt-0 wInput mx-auto">
                         <li class="nav-item">
-                            <a class="nav-link active" href="/consulta_online/por_documento"> Buscar por Documento </a>
+                            <a class="nav-link tabradius active" href="/consulta_online/por_documento"> Buscar por Documento </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/consulta_online/por_numero">
+                            <a class="nav-link tabradius" href="/consulta_online/por_numero">
                                 Buscar por Matrícula o Certificado de Inscripción Profesional
                             </a>
                         </li>
@@ -51,12 +51,12 @@
             </form>
             <form t-if="form == 'por_numero'" class="container formSection mt-3">
                 <nav>
-                    <ul class="nav nav-tabs mb-3 mt-0 wInput mx-auto">
+                    <ul class="nav nav-tabs tabradius mb-3 mt-0 wInput mx-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="/consulta_online/por_documento"> Buscar por Documento </a>
+                            <a class="nav-link tabradius" href="/consulta_online/por_documento"> Buscar por Documento </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" href="/consulta_online/por_numero">
+                            <a class="nav-link tabradius active" href="/consulta_online/por_numero">
                                 Buscar por Matrícula o Certificado de Inscripción Profesional
                             </a>
                         </li>

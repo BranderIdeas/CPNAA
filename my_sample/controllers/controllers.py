@@ -529,15 +529,18 @@ class MySample(http.Controller):
         _logger.info(kw)
         if self.validar_captcha(kw.get('token')):
             data = kw.get('data')
+            hoy = date.today()
             fecha_maxima, graduandos, definitivos = '', [], []
             if data['doc_type'] == '':
                 graduandos = http.request.env['x_procedure_temp'].sudo().search_read([('x_nombres','=',data['nombres']),
                                                                                       ('x_apellidos','=',data['apellidos']),
                                                                                       ('x_grado_ID','!=',False),
+                                                                                      ('x_fecha_de_grado','>=',hoy),
                                                                                       ('x_origin_type','=','CONVENIO')])
             else:
                 graduandos = http.request.env['x_procedure_temp'].sudo().search_read([('x_tipo_documento_select','=',int(data['doc_type'])),
                                                                                       ('x_grado_ID','!=',False),
+                                                                                      ('x_fecha_de_grado','>=',hoy),
                                                                                       ('x_documento','=',data['doc']),
                                                                                       ('x_origin_type','=','CONVENIO')])
             if (len(graduandos) > 0):

@@ -374,7 +374,6 @@ odoo.define('website.validations', function(require) {
             if(elem.classList.contains('o-letters')){
                 let valid = _this.validar_solo_letras(elem.value);
                 if(!valid){
-                    console.log(elem.value);
                     elem.classList.add('is-invalid');
                     return valid;
                 }else{
@@ -391,7 +390,6 @@ odoo.define('website.validations', function(require) {
             if (elem.classList.contains('v-address')){
                 let valid = _this.validar_direccion(elem.value);
                 if(!valid){
-                    console.log(elem.value);
                     elem.classList.add('is-invalid');
                     return valid;
                 }else{
@@ -403,26 +401,17 @@ odoo.define('website.validations', function(require) {
                 let valor = elem.value.trim().toLowerCase().replace(/\s+/g, '');
                 let valid = _this.validar_email(valor);
                 if(!valid){
-                    console.log(elem.value);
                     elem.classList.add('is-invalid');
                     return valid;
-                }else{
-                    valid = await _this.validar_email_unico(valor)
-                    if(!valid){
-                        console.log(elem.value);
-                        elem.classList.add('is-invalid');
-                        elem.focus();
-                    }else{
-                        elem.classList.remove('is-invalid');
-                        elem.value = valor;
-                    }
+                } else {
+                    elem.classList.remove('is-invalid');
+                    elem.value = valor;
                 }
             } 
             if (elem.classList.contains('v-celular')){
                 let valor = elem.value.trim().replace(/\s+/g, '');
                 let valid = _this.validar_celular(valor);
                 if(!valid){
-                    console.log(elem.value);
                     elem.classList.add('is-invalid');
                     return valid;
                 }else{
@@ -434,7 +423,6 @@ odoo.define('website.validations', function(require) {
                 if(elem.value.length > 0){
                     let valid = _this.validar_telefono(elem.value);
                     if(!valid){
-                        console.log(elem.value);
                         elem.classList.add('is-invalid');
                         return valid;
                     }else{
@@ -447,7 +435,6 @@ odoo.define('website.validations', function(require) {
                 let valor = elem.value.trim().toUpperCase().replace(/\s+/g, '');
                 let valid = _this.validar_alfanum(valor, 'el documento Ministerio de Educación');
                 if(!valid){
-                    console.log(elem.value);
                     elem.classList.add('is-invalid');
                     return valid;
                 }else{
@@ -526,7 +513,7 @@ odoo.define('website.validations', function(require) {
                     }
                 }
             }
-            console.log(errores);
+//             console.log(errores);
             return formValido;
         },
         mostrar_helper_inicio: function(campo, msg) {

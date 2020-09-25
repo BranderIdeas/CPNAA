@@ -35,13 +35,14 @@ odoo.define('website.tramites', function(require) {
             }).then(function(response){
                 if(response.convenio){
                     $(location).attr('href','/tramite/convenios/'+ response.id);
-                } else if(response.id){
-                    if (response.matricula){
-                        $('#msj_matricula').removeClass('invisible').attr('aria-hidden',false);
-                    } else {
-                        $(location).attr('href','/cliente/'+ response.id +'/tramites');
-                    }
-                }
+                } 
+//                 else if(response.id){
+//                     if (response.matricula){
+//                         $('#msj_matricula').removeClass('invisible').attr('aria-hidden',false);
+//                     } else {
+//                         $(location).attr('href','/cliente/'+ response.id +'/tramites');
+//                     }
+//                 }
                 else {
                     $(location).attr('href','/tramite' + origen+'/['+data.doc_type+':'+data.doc+']');
                 }

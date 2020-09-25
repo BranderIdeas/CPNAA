@@ -571,12 +571,12 @@ class MySample(http.Controller):
             servicio = 'CERTIFICADO DE INSCRIPCION PROFESIONAL'
         if origen == validos[2]:
             servicio = 'LICENCIA TEMPORAL ESPECIAL'
-        mismo_tramite = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
-                                                                      ('x_studio_documento_1','=',documento),('x_service_ID.x_name','like',servicio)])
-        if origen in validos and tipo_doc in doc_validos and not mismo_tramite:
+#         mismo_tramite = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
+#                                                                       ('x_studio_documento_1','=',documento),('x_service_ID.x_name','like',servicio)])
+        if origen in validos and tipo_doc in doc_validos: #and not mismo_tramite
             return http.request.render('my_sample.formulario_tramites', {'tipo_doc': tipo_doc, 'documento':documento, 'form': origen, 'origen': 1})
         else:
-            return http.request.redirect('/cliente/tramite/'+origen)
+            return http.request.redirect('/cliente/tramite/'+origen) # redireccionar_lista_tramites
     
     # Renderiza el formulario para trámites por convenios, valida si ya hay trámite en curso y lo redirige al estado del tramite
     @http.route('/tramite/convenios/<model("x_procedure_temp"):cliente>', auth='public', website=True)

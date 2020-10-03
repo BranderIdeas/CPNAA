@@ -59,13 +59,15 @@
                                             <h4 class="ml-3 mt-2 mb-0">Recibo para pago en oficina</h4>
                                         </div>
                                         <div class="container ml-3">
-                                            <ul>
+                                            <ul class="mb-0">
                                                 <li>Debe pagar antes de la fecha indicada para continuar con su trámite</li>
                                                 <li>Pague únicamente en efectivo</li>
                                                 <li>Recuerde que su recibo ha sido descargado</li>
                                                 <li>No olvide imprimir este recibo en impresora laser</li>
                                             </ul>
                                         </div>
+                                        <h5 id="numero_radicado" class="mx-4 mt-2 mb-0 alert alert-info text-center invisible" 
+                                            aria-hidden="true"></h5>
                                         <div class="modal-body container-fluid">
                                             <iframe id="pdfFrame" class="recibo-pdf" frameborder="0" width="100%" height="320"></iframe>
                                         </div>

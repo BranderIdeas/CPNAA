@@ -73,9 +73,12 @@ odoo.define('website.pagos', function(require) {
             }
             handler.open(dataTran);
         },
-        buscar_numero_recibo: async function() {
+        numero_recibo_radicado: async function() {
             let corte = dataPDF.corte ? dataPDF.corte.x_name : false;
-            let numero_recibo = 0;
+            const resp = {
+                numero_recibo: 0,
+                numero_radicado: 0
+            }
             let data = {
                 'id_tramite': dataPDF.tramite.id,
                 'corte': corte,
@@ -85,10 +88,11 @@ odoo.define('website.pagos', function(require) {
                 params: {'data': data}
             }).then(function(response){
                 if(response.ok){
-                    numero_recibo = response.numero_recibo
+                    resp.numero_recibo = response.numero_recibo;
+                    resp.numero_radicado = response.numero_radicado;
                 }
             })
-            return numero_recibo;
+            return resp;
         },
         downloadPDF: function() {
                 const linkSource = $('#pdfFrame').attr('src');
@@ -103,7 +107,9 @@ odoo.define('website.pagos', function(require) {
 
     $('#recibo').click(async ()=>{
         
-        let num_recibo = await pagos.buscar_numero_recibo();
+        const data_numeros = await pagos.numero_recibo_radicado();
+        const num_radicado = data_numeros.numero_radicado;
+        let num_recibo = data_numeros.numero_recibo;
         let mes = '';
         let dia = '';
         let re = /[a-zA-Z]/g;
@@ -155,6 +161,10 @@ odoo.define('website.pagos', function(require) {
             $('#modal-recibo-pdf').modal({ keyboard: false, backdrop: 'static' });
             $('#modal-recibo-pdf').modal('show');
             pagos.downloadPDF();
+            if(num_radicado.indexOf('0-') != 0){
+                $('#numero_radicado').removeClass('invisible').removeAttr('aria-hidden')
+                    .text(`Su trámite quedo registrado con el número de radicado ${num_radicado}`);
+            }
         } catch (e) {
             console.error('Error al generar recibo PDF: '+e);
             console.log(invoiceData); 
@@ -208,72 +218,6 @@ odoo.define('website.pagos', function(require) {
         $('#volver').click(()=>{
             location.replace('https://www.cpnaa.gov.co/');
         })
-    
-        const urlHead = "https://secure.epayco.co/validation/v1/reference/";
-        let datosTramite = {};
-
-        var gethataTransaction = async(urlHead) => {
-            try {
-                let urlParams = new URLSearchParams(window.location.search);
-                let ref_payco = urlParams.get('ref_payco');
-                let urlApp = urlHead + ref_payco;
-
-                let res = await fetch(urlApp);
-                let transaction = await res.json();
-                if (transaction.success) {
-                    document.getElementById("fecha").innerHTML = transaction.data.x_transaction_date;
-                    document.getElementById("respuesta").innerHTML = transaction.data.x_response;
-                    document.getElementById("motivo").innerHTML = transaction.data.x_response_reason_text;
-                    document.getElementById("recibo").innerHTML = transaction.data.x_transaction_id;
-                    document.getElementById("banco").innerHTML = transaction.data.x_bank_name;
-                    document.getElementById("ip_publica").innerHTML = transaction.data.x_customer_ip;
-                    document.getElementById("total").innerHTML = transaction.data.x_amount + ' ' + transaction.data.x_currency_code;
-                    
-                    datosTramite['numero_pago'] = transaction.data.x_transaction_id;
-                    datosTramite['fecha_pago'] = transaction.data.x_transaction_date;
-                    datosTramite['banco'] = transaction.data.x_bank_name;
-                    datosTramite['monto_pago'] = transaction.data.x_amount;
-                    datosTramite['tipo_pago'] = transaction.data.x_type_payment;
-                    datosTramite['id_tramite'] = transaction.data.x_extra1;
-                    if(transaction.data.x_response === 'Aceptada'){
-                        rpc.query({
-                            route: '/tramite_fase_verificacion',
-                            params: {'data': datosTramite}
-                        }).then(function(response){
-                            if(response.ok && !response.error){
-                                console.log(response.message)
-                            }else if(response.ok && response.error){
-                                console.warn(response.message+'\n'+response.error)
-                            }else if(!response.ok && response.error){
-                                console.error(response.error);
-                                let enlaceEstado = response.id_user ? `<a href="${urlBase}/cliente/${response.id_user}/tramites">Ver estado del trámite</a><br/>` : '';
-                                $('#error_pagos').removeClass('invisible').attr('aria-hidden',false);
-                                $('#error_pagos').find('.alert').html(
-                                    `${response.error}<br/>${enlaceEstado}
-                                     Si tiene alguna duda, por favor comuníquese con el CPNAA al siguiente correo 
-                                     electrónico: info@cpnaa.gov.co o al número telefónico (1)3502700 ext 111-115 en Bogotá`);
-                            }
-                        }).catch(function(e){
-                            console.error('Ha ocurrido un error: '+e);
-                            $('#error_pagos').removeClass('invisible').attr('aria-hidden',false);
-                            $('#error_pagos').find('.alert').html(
-                                `Su pago ha sido exitoso pero no se pudo completar el trámite, por favor envie esta información al
-                                 correo info@cpnaa.gov.co`);
-                        })
-                    }
-                } else {
-                    validaciones.alert_error_toast('Error consultando la información.', 'center');
-                }
-                
-            } catch (error) {
-                validaciones.alert_error_toast('Error consultando la información.', 'center');
-                console.log('Error en la transaccion ', error);
-            }
-
-
-        }
-
-        gethataTransaction(urlHead);
     
     }
 })

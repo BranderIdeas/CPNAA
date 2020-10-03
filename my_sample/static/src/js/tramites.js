@@ -33,21 +33,20 @@ odoo.define('website.tramites', function(require) {
                 route: '/validar_tramites',
                 params: {'data': data, 'token': token}
             }).then(function(response){
-                console.log(response);
                 resetCaptcha();
                 if (response.error_captcha){
                     return;
                 }                
                 if(response.convenio){
                     $(location).attr('href','/tramite/convenios/'+ response.id);
-                } else if(response.id && data.origen == 'matricula'){
+                } else if(response.id){
                     if (response.tramite_en_curso){
                          $(location).attr('href','/cliente/'+ response.id +'/tramites');
-                    } else if (response.matricula){
+                    } else if (response.matricula && data.origen == 'matricula'){
                         $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
                         $('#text_message').text(`Usted ya posee Matricula Profesional de Arquitecto`);
                         $('#btn-result').attr('href','https://cpnaa.gov.co/').text('Contactar con el CPNAA');
-                    } else if (response.certificado){
+                    } else if (response.certificado && data.origen == 'matricula'){
                         $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
                         $('#text_message').text(`El documento ${validaciones.capitalizeFromUpper(response.result.tipo_documento)}: ${response.result.documento}, ya se encuentra registrado con la profesión auxiliar ${validaciones.capitalizeFromUpper(response.result.carrera)}, desea continuar para tramitar su matrícula profesional de arquitectura, por primer vez.`);
                         $('#btn-result').attr('href','/tramite/matricula/['+data.doc_type+':'+data.doc+']').text('Tramitar Matrícula Profesional');

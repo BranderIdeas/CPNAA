@@ -2,60 +2,97 @@
     <data>
         <template id="epayco_confirmacion" name="Confirmación Pago">
             <t t-call="website.layout">
-                <div id="resumenPago" class="container">
-                    <div id="logo" class="row justify-content-md-center mt-4 mb-4" aria-hidden="true"></div>
+            <div id="resumenPago" class="container">
+                <div id="logo" class="row justify-content-md-center mt-4 mb-4" aria-hidden="true"></div>
                     <div class="row justify-content-md-center mt-4 mb-4">
                         <h1 class="formTitle">
                             <font>RESUMEN DE LA TRANSACCIÓN</font>
                         </h1>
                     </div>
-                    <div class="container mb-5 col-sm-8 col-lg-6 justify-content-md-center">
+                    <div class="container col-sm-8 col-lg-6 justify-content-md-center">
                         <div class="formSection">
-                        <table class="table table-striped">
-                            <tbody>
-                                <tr>
-                                    <th scope="row">Fecha</th>
-                                    <td id="fecha" class=""></td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Banco</th>
-                                    <td class="" id="banco"></td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">IP Pública del Usuario</th>
-                                    <td id="ip_publica"></td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Respuesta</th>
-                                    <td id="respuesta"></td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Total</th>
-                                    <td class="" id="total"></td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Motivo</th>
-                                    <td id="motivo"></td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Recibo</th>
-                                    <td id="recibo"></td>
-                                </tr>
-<!--                                 <tr>
-                                    <th scope="row">Autorización</th>
-                                    <td class="" id="autorizacion"></td>
-                                </tr> -->
-                            </tbody>
-                        </table>
+                            <table t-if="ok" class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">Fecha</th>
+                                        <td id="fecha" class="">
+                                            <t t-raw="data['data']['x_transaction_date']"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Banco</th>
+                                        <td class="" id="banco">
+                                            <t t-raw="data['data']['x_bank_name']"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">IP Pública del Usuario</th>
+                                        <td id="ip_publica">
+                                            <t t-raw="data['data']['x_customer_ip']"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Respuesta</th>
+                                        <td id="respuesta">
+                                            <t t-raw="data['data']['x_response']"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Total</th>
+                                        <td class="" id="total">
+                                            <t t-raw="data['data']['x_amount']"/> <t t-raw="data['data']['x_currency_code']"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Motivo</th>
+                                        <td id="motivo">
+                                            <t t-raw="data['data']['x_response_reason_text']"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Recibo</th>
+                                        <td id="recibo">
+                                            <t t-raw="data['data']['x_transaction_id']"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div t-else="" class="alert alert-primary col-sm-12 text-center mb-5" role="alert" style="border-radius: 15px;">
+                                <h5 class="my-2">
+                                    <t t-raw="(data['data']['description'])"/><br/>
+                                    Ya ha expirado el tiempo de validar la transacción o el servidor no responde
+                                </h5>
+                                Si tiene alguna duda, por favor comuníquese con el CPNAA al siguiente correo 
+                                electrónico: info@cpnaa.gov.co o al número telefónico (1)3502700 ext 111-115 en Bogotá
+                            </div>
+                        </div>
+                        <div t-if="ok and resultado_pago['numero_radicado']">
+                            <h5 class="alert alert-info text-center">
+                                Su trámite quedo registrado con el número de radicado <t t-raw="(resultado_pago['numero_radicado'])"/>
+                            </h5>
                         </div>
                     </div>
-                </div>
-                <div class="row col-sm-12 justify-content-md-center my-5">
-                    <div>
-                        <button id="imprimir" type="button" class="btn btn-primary btn-stadium float-right">Imprimir</button>
+                    <div t-if="ok and not resultado_pago['ok'] and resultado_pago['error']">
+                        <div id="error_pagos" class="row col-sm-12 justify-content-md-center">
+                            <div class="alert alert-primary col-sm-7 text-center" role="alert">
+                                <span t-if="resultado_pago['error']"><t t-raw="(resultado_pago['error'])"/><br/></span>
+                                <a t-if="resultado_pago['id_user']" 
+                                    t-attf-href="/cliente/{{resultado_pago['id_user']}}/tramites">
+                                    Ver estado del trámite
+                                </a><br/>
+                                Si tiene alguna duda, por favor comuníquese con el CPNAA al siguiente correo 
+                                electrónico: info@cpnaa.gov.co o al número telefónico (1)3502700 ext 111-115 en Bogotá
+                            </div>
+                        </div>
+                        <t t-log="resultado_pago['error']"/>
                     </div>
-                    <div>
-                        <button id="volver" type="button" class="btn btn-primary btn-stadium ml-3">Finalizar</button>
+                    <div class="row col-sm-12 justify-content-md-center mt-2 mb-5">
+                        <div>
+                            <button id="imprimir" type="button" class="btn btn-primary btn-stadium float-right">Imprimir</button>
+                        </div>
+                        <div>
+                            <button id="volver" type="button" class="btn btn-primary btn-stadium ml-3">Finalizar</button>
+                        </div>
                     </div>
                 </div>
             </t>

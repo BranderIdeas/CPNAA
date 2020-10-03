@@ -47,9 +47,9 @@ odoo.define('website.denuncia', function(require) {
                                 $('#div_results').removeClass('offset-md-2 col-md-8').addClass('offset-md-4 col-md-6');
                                 $('#mssg_result').text('').removeClass('alert alert-danger');
                                 $('#mssg_result').addClass('alert alert-info').text(resp.message);
-//                                 setTimeout(()=>{ 
-//                                     location.replace(`https://www.cpnaa.gov.co`);
-//                                 },800);
+                                setTimeout(()=>{ 
+                                    window.top.location.href = 'https://www.cpnaa.gov.co/';
+                                },1200);
                             }else{
                                 ocultarSpinner();
                                 $('#mssg_result').text('').removeClass('alert alert-info');

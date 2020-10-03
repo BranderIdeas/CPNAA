@@ -33,7 +33,7 @@ odoo.define('website.pagos', function(require) {
                     $('#recibo').removeAttr('disabled');
                     $('#epayco').removeAttr('disabled');
                 }else{
-                    location.replace('https://www.cpnaa.gov.co');
+                    window.top.location.href = 'https://www.cpnaa.gov.co/';
                 }
             })
         },
@@ -216,7 +216,7 @@ odoo.define('website.pagos', function(require) {
         })
 
         $('#volver').click(()=>{
-            location.replace('https://www.cpnaa.gov.co/');
+            window.top.location.href = 'https://www.cpnaa.gov.co/';
         })
     
     }

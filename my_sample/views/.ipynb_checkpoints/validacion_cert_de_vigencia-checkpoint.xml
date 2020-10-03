@@ -86,7 +86,7 @@
                     </div>
                     <div class="text-center mb-5">
                         <a class="btn btn-primary btn-lg btn-stadium"
-                            t-attf-href="https://cpnaa.gov.co">
+                            t-attf-href="https://cpnaa.gov.co" target="_top">
                             Regresar
                         </a>
                     </div>

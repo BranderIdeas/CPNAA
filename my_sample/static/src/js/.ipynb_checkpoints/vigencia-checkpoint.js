@@ -81,7 +81,7 @@ odoo.define('website.vigencia', function(require) {
                     _this.downloadPDF();
                     $('#mssg_result').addClass('alert alert-info').text(response.mensaje);
                     setTimeout(()=>{
-                        $(location).attr('href','https://cpnaa.gov.co');
+                        window.top.location.href = 'https://www.cpnaa.gov.co/';
                     },2000)
                 }else{
                     $('#mssg_result').addClass('alert alert-danger').text(response.mensaje);
@@ -110,7 +110,7 @@ odoo.define('website.vigencia', function(require) {
                         div_msj.removeClass('invisible').attr('aria-hidden',false);
                         div_msj.find('div').removeClass('alert-primary').addClass('alert-info');
                         let texto = `<h5 class="text-center">${response.tramites[0].mensaje}</h5>
-                                        <a href="https://cpnaa.gov.co/profesionales-sancionados-y-amonestaciones/">
+                                        <a href="https://cpnaa.gov.co/profesionales-sancionados-y-amonestaciones/" target="_top">
                                         <h5 class="text-center">Ir a sancionados</h5>
                                     </a>`;
                         div_msj.find('div').html(texto);
@@ -123,9 +123,10 @@ odoo.define('website.vigencia', function(require) {
                     let texto = '<h5 class="text-center">Se han encontrado varias coincidencias, por favor selecciona</h5>';
                     response.tramites.forEach((tram)=>{
                         let mensaje = tram.x_legal_status == 'SANCIONADO' ? tram.mensaje : 'Seleccione para generar certificado';
-                        let enlace = tram.x_legal_status == 'SANCIONADO' ? 'https://cpnaa.gov.co/profesionales-sancionados-y-amonestaciones/' 
-                                                                         : `/tramites/certificado_de_vigencia/${tram.id}`;
-                        texto += `<a class="card card-link fw700" href="${enlace}">
+                        let enlace = tram.x_legal_status == 'SANCIONADO' 
+                                   ? 'href="https://cpnaa.gov.co/profesionales-sancionados-y-amonestaciones/" target="_top"' 
+                                   : `href="/tramites/certificado_de_vigencia/${tram.id}"`;
+                        texto += `<a class="card card-link fw700" ${enlace}>
                                     <div class="card-header results-vigencia">
                                         PROFESIÓN: ${tram.x_studio_carrera_1[1]}
                                         <h5>${mensaje}</h5>

@@ -109,7 +109,7 @@
                             <button type="button" id="btn_generar_certificado" class="btn btn-primary btn-lg btn-stadium">Generar Certificado</button>
                         </div>
                         <div class="justify-content-center">
-                            <a href="https://cpnaa.gov.co" class="btn btn-primary btn-lg btn-stadium">Salir</a>
+                            <a href="https://cpnaa.gov.co" target="_top" class="btn btn-primary btn-lg btn-stadium">Salir</a>
                         </div>
                     </div>
                     <div class="mb-3">

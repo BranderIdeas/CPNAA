@@ -45,13 +45,13 @@ odoo.define('website.tramites', function(require) {
                     } else if (response.matricula && data.origen == 'matricula'){
                         $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
                         $('#text_message').text(`Usted ya posee Matricula Profesional de Arquitecto`);
-                        $('#btn-result').attr('href','https://cpnaa.gov.co/').text('Contactar con el CPNAA');
+                        $('#btn-result').attr('href','https://cpnaa.gov.co/').text('Contactar con el CPNAA').attr('target','_top');
                     } else if (response.certificado && data.origen == 'matricula'){
                         $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
                         $('#text_message').text(`El documento ${validaciones.capitalizeFromUpper(response.result.tipo_documento)}: ${response.result.documento}, ya se encuentra registrado con la profesión auxiliar ${validaciones.capitalizeFromUpper(response.result.carrera)}, desea continuar para tramitar su matrícula profesional de arquitectura, por primer vez.`);
                         $('#btn-result').attr('href','/tramite/matricula/['+data.doc_type+':'+data.doc+']').text('Tramitar Matrícula Profesional');
                     } else {
-                        $(location).attr('href','/cliente/'+ response.id +'/tramites');
+                        $(location).attr('href','/tramite' + origen+'/['+data.doc_type+':'+data.doc+']');
                     }
                 }
                 else {
@@ -314,8 +314,8 @@ odoo.define('website.tramites', function(require) {
                                 $('#div_results').removeClass('offset-md-2 col-md-8').addClass('offset-md-4 col-md-6');
                                 $('#mssg_result').addClass('alert alert-info').text('Trámite actualizado con exito');
                                 setTimeout(()=>{ 
-                                    location.replace(`https://www.cpnaa.gov.co`);
-                                },800);
+                                    window.top.location.href = 'https://www.cpnaa.gov.co/';
+                                },1200);
                             }else{
                                 ocultarSpinner();
                                 $('#mssg_result').addClass('alert alert-danger').text('Error: '+resp.message.slice(0,80));

@@ -158,6 +158,11 @@ class MySample(http.Controller):
         response = requests.get(base_url + ref_payco)
         return response.json()
     
+    # Ruta que renderiza página de formulario de pqrd
+    @http.route('/pqrd/formulario', auth='public', website=True)
+    def formulario_pqrd(self):
+        return http.request.render('my_sample.formulario_pqrd', {})
+    
     # Ruta que renderiza página de formulario de denuncias
     @http.route('/denuncias/formulario', auth='public', website=True)
     def formulario_denuncia(self):
@@ -258,20 +263,20 @@ class MySample(http.Controller):
         ahora = datetime.now() - timedelta(hours=5)
         tramite = http.request.env['x_cpnaa_procedure'].search([('id','=',int(data['id_tramite']))])
         numero_recibo = tramite.x_voucher_number
-#         numero_radicado = tramite.x_rad_number
+        numero_radicado = tramite.x_rad_number
         if (not data['corte'] and numero_recibo) and (data['corte'] == tramite.x_origin_name and numero_recibo):
             pass
         elif not numero_recibo or (data['corte'] and data['corte'] != tramite.x_origin_name):
             consecutivo = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Consecutivo Recibo de Pago')])
             numero_recibo = int(consecutivo.x_value) + 1
-#             numero_radicado = Sevenet.sevenet_consulta(tramite.id)
-            update = {'x_voucher_number': numero_recibo } #, 'x_radicacion_date': ahora, 'x_rad_number': numero_radicado
+            numero_radicado = Sevenet.sevenet_consulta(tramite.id)
+            update = {'x_voucher_number': numero_recibo, 'x_radicacion_date': ahora, 'x_rad_number': numero_radicado }
             if data['corte']:
-                update = {'x_voucher_number': numero_recibo,'x_origin_name': data['corte']}
-#                           'x_radicacion_date': ahora, 'x_rad_number': numero_radicado}
+                update = {'x_voucher_number': numero_recibo,'x_origin_name': data['corte'],
+                          'x_radicacion_date': ahora, 'x_rad_number': numero_radicado}
             http.request.env['x_cpnaa_parameter'].browse(consecutivo.id).sudo().write({'x_value':str(numero_recibo)})
             http.request.env['x_cpnaa_procedure'].browse(tramite.id).sudo().write(update)
-        return {'ok': True, 'numero_recibo': str(numero_recibo)} #, 'numero_radicado': str(numero_radicado)+'-'+str(ahora.year)
+        return {'ok': True, 'numero_recibo': str(numero_recibo), 'numero_radicado': str(numero_radicado)+'-'+str(ahora.year)}
     
     # Envia la información necesaria para el recibo de pago o para el pago desde la pasarela
     @http.route('/tramite_fase_inicial', methods=["POST"], type="json", auth='public', website=True)
@@ -309,7 +314,7 @@ class MySample(http.Controller):
         datetime_str = datetime.strptime(data['fecha_pago'], '%Y-%m-%d %H:%M:%S')
         datetime_str = datetime_str + timedelta(hours=5)
         _logger.info('Hora del pago UTC: '+str(datetime_str))
-#         numero_radicado = False
+        numero_radicado = False
         id_user, error, tramite, pago_registrado, mailthread_registrado, origin_name, grado = False, False, False, False, False, False, False
         try:
             tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',data["id_tramite"])])
@@ -318,7 +323,7 @@ class MySample(http.Controller):
                 if tramite.x_cycle_ID.x_order > 0:
                     raise Exception('Este pago ya fue registrado')
                 if tramite.x_cycle_ID.x_order == 0:
-#                     numero_radicado = Sevenet.sevenet_consulta(tramite.id)
+                    numero_radicado = Sevenet.sevenet_consulta(tramite.id)
                     if (tramite.x_origin_type.x_name == 'CORTE'):
                         corte_vigente = self.buscar_corte(tramite.x_origin_name)
                         origin_name = corte_vigente['x_name']
@@ -328,9 +333,9 @@ class MySample(http.Controller):
                     ciclo_ID = http.request.env["x_cpnaa_cycle"].sudo().search(["&",("x_service_ID.id","=",tramite["x_service_ID"].id),("x_order","=",1)])
                     update = {'x_cycle_ID': ciclo_ID.id,'x_radicacion_date': datetime_str, 'x_pay_datetime': datetime_str,
                               'x_pay_type': data['tipo_pago'],'x_consignment_number': data['numero_pago'], 'x_bank': data['banco'],
-                              'x_consignment_price': data['monto_pago'],'x_origin_name': origin_name} #, 'x_rad_number': numero_radicado
+                              'x_consignment_price': data['monto_pago'],'x_origin_name': origin_name, 'x_rad_number': numero_radicado}
                     pago_registrado = http.request.env['x_cpnaa_procedure'].browse(tramite['id']).sudo().write(update)
-#                     numero_radicado = str(numero_radicado) +'-'+ str(datetime_str.year)
+                    numero_radicado = str(numero_radicado) +'-'+ str(datetime_str.year)
                     if not pago_registrado:
                         raise Exception('Su pago ha sido exitoso pero no se pudo completar el trámite, por favor envie esta información al correo info@cpnaa.gov.co')
             else:
@@ -353,9 +358,9 @@ class MySample(http.Controller):
         if pago_registrado and error:
             _logger.info(error)
             return { 'ok': True, 'message': 'Trámite actualizado con exito', 'error': error, 
-                    'id_user': user.id } #'numero_radicado': numero_radicado, 
+                     'numero_radicado': numero_radicado, 'id_user': user.id }
         if not pago_registrado:        
-            return { 'ok': False, 'error': error, 'id_user': user.id } #, 'numero_radicado': numero_radicado
+            return { 'ok': False, 'error': error, 'id_user': user.id, 'numero_radicado': numero_radicado }
         
     def grado_check_pagos(self, grado):
         _logger.info(grado)

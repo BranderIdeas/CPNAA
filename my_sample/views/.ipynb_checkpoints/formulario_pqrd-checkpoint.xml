@@ -1,0 +1,351 @@
+<odoo>
+    <data>
+        <template id="formulario_pqrd" name="Formulario PQRD">
+            <t t-call="website.layout">
+                <div id="wrap" class="oe_structure">
+                    <section class="container">
+                        <h1 class="formTitle my-3">
+                            <font>REGISTRO PQRD</font>
+                        </h1>
+                        <form id="denunciaForm" method="post" class="s_website_form container-fluid mt32 o_fake_not_editable" 
+                              enctype="multipart/form-data">
+                            <div class="container">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <div class="formSection">
+                                <h2 class="sectionName">Datos del Solicitante</h2>
+                                <div class="row">
+                                    <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required">
+                                        <div class="col-md-6">
+                                            <label class="col-form-label o_fake_editable" for="x_applicant_names">
+                                                Nombres
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="text" class="o-letters form-control i_required o_website_form_input"
+                                                   name="x_applicant_names"/>
+                                        </div>
+                                    </div>
+                                    <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required">
+                                        <div class="col-md-6">
+                                            <label class="col-form-label o_fake_editable" for="x_applicant_lastnames">
+                                                Apellidos
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="text" class="o-letters form-control i_required o_website_form_input"
+                                                   name="x_applicant_lastnames"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="row col-md-6 form-group form-field o_website_form_required">
+                                        <div class="col-md-6">
+                                        <label class="col-form-label o_fake_editable" for="x_complainant_document_type_ID">
+                                                Tipo de Solicitante
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                        <select class="form-control o_website_form_input i_required" name="x_request_type_ID">
+                                            <option value="">Seleccione...</option>
+                                            <t t-foreach="request.env['x_cpnaa_user_type'].search([],order='x_name')" t-as="tipo_usuario">
+                                            <option t-att-value="tipo_usuario.id">
+                                                <t t-esc="tipo_usuario.x_name"/>
+                                            </option>
+                                            </t>
+                                        </select>   
+                                        </div>
+                                    </div>
+                                    <div class="row col-md-6 form-group form-field o_website_form_required">
+                                        <div class="col-md-6">
+                                        <label class="col-form-label o_fake_editable" for="x_document_type_ID">
+                                                Tipo de documento
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                        <select class="form-control o_website_form_input i_required" name="x_document_type_ID">
+                                            <option value="">Seleccione...</option>
+                                            <t t-foreach="request.env['x_cpnaa_document_type'].search([],order='x_name')" t-as="tipo_doc">
+                                            <option t-att-value="tipo_doc.id">
+                                                <t t-esc="tipo_doc.x_name"/>
+                                            </option>
+                                            </t>
+                                        </select>   
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="row col-md-6 form-group form-field o_website_form_required">
+                                        <div class="col-md-6">
+                                        <label class="col-form-label o_fake_editable" for="x_document">
+                                                Documento
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="text" class="form-control o_website_form_input v-document i_required" 
+                                                   data-type_doc="x_document_type_ID" name="x_document"/>                                            
+                                        </div>
+                                    </div>
+                                    <div class="row col-md-6 form-group form-field o_website_form_required">
+                                        <div class="col-md-6">
+                                            <label class="col-form-label o_fake_editable" for="x_address_applicant">
+                                                Dirección de Correspondencia
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="text" class="form-control o_website_form_input i_required v-address" name="x_address_applicant"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="row col-md-6 form-group form-field o_website_form_required">
+                                        <div class="col-md-6">
+                                            <label class="col-form-label o_fake_editable" for="x_deparment_applicant">
+                                                Departamento
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                        <select class="child-place-x_city_applicant form-control 
+                                                       o_website_form_input i_required" name="x_deparment_applicant">
+                                            <option value="">Seleccione...</option>
+                                            <t t-foreach="request.env['x_cpnaa_state'].search([('x_name','!=','NO APLICA')],order='x_name')" t-as="x_state">
+                                            <option t-att-value="x_state.id">
+                                                <t t-esc="x_state.x_name"/>
+                                            </option>
+                                            </t>
+                                        </select>
+                                        </div>
+                                    </div>
+                                    <div class="row col-md-6 form-group form-field o_website_form_required">
+                                        <div class="col-md-6">
+                                            <label class="col-form-label o_fake_editable" for="x_city_applicant">
+                                                Ciudad
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                        <select class="form-control o_website_form_input i_required" name="x_city_applicant" id="x_city_applicant">
+                                            <option value="">Seleccione...</option>
+                                            <t t-foreach="request.env['x_cpnaa_city'].search([('x_name','!=','NO APLICA')],order='x_name')" t-as="x_city">
+                                                <option t-att-value="x_city.id" style="display: none;" t-att-data-state_id="x_city.x_state_ID.id">
+                                                    <t t-esc="x_city.x_name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="row col-md-6 form-group form-field">
+                                        <div class="col-md-6">
+                                            <label class="col-form-label o_fake_editable" for="x_applicant_local_phone">
+                                                Teléfono
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="text" class="form-control o_website_form_input v-telefono" name="x_celular_applicant"/>
+                                        </div>
+                                    </div>
+                                    <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required">
+                                        <div class="col-md-6">
+                                            <label class="col-form-label o_fake_editable" for="x_celular_applicant">
+                                                Número de celular
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="text" class="form-control o_website_form_input v-celular i_required" 
+                                                   name="x_complainant_celular"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="row col-md-6 form-group form-field o_website_form_required">
+                                        <div class="col-md-6">
+                                            <label class="col-form-label o_fake_editable" for="x_applicant_email">
+                                                Email de notificación
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="text" class="form-control o_website_form_input v-email i_required" 
+                                                   name="x_applicant_email"/>
+                                        </div>
+                                    </div>
+<!--                                     <label class="text-justify mx-3 mb-4">
+Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con abogado ni con intermediarios, nuestros servicios son gratuitos y el quejoso no interviene en el proceso disciplinario.                                    
+                                    </label> -->
+                                </div>
+                            </div>
+                            <div class="formSection">
+                                <h2 class="sectionName">Datos de la Solicitud</h2> 
+                                    <div class="row">
+                                        <div class="row col-md-10 ml-0 mb-3 form-group form-field o_website_form_required">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label o_fake_editable" for="x_request_type_ID">
+                                                    Tipo de Solicitud
+                                                </label>
+                                            </div>
+                                            <div class="col-md-6">
+                                            <select class="form-control o_website_form_input i_required" name="x_request_type_ID">
+                                                <option value="">Seleccione...</option>
+                                                <t t-foreach="request.env['x_cpnaa_pqrd_request_type'].search([],order='x_name')" t-as="tipo_solicitud">
+                                                <option t-att-value="tipo_solicitud.id">
+                                                    <t t-esc="tipo_solicitud.x_name"/>
+                                                </option>
+                                                </t>
+                                            </select>   
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row col-md-12 form-group form-field mb-0 o_website_form_required">
+                                    <div class="row col-md-12 ml-0 pb-3">
+                                        <label>Seleccione los asuntos que generan la solicitud</label>
+                                    </div>                                        
+                                    <div class="col-md-2">
+                                        <label class="col-form-label o_fake_editable" for="x_issues_ID">
+                                            Asunto
+                                        </label>
+                                    </div>
+                                    <div class="col-md-10 mb-3">
+                                        <div class="o_website_form_flex">
+                                            <t t-foreach="request.env['x_pqrd_issues'].sudo().search([])" t-as="pqrd_issue">
+                                            <div class="checkbox o_website_form_flex_item mb-2 px-1">
+                                            <label>
+                                                <input type="checkbox" class="o_website_form_input" name="x_issues_ID" t-att-value="pqrd_issue.id"/>
+                                                <span class="o_fake_editable">
+                                                    <t t-esc="pqrd_issue.x_name"/>
+                                                </span>
+                                            </label>
+                                            </div>
+                                            </t>
+                                        </div>                                        
+                                    </div>
+                                    </div>
+                                    <div class="row invisible" id="otro_asunto" aria-hidden="true">
+                                        <div class="row col-md-10 ml-0 mb-2 form-group form-field o_website_form_required">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label o_fake_editable" for="x_pqrd_issue_other">
+                                                    Otro (Por favor indique cuál)
+                                                </label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <input type="text" class="form-control o_website_form_input" name="x_pqrd_issue_other"/>
+                                            </div> 
+                                        </div>
+                                    </div>
+<!--                                     <hr style="border-top: 1px solid #CCCCCC !important;"/>
+                                    <div class="row mx-3">
+                                        <label class="text-justify my-3">
+                                        <b>Hechos materia de su queja disciplinaria:</b> a continuación, haga una narración clara y concisa de los hechos materia de su queja, especificando circunstancias de tiempo (fecha), modo y lugar de ocurrencia de los mismos:
+                                        </label>
+                                        <label class="text-justify mb-3">
+                                        Tenga en cuenta que:
+                                        </label>
+                                        <ul>
+                                            <li>
+                                            El implicado debe encontrarse inscrito en el registro de arquitectos y profesionales auxiliares 
+                                            de la arquitectura del CPNAA.
+                                            </li>
+                                            <li>
+                                            Los hechos de la falta denunciada no deben haber sucedido hace más de cinco (5) años.
+                                            </li>
+                                            <li>
+                                            Los hechos de la queja deben constituir una falta disciplinaria del profesional al código de ética 
+                                            contemplado en la ley 435 de 1998.
+                                            </li>                                                    
+                                        </ul>
+                                        <label class="text-justify mb-3">
+                                        Es importante aclarar que en el evento en que se determine la responsabilidad del profesional en la 
+                                        comisión de una falta disciplinaria, las sanciones serán las determinadas en la ley de carácter 
+                                        disciplinario y no se contempla la imposición de ordenes tales como la obligación de realizar la 
+                                        devolución de sumas de dinero, para lo cual se debe acudir ante la justicia ordinaria.
+                                        </label>
+                                    </div> -->
+                                    <div class="col-md-12">
+                                        <label class="col-form-label o_fake_editable" for="x_applicant_local_phone">
+                                            Detalle
+                                        </label>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="row form-group form-field">
+                                            <textarea rows="7" maxlength="1000" style="width:100%;" name="x_request_details"
+                                                        class="form-control o_website_form_input i_required" />
+                                        </div>                                            
+                                    </div>
+                            </div>
+                            <div class="formSection">
+                                <h2 class="sectionName">Adjuntos</h2>                                    
+                                <div class="row">
+                                    <div class="col-md-12">
+<!--                                         <label class="col-form-label o_fake_editable text-justify mb-3"> Por favor relacione y adjunte las pruebas que soporten los hechos de la queja interpuesta. Si usted cuenta con licencia de construcción, contratos, recibos de pago, consignaciones, planos, diseños, correos electrónicos, denuncias, por favor adjuntarlos en formato pdf o imágenes, así como los testimonios que pretenda hacer valer en el presente proceso.  </label> -->
+                                    </div>
+                                    <div class="col-md-6 mx-auto mb-4">
+                                        <label for="x_evidence_files" class="file-label"><i class="fa fa-search"></i>
+                                            <span> Agregar archivos</span>
+                                        </label>    
+                                        <span class="help-block">Tamaño máximo 3mb</span>
+                                        <input type="file" class="form-control i_required btn-file evidencias" id="x_evidence_files" 
+                                               accept="application/pdf, image/png, image/jpg, image/jpeg" multiple="1" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <table id="tableHead" class="table table-striped invisible" style="border: none" aria-hidden="true">
+                                        <thead class="thead-ligth">
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Nombre del Archivo</th>
+                                            <th scope="col" class="text-center">Extensión</th>
+                                            <th scope="col" class="text-center">Tamaño</th>
+                                            <th scope="col" class="text-center">Previsualizar</th>
+                                            <th scope="col" class="text-center">Eliminar</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="tableFiles">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+<!--                                 <label class="text-justify mb-3">
+Bajo la gravedad de juramento me permito manifestar que los hechos narrados en el escrito de queja corresponden a la verdad, teniendo en cuenta las implicaciones legales contenidas en el artículo 442 del código penal colombiano, que en su tenor literal señala: "artículo 442. Falso testimonio. El que, en actuación judicial o administrativa, bajo la gravedad del juramento ante autoridad competente, falte a la verdad o la calle total o parcialmente, incurrirá en prisión de seis (6) a doce (12) años."
+                                </label> -->
+                                <label class="col-form-label o_fake_editable text-justify" for="x_elec_terminos">
+                                <input type="checkbox" value="Yes" class="o_website_form_input" required="true" id="x_elec_terminos"/>
+                                Manifiesto y acepto que conozco los términos y condiciones de la <a href="#" data-toggle="modal" data-target="#policyModal">política de protección de datos</a>, uso y tratamiento de datos personales. Y autorizo el uso de mis datos personales para recibir notificaciones sobre los trámites relacionados con las actividades misionales adelantadas por la entidad.
+                                </label>
+                            </div>
+                            <div class="row mt-3 mb-5">
+                                <div id="div_results_denuncia" class="offset-md-2 col-md-8">
+                                    <span id="mssg_result" role="alert"/>
+                                </div>
+                                <div id="div_spinner_denuncia" class="offset-md-5 col-md-5" aria-hidden="true">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <button id="enviar_denuncia" class="btn btn-primary btn-lg btn-stadium">Registrar</button>
+                                </div>
+                            </div>
+                        </div> 
+                        </form>
+                        <t t-call="my_sample.politica_datos"/>
+                        <div class="modal fade" id="viewerModalEvidence" tabindex="-1" role="dialog" 
+                             aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-xl" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header pdfViewer">
+                                        <h3 class="modal-title formTitle">Previsualización de archivo</h3>
+                                    </div>
+                                    <div class="modal-body pdfViewer">
+                                        <iframe id="pdfPreview" src="#" height="800" width="100%"></iframe>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary btn-lg btn-stadium" data-dismiss="modal">Cerrar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </t>
+        </template>
+    </data>
+</odoo>

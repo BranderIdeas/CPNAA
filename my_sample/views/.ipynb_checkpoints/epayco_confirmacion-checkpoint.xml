@@ -66,11 +66,11 @@
                                 electrónico: info@cpnaa.gov.co o al número telefónico (1)3502700 ext 111-115 en Bogotá
                             </div>
                         </div>
-<!--                         <div t-if="ok and resultado_pago['numero_radicado']">
+                        <div t-if="ok and resultado_pago['numero_radicado']">
                             <h5 class="alert alert-info text-center">
                                 Su trámite quedo registrado con el número de radicado <t t-raw="(resultado_pago['numero_radicado'])"/>
                             </h5>
-                        </div> -->
+                        </div>
                     </div>
                     <div t-if="ok and not resultado_pago['ok'] and resultado_pago['error']">
                         <div id="error_pagos" class="row col-sm-12 justify-content-md-center">

@@ -12,6 +12,7 @@
                 <script src="/my_sample/static/src/js/vigencia.js"></script>
                 <script src="/my_sample/static/src/js/consulta.js"></script>
                 <script src="/my_sample/static/src/js/denuncia.js"></script>
+                <script src="/my_sample/static/src/js/pqrd.js"></script>
                 <script src='/my_sample/static/src/js/scripts/libs/png_support/zlib.js'></script>
                 <script src='/my_sample/static/src/js/scripts/libs/png_support/png.js'></script>
                 <script src="/my_sample/static/src/js/scripts/libs/downloadify/js/swfobject.js"></script>

@@ -150,7 +150,9 @@ class MySample(http.Controller):
                     'id_tramite': data['data']['x_extra1']
                 }
                 resultado_pago = self.tramite_fase_verificacion(data_tramite)
-                _logger.info(resultado_pago)
+            else:
+                resultado_pago = { 'ok': False, 'message': 'La transacción no fue aprobada','error': False }
+            _logger.info(resultado_pago)
         return http.request.render('my_sample.epayco_confirmacion', {'ok': success, 'data': data, 'resultado_pago': resultado_pago})
     
     def validar_ref_epayco(self, ref_payco):
@@ -209,7 +211,12 @@ class MySample(http.Controller):
     @http.route('/consulta_online/por_numero', auth='public', website=True)
     def consulta_por_numero(self):
         return http.request.render('my_sample.consulta_registro', {'form': 'por_numero'})
-        
+    
+    # Ruta que renderiza página de consulta estado trámite
+    @http.route('/cliente/tramite/consulta', auth='public', website=True)
+    def estado_tramite(self):
+        return http.request.render('my_sample.inicio_tramite', {'form': 'consulta', 'inicio_tramite': False})
+           
     # Realiza la consulta del registro online por documento o numero de tarjeta
     @http.route('/realizar_consulta', methods=["POST"], type="json", auth='public', website=True)
     def realizar_consulta(self, **kw):

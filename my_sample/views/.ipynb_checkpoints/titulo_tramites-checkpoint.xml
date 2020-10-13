@@ -6,6 +6,7 @@
                     <font t-if="form == 'inscripciontt'">CERTIFICADO DE INSCRIPCIÓN PROFESIONAL - PROFESIONAL AUXILIAR DE LA ARQUITECTURA</font>
                     <font t-elif="form == 'licencia'">LICENCIA TEMPORAL ESPECIAL</font>
                     <font t-elif="form == 'convenio'">CONVENIOS - ACCESO ESTUDIANTES</font>
+                    <font t-elif="form == 'consulta'">CONSULTA ESTADO DE TRÁMITE</font>
                     <font t-else="">MATRÍCULA PROFESIONAL DE ARQUITECTO</font>
                 </h1>
             </div>

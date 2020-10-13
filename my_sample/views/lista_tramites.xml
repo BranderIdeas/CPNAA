@@ -166,7 +166,7 @@
                                 </div>
                             </div>  
                             <div class="row float-right mb-4">
-                                <button id="btn-atras" class="btn btn-primary btn-lg btn-stadium mr-3">Atras</button>
+                                <button id="btn-atras" class="btn btn-primary btn-lg btn-stadium mr-3">Ir al inicio</button>
                                 <td>
                                 <a t-if="rechazo or (tramites[0].x_cycle_ID[0].x_order == 0 and tramites[0].x_origin_type.x_name != 'CONVENIO')"
                                    class="btn btn-primary btn-lg btn-stadium ml-3"

@@ -43,6 +43,9 @@ odoo.define('website.tramites', function(require) {
                 } else if(response.id){
                     if (response.tramite_en_curso){
                          $(location).attr('href','/cliente/'+ response.id +'/tramites');
+                    } else if (!response.tramite_en_curso && location.href.indexOf('/consulta') != -1){
+                        $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
+                        $('#text_message').text(`No se ha encontrado trámite en curso con los datos ingresados`);
                     } else if (response.matricula && data.origen == 'matricula'){
                         $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
                         $('#text_message').text(`Usted ya posee Matricula Profesional de Arquitecto`);

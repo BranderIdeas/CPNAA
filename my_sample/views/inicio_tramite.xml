@@ -161,7 +161,7 @@
                     </div>                    
                 </form>    
                 <br/>
-                <t t-if="form != 'consulta'" t-call="my_sample.textos_tramite"/>
+<!--                 <t t-if="form != 'consulta'" t-call="my_sample.textos_tramite"/> -->
              </t>
         </template>
     </data>

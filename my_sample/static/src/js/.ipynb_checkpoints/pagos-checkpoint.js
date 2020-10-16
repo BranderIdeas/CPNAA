@@ -73,7 +73,11 @@ odoo.define('website.pagos', function(require) {
             }
             handler.open(dataTran);
             handler.onCloseModal = function () {
-                location.reload();
+                alert('Close OnePage');
+                console.log("document.querySelector('#overlay-epayco')", document.querySelector('#overlay-epayco'))
+                if(document.querySelector('#overlay-epayco')){
+                    document.querySelector('#overlay-epayco').remove();
+                }
             }
         },
         numero_recibo_radicado: async function() {

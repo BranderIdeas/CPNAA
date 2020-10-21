@@ -528,7 +528,7 @@ class MySample(http.Controller):
     @http.route('/validar_tramites', methods=["POST"], type="json", auth='public', website=True)
     def validar_tramites(self, **kw):
         data = kw.get('data')
-        user = False
+        user, data_user = False, False
         if self.validar_captcha(kw.get('token')):
             result, por_nombre, matricula, certificado, tramite_en_curso = {}, False, False, False, False
             graduando = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select','=',int(data['doc_type'])),
@@ -555,17 +555,19 @@ class MySample(http.Controller):
                     user = tramite.x_user_ID
                     result = {'carrera': tramite.x_studio_carrera_1.x_name, 'tipo_documento': tramite.x_studio_tipo_de_documento_1.x_name, 
                               'documento': tramite.x_studio_documento_1 }
+                if user:
+                    data_user = { 'tipo_documento': user.x_document_type_ID.x_name, 'documento': user.x_document, 'carrera': user.x_institute_career.x_name }
             _logger.info(user)
             if len(graduando) > 1:
                 graduando = graduando[-1]
             if (tramite_en_curso):
                 return { 'ok': True, 'id': user.id, 'tramite_en_curso': tramite_en_curso }
             if (matricula or certificado):
-                return { 'ok': True, 'id': user.id, 'matricula': matricula, 'certificado': certificado, 'result': result }
+                return { 'ok': True, 'id': user.id, 'matricula': matricula, 'certificado': certificado, 'result': result, 'data_user': data_user }
             elif (grado):
                 return { 'ok': True, 'id': graduando.id, 'convenio': True }
             elif (user):
-                return { 'ok': True, 'id': user.id, 'convenio': False }
+                return { 'ok': True, 'id': user.id, 'convenio': False, 'user': data_user }
             else:
                 return { 'ok': False, 'id': False, 'convenio': False }
         else:

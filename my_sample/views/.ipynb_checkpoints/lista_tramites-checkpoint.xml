@@ -2,7 +2,9 @@
     <data>
         <template id="lista_tramites" name="Estado del Trámite">
             <t t-call="website.layout">
-                <t t-call="my_sample.titulo_tramites"/>
+                <div t-if="len(tramites) > 0">
+                    <t t-call="my_sample.titulo_tramites"/>
+                </div>
                 <div class="container mt-5">
                     <div t-if="len(tramites) > 0">
                         <div class="container">
@@ -103,7 +105,7 @@
                                     </div>
                                     <div class="row col-md-6 form-group form-field" disabled="true">
                                         <div class="col-md-4">
-                                            <label class="col-form-label" for="x_cycle_name"> Ciclo del Trámite </label>
+                                            <label class="col-form-label" for="x_cycle_name"> <b>Estado del Trámite</b> </label>
                                         </div>
                                         <div class="col-md-8">
                                             <input type="text" class="form-control" name="x_cycle_name" 
@@ -114,22 +116,28 @@
                                 <div class="row">
                                     <div class="form-group row col-md-6 form-field" disabled="true">
                                         <div class="col-md-4">
-                                            <label class="col-form-label" for="x_pay_type"> Tipo de Pago </label>
+                                            <label class="col-form-label" for="x_radicacion_date"> Fecha de Radicado </label>
                                         </div>
                                         <div class="col-md-8">
-                                            <input type="text" class="form-control" name="x_pay_type"  
-                                                 t-attf-value="{{tramites[0].x_pay_type}}" disabled="1"/>
+                                            <input type="text" class="form-control" name="x_radicacion_date"  
+                                                 t-attf-value="{{tramites[0].x_radicacion_date}}" disabled="1"/>
                                         </div>
                                     </div>
                                     <div class="row col-md-6 form-group form-field" disabled="true">
                                         <div class="col-md-4">
-                                            <label class="col-form-label" for="x_consignment_number"> Número de Pago </label>
+                                            <label class="col-form-label" for="x_rad_number"> Número de Radicado </label>
                                         </div>
                                         <div class="col-md-8">
-                                            <input type="text" class="form-control" name="x_consignment_number" 
-                                                t-attf-value="{{tramites[0].x_consignment_number}}" disabled="1"/>
+                                            <input type="text" class="form-control" name="x_rad_number" 
+                                                t-attf-value="{{tramites[0].x_rad_number}}" disabled="1"/>
                                         </div>
                                     </div>
+                                </div>
+                                <div t-if="tramites[0].x_cycle_ID.x_description" class="row my-3 justify-content-center">
+                                    <label class="mx-3 mb-2">
+                                        <b> Descripción del estado del trámite: </b>
+                                        <t t-raw="(tramites[0].x_cycle_ID.x_description)"/> 
+                                    </label>
                                 </div>
                             </div>
                             <div t-if="rechazo">
@@ -191,19 +199,19 @@
                                     id="btn-pagar" class="btn btn-primary btn-lg btn-stadium ml-3">Pagar</button>
                                 <a t-if="tramites[0].x_cycle_ID[0].x_order &gt; 0 and tramites[0].x_cycle_ID[0].x_order &lt; 5 and not rechazo and not diploma" 
                                     href="https://cpnaa.gov.co/calendario-de-matriculas-d65/" target="_top"
-                                    class="btn btn-primary btn-lg btn-stadium ml-3">Su solicitud esta en trámite</a>
+                                    class="btn btn-primary btn-lg btn-stadium ml-3">Calendario de trámites</a>
                                 </td>                                
                             </div>
                         </div>
                     </div>
                     <div t-else="">
-                        <div class="row justify-content-md-center mb-5">
+                        <div class="row justify-content-md-center text-center mb-5">
                             <span class="alert alert-info col-sm-8" role="alert">
-                                El tipo de documento: <t t-raw="(persona.x_document_type_ID[0].x_name.title())"/> con el número: 
-                                <t t-raw="(persona.x_document)"/> esta registrado pero actualmente no tiene ningúna solicitud de tramite.
-                                <br/><br/>
-                                Si tiene alguna duda, por favor comuníquese con el CPNAA al siguiente correo 
-                                electrónico: info@cpnaa.gov.co o al número telefónico (1)3502700 ext 111-115 en Bogotá
+                                El documento <t t-raw="(persona.x_document_type_ID[0].x_name.title())"/>: 
+                                <t t-raw="(persona.x_document)"/> ya se encuentra registrado como: 
+                                <t t-raw="(persona.x_institute_career.x_name.title())"/>, dirigirse a 
+                                <a href="https://cpnaa.gov.co/consulta-del-registro-de-arquitectos-y-profesionales-auxiliares-de-la-arquitectura/" target="_top"> 
+                                    consulta del registro del CPNAA.</a>
                             </span>
                         </div>
                         <br/>

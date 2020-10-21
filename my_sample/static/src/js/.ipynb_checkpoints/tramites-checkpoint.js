@@ -41,11 +41,18 @@ odoo.define('website.tramites', function(require) {
                 if(response.convenio){
                     $(location).attr('href','/tramite/convenios/'+ response.id);
                 } else if(response.id){
+                    console.log(response);
                     if (response.tramite_en_curso){
                          $(location).attr('href','/cliente/'+ response.id +'/tramites');
                     } else if (!response.tramite_en_curso && location.href.indexOf('/consulta') != -1){
+                        if(response.id && (response.matricula || response.certificado)){
+                            $('#text_message').html(`El documento ${validaciones.capitalizeFromUpper(response.data_user.tipo_documento)}: 
+                                ${response.data_user.documento} ya se encuentra registrado como: 
+                                ${validaciones.capitalizeFromUpper(response.data_user.carrera)}, dirigirse a <a href="https://cpnaa.gov.co/consulta-del-registro-de-arquitectos-y-profesionales-auxiliares-de-la-arquitectura/" target="_top"> consulta del registro del CPNAA.</a>`);                           
+                        }else{
+                            $('#text_message').text(`No se ha encontrado trámite en curso con los datos ingresados`);                           
+                        }
                         $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
-                        $('#text_message').text(`No se ha encontrado trámite en curso con los datos ingresados`);
                     } else if (response.matricula && data.origen == 'matricula'){
                         $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
                         $('#text_message').text(`Usted ya posee Matricula Profesional de Arquitecto`);

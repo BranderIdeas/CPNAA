@@ -39,7 +39,7 @@
                                 <button type="submit" id="btn_verificar" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
                             </div>
                             <div id="msj_result" class="invisible mb-3 text-center" aria-hidden="true">
-                                <div id="text_message" class="alert alert-info d-flex justify-content-center" role="alert">
+                                <div id="text_message" class="alert alert-info justify-content-center" role="alert">
                                 </div>
                                 <div class="d-flex justify-content-center">
 <!--                                     <a id="btn-cancelar" type="button" class="btn btn-light">Cancelar</a> -->
@@ -103,7 +103,7 @@
                                 </button>
                             </div>
                             <div id="msj_result" class="invisible mb-3 text-center" aria-hidden="true">
-                                <div id="text_message" class="alert alert-info d-flex justify-content-center" role="alert">
+                                <div id="text_message" class="alert alert-info justify-content-center" role="alert">
                                 </div>
                                 <div class="d-flex justify-content-center">
 <!--                                     <a id="btn-cancelar" type="button" class="btn btn-light">Cancelar</a> -->

@@ -74,10 +74,9 @@ odoo.define('website.pagos', function(require) {
             handler.open(dataTran);
             handler.onCloseModal = function () {
                 alert('Close OnePage');
-                console.log("document.querySelector('#overlay-epayco')", document.querySelector('#overlay-epayco'))
-                if(document.querySelector('#overlay-epayco')){
-                    document.querySelector('#overlay-epayco').remove();
-                }
+                const div = document.querySelector('#overlay-epayco');
+                if(div){ div.remove(); }
+                handler.onCloseModal = null;
             }
         },
         numero_recibo_radicado: async function() {
@@ -168,10 +167,10 @@ odoo.define('website.pagos', function(require) {
             $('#modal-recibo-pdf').modal({ keyboard: false, backdrop: 'static' });
             $('#modal-recibo-pdf').modal('show');
             pagos.downloadPDF();
-//             if(num_radicado.indexOf('0-') != 0){
-//                 $('#numero_radicado').removeClass('invisible').removeAttr('aria-hidden')
-//                     .text(`Su trámite quedo registrado con el número de radicado ${num_radicado}`);
-//             }
+            if(num_radicado.indexOf('0-') != 0){
+                $('#numero_radicado').removeClass('invisible').removeAttr('aria-hidden')
+                    .text(`Su trámite quedo registrado con el número de radicado ${num_radicado}`);
+            }
         } catch (e) {
             console.error('Error al generar recibo PDF: '+e);
             console.log(invoiceData); 

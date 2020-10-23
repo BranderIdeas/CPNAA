@@ -1,0 +1,100 @@
+<odoo>
+    <data>
+        <template id="detalle_denuncia" name="Seguimiento Denuncias">
+            <t t-call="website.layout">
+                <t t-set="additional_title">Denuncias</t>
+                <div class="container">
+                    <div class="row justify-content-md-center mt-4 mb-4">
+                        <h1 class="formTitle">
+                            <font>SEGUIMIENTO DENUNCIA</font>
+                        </h1>
+                    </div>
+                </div>
+                <div id="results_table" class="container justify-content-md-center">
+                    <div class="formSection">
+                        <h2 class="sectionName">Datos del Implicado</h2>
+                        <table class="table table-striped">
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Fecha de creación:</th>
+                                    <td class="" id="fecha_expedicion">
+                                        <t t-esc="denuncia.create_date.strftime('%d-%m-%Y %H:%M:%S')"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Tipo de documento:</th>
+                                    <td id="tipo_documento_prof">
+                                        <t t-esc="denuncia.x_implicated_document_type_ID.x_name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Documento:</th>
+                                    <td id="documento_prof">
+                                        <t t-esc="denuncia.x_implicated_document"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Nombres y Apellidos:</th>
+                                    <td class="" id="nombres_prof">
+                                        <t t-esc="denuncia.x_implicated_names"/> <t t-esc="denuncia.x_implicated_lastnames"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Número de Matrícula:</th>
+                                    <td id="numero_cert" class="">
+                                        <t t-esc="denuncia.x_implicated_enrollment_number"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="container row mx-auto">
+                    <div class="col-sm-3 text-center mb-5 pb-5 o-border">
+                        <h2 class="sectionName">Fases</h2>
+                        <t t-foreach="request.env['x_cpnaa_cycle'].sudo().search([('x_service_ID.x_name','=','DENUNCIA'),('x_public','=',True)],order='x_order')" 
+                           t-as="fase_denuncia">
+                            <a class="btn btn-primary btn-stadium btn-block mt-3"
+                                t-attf-href="#" target="_top">
+                                <t t-esc="fase_denuncia.x_name"/>
+                            </a>
+                        </t>
+                    </div>
+                    <div class="col-sm-9 mb-5 pb-5 o-border">
+                        <div id="results_table" class="container justify-content-md-center">
+                            <h2 class="sectionName">Información de la Fase</h2>
+                            <table class="table table-striped mt-4">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">Número de certificado:</th>
+                                        <td id="numero_cert" class=""></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Fecha de expedición:</th>
+                                        <td class="" id="fecha_expedicion"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Tipo de documento:</th>
+                                        <td id="tipo_documento_prof"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Documento:</th>
+                                        <td id="documento_prof"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Nombres y Apellidos:</th>
+                                        <td class="" id="nombres_prof"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Vigencia del certificado:</th>
+                                        <td id="fecha_vencimiento"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+    </data>
+</odoo>

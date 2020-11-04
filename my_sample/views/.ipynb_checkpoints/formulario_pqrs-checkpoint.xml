@@ -1,13 +1,13 @@
 <odoo>
     <data>
-        <template id="formulario_pqrd" name="Formulario PQRD">
+        <template id="formulario_pqrs" name="Formulario PQRS">
             <t t-call="website.layout">
                 <div id="wrap" class="oe_structure">
                     <section class="container">
                         <h1 class="formTitle my-3">
-                            <font>REGISTRO PQRD</font>
+                            <font>REGISTRO PQRS</font>
                         </h1>
-                        <form id="denunciaForm" method="post" class="s_website_form container-fluid mt32 o_fake_not_editable" 
+                        <form id="pqrsForm" method="post" class="s_website_form container-fluid mt32 o_fake_not_editable" 
                               enctype="multipart/form-data">
                             <div class="container">
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
@@ -40,12 +40,12 @@
                                 <div class="row">
                                     <div class="row col-md-6 form-group form-field o_website_form_required">
                                         <div class="col-md-6">
-                                        <label class="col-form-label o_fake_editable" for="x_complainant_document_type_ID">
+                                        <label class="col-form-label o_fake_editable" for="x_user_type_ID">
                                                 Tipo de Solicitante
                                             </label>
                                         </div>
                                         <div class="col-md-6">
-                                        <select class="form-control o_website_form_input i_required" name="x_request_type_ID">
+                                        <select class="form-control o_website_form_input i_required" name="x_user_type_ID">
                                             <option value="">Seleccione...</option>
                                             <t t-foreach="request.env['x_cpnaa_user_type'].search([],order='x_name')" t-as="tipo_usuario">
                                             <option t-att-value="tipo_usuario.id">
@@ -141,7 +141,7 @@
                                             </label>
                                         </div>
                                         <div class="col-md-6">
-                                            <input type="text" class="form-control o_website_form_input v-telefono" name="x_celular_applicant"/>
+                                            <input type="text" class="form-control o_website_form_input v-telefono" name="x_applicant_local_phone"/>
                                         </div>
                                     </div>
                                     <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required">
@@ -152,7 +152,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <input type="text" class="form-control o_website_form_input v-celular i_required" 
-                                                   name="x_complainant_celular"/>
+                                                   name="x_celular_applicant"/>
                                         </div>
                                     </div>
                                 </div>
@@ -185,38 +185,33 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                             <div class="col-md-6">
                                             <select class="form-control o_website_form_input i_required" name="x_request_type_ID">
                                                 <option value="">Seleccione...</option>
-                                                <t t-foreach="request.env['x_cpnaa_pqrd_request_type'].search([],order='x_name')" t-as="tipo_solicitud">
+                                                <t t-foreach="request.env['x_cpnaa_pqrd_request_type'].sudo().search([])" t-as="tipo_solicitud">
                                                 <option t-att-value="tipo_solicitud.id">
-                                                    <t t-esc="tipo_solicitud.x_name"/>
+                                                    <t t-esc="tipo_solicitud.x_name.title()"/>
                                                 </option>
                                                 </t>
                                             </select>   
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row col-md-12 form-group form-field mb-0 o_website_form_required">
-                                    <div class="row col-md-12 ml-0 pb-3">
-                                        <label>Seleccione los asuntos que generan la solicitud</label>
-                                    </div>                                        
-                                    <div class="col-md-2">
-                                        <label class="col-form-label o_fake_editable" for="x_issues_ID">
-                                            Asunto
-                                        </label>
-                                    </div>
-                                    <div class="col-md-10 mb-3">
-                                        <div class="o_website_form_flex">
-                                            <t t-foreach="request.env['x_pqrd_issues'].sudo().search([])" t-as="pqrd_issue">
-                                            <div class="checkbox o_website_form_flex_item mb-2 px-1">
-                                            <label>
-                                                <input type="checkbox" class="o_website_form_input" name="x_issues_ID" t-att-value="pqrd_issue.id"/>
-                                                <span class="o_fake_editable">
-                                                    <t t-esc="pqrd_issue.x_name"/>
-                                                </span>
-                                            </label>
+                                    <div class="row" id="asunto_pqrs">
+                                        <div class="row col-md-10 ml-0 mb-3 form-group form-field o_website_form_required">
+                                            <div class="col-md-4">
+                                                <label class="col-form-label o_fake_editable" for="x_issues_ID">
+                                                    Seleccione el Asunto
+                                                </label>
                                             </div>
-                                            </t>
-                                        </div>                                        
-                                    </div>
+                                            <div class="col-md-6">
+                                                <select class="form-control o_website_form_input i_required" name="x_issues_ID">
+                                                    <option value="">Seleccione...</option>
+                                                    <t t-foreach="request.env['x_pqrd_issues'].search([])" t-as="pqrd_issue">
+                                                    <option t-att-value="pqrd_issue.id">
+                                                        <t t-esc="pqrd_issue.x_name"/>
+                                                    </option>
+                                                    </t>
+                                                </select>   
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="row invisible" id="otro_asunto" aria-hidden="true">
                                         <div class="row col-md-10 ml-0 mb-2 form-group form-field o_website_form_required">
@@ -230,37 +225,9 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                             </div> 
                                         </div>
                                     </div>
-<!--                                     <hr style="border-top: 1px solid #CCCCCC !important;"/>
-                                    <div class="row mx-3">
-                                        <label class="text-justify my-3">
-                                        <b>Hechos materia de su queja disciplinaria:</b> a continuación, haga una narración clara y concisa de los hechos materia de su queja, especificando circunstancias de tiempo (fecha), modo y lugar de ocurrencia de los mismos:
-                                        </label>
-                                        <label class="text-justify mb-3">
-                                        Tenga en cuenta que:
-                                        </label>
-                                        <ul>
-                                            <li>
-                                            El implicado debe encontrarse inscrito en el registro de arquitectos y profesionales auxiliares 
-                                            de la arquitectura del CPNAA.
-                                            </li>
-                                            <li>
-                                            Los hechos de la falta denunciada no deben haber sucedido hace más de cinco (5) años.
-                                            </li>
-                                            <li>
-                                            Los hechos de la queja deben constituir una falta disciplinaria del profesional al código de ética 
-                                            contemplado en la ley 435 de 1998.
-                                            </li>                                                    
-                                        </ul>
-                                        <label class="text-justify mb-3">
-                                        Es importante aclarar que en el evento en que se determine la responsabilidad del profesional en la 
-                                        comisión de una falta disciplinaria, las sanciones serán las determinadas en la ley de carácter 
-                                        disciplinario y no se contempla la imposición de ordenes tales como la obligación de realizar la 
-                                        devolución de sumas de dinero, para lo cual se debe acudir ante la justicia ordinaria.
-                                        </label>
-                                    </div> -->
-                                    <div class="col-md-12">
+                                    <div class="col-md-12 o_website_form_required">
                                         <label class="col-form-label o_fake_editable" for="x_applicant_local_phone">
-                                            Detalle
+                                            Observaciones
                                         </label>
                                     </div>
                                     <div class="col-md-12">
@@ -277,12 +244,15 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
 <!--                                         <label class="col-form-label o_fake_editable text-justify mb-3"> Por favor relacione y adjunte las pruebas que soporten los hechos de la queja interpuesta. Si usted cuenta con licencia de construcción, contratos, recibos de pago, consignaciones, planos, diseños, correos electrónicos, denuncias, por favor adjuntarlos en formato pdf o imágenes, así como los testimonios que pretenda hacer valer en el presente proceso.  </label> -->
                                     </div>
                                     <div class="col-md-6 mx-auto mb-4">
-                                        <label for="x_evidence_files" class="file-label"><i class="fa fa-search"></i>
+                                        <label for="x_pqdr_attachments" class="file-label"><i class="fa fa-search"></i>
                                             <span> Agregar archivos</span>
                                         </label>    
                                         <span class="help-block">Tamaño máximo 3mb</span>
-                                        <input type="file" class="form-control i_required btn-file evidencias" id="x_evidence_files" 
+                                        <input type="file" class="form-control i_required btn-file adjunto" id="x_pqdr_attachments" 
                                                accept="application/pdf, image/png, image/jpg, image/jpeg" multiple="1" />
+                                        <div class="col-form-label o_fake_editable mt-3 text-center font-weight-bold">
+                                            *Adjuntar máximo 10 archivos.
+                                        </div>                                        
                                     </div>
                                 </div>
                                 <div class="row">
@@ -312,22 +282,22 @@ Bajo la gravedad de juramento me permito manifestar que los hechos narrados en e
                                 </label>
                             </div>
                             <div class="row mt-3 mb-5">
-                                <div id="div_results_denuncia" class="offset-md-2 col-md-8">
+                                <div id="div_results_pqrs" class="offset-md-2 col-md-8">
                                     <span id="mssg_result" role="alert"/>
                                 </div>
-                                <div id="div_spinner_denuncia" class="offset-md-5 col-md-5" aria-hidden="true">
+                                <div id="div_spinner_pqrs" class="offset-md-5 col-md-5" aria-hidden="true">
                                     <div class="spinner-border text-primary" role="status">
                                         <span class="sr-only">Loading...</span>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
-                                    <button id="enviar_denuncia" class="btn btn-primary btn-lg btn-stadium">Registrar</button>
+                                    <button id="registrar_pqrs" class="btn btn-primary btn-lg btn-stadium">Registrar</button>
                                 </div>
                             </div>
                         </div> 
                         </form>
                         <t t-call="my_sample.politica_datos"/>
-                        <div class="modal fade" id="viewerModalEvidence" tabindex="-1" role="dialog" 
+                        <div class="modal fade" id="viewerModalAttachment" tabindex="-1" role="dialog" 
                              aria-labelledby="exampleModalLabel" aria-hidden="true">
                             <div class="modal-dialog modal-xl" role="document">
                                 <div class="modal-content">

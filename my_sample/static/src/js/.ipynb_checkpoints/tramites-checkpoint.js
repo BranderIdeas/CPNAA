@@ -41,7 +41,7 @@ odoo.define('website.tramites', function(require) {
                 if(response.convenio){
                     $(location).attr('href','/tramite/convenios/'+ response.id);
                 } else if(response.id){
-                    console.log(response);
+                    // console.log(response);
                     if (response.tramite_en_curso){
                          $(location).attr('href','/cliente/'+ response.id +'/tramites');
                     } else if (!response.tramite_en_curso && location.href.indexOf('/consulta') != -1){
@@ -713,7 +713,7 @@ odoo.define('website.tramites', function(require) {
                 }
                 reader.readAsDataURL(file);
             });
-            $("#viewerModalDiploma").modal('show');            
+            $("#viewerModalDiploma").modal('show');          
         }
     });
     

@@ -329,7 +329,7 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                             <span class="help-block">Máximo 50 caracteres</span>
                                         </div>
                                     </div>
-                                    <hr style="border-top: 1px solid #CCCCCC !important;"/>
+                                    <hr style="border-top: 1px solid #CCCCCC;"/>
                                     <div class="row">
                                         <div class="row col-md-12 form-group form-field o_fake_not_editable m-2 pb-3">
                                             <div class="row col-md-12">

@@ -3,6 +3,7 @@
         <template id="assets_frontend" inherit_id="website.assets_frontend" name="Assets">
             <xpath expr="." position="inside">
                 <link rel="stylesheet" href="/my_sample/static/src/css/styles.css"/>
+                <link rel="stylesheet" href="/my_sample/static/src/css/yearpicker.css"/>
                 <link rel="stylesheet" href="/my_sample/static/src/css/website_preloader.css"/>
                 <script src='/my_sample/static/src/js/swal.js'></script>
                 <script src="/my_sample/static/src/js/tramites.js"></script>
@@ -12,7 +13,10 @@
                 <script src="/my_sample/static/src/js/vigencia.js"></script>
                 <script src="/my_sample/static/src/js/consulta.js"></script>
                 <script src="/my_sample/static/src/js/denuncia.js"></script>
+                <script src="/my_sample/static/src/js/activacion.js"></script>
+                <script src="/my_sample/static/src/js/correccion.js"></script>                
                 <script src="/my_sample/static/src/js/pqrd.js"></script>
+                <script src='/my_sample/static/src/js/scripts/yearpicker.js'></script>
                 <script src='/my_sample/static/src/js/scripts/libs/png_support/zlib.js'></script>
                 <script src='/my_sample/static/src/js/scripts/libs/png_support/png.js'></script>
                 <script src="/my_sample/static/src/js/scripts/libs/downloadify/js/swfobject.js"></script>

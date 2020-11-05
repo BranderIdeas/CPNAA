@@ -1,0 +1,126 @@
+<odoo>
+    <data>
+        <template id="preguntas_mat_virtual">
+            <t t-call="website.layout">
+                <t t-set="additional_title">Solicitud Duplicado Virtual</t>
+                <h1 class="formTitle mt-5 mb-3">
+                    <font>ACTIVACIÓN DE MATRÍCULA O CERTIFICADO DE INSCRIPCIÓN PROFESIONAL VIRTUAL</font>
+                </h1>
+                <div class="form-group row d-flex justify-content-center text-center mt-0 mb-2">
+                    <h4>
+                        RESPONDE LAS PREGUNTAS PARA CONTINUAR CON EL TRÁMITE<br/>                   
+                        <t t-esc="tramite.x_studio_nombres" /> <t t-esc="tramite.x_studio_apellidos" />
+                    </h4>
+                </div>
+                <div class="container">
+                    <div class="formSection mt-3">
+                        <form id="form_respuestas">
+                            <input type="hidden" id="genero" name="genero" t-attf-value="{{ tramite.x_studio_gnero.id }}" />
+                            <input type="hidden" id="x_doc_type_ID" name="x_doc_type_ID" 
+                                   t-attf-value="{{ tramite.x_studio_tipo_de_documento_1.id }}" />
+                            <input type="hidden" id="x_document" name="x_document" t-attf-value="{{ tramite.x_studio_documento_1 }}" />
+                            <div class="row col-md-12 form-group form-field o_fake_not_editable o_website_form_required_custom">
+                                <div class="col-md-12">
+                                    <label class="col-form-label o_fake_editable" for="universidades_preguntas"> Universidad donde se graduo </label>
+                                </div>
+                                <div class="col-md-12">
+                                    <input type="text" id="universidades_preguntas" placeholder="Buscar..." class="form-control"/>
+                                    <ul class="list-group" id="result_univ"></ul>
+                                    <select class="form-control invisible i_required"
+                                            aria-hidden="true" name="x_institution_ID" id="x_institution_ID">
+                                        <option id="seleccion_univ" value="" selected="true">universidad</option>
+                                    </select>
+                                </div> 
+                            </div> 
+                            <div class="row col-md-12 form-group form-field o_fake_not_editable o_website_form_required_custom">
+                                <div class="col-md-12">
+                                    <label class="col-form-label o_fake_editable" for="carreras_preguntas"> Carrera registrada </label>
+                                </div>
+                                <div class="col-md-12">
+                                    <input type="text" id="carreras_preguntas" placeholder="Buscar..." class="form-control"/>
+                                    <ul class="list-group" id="result_carreras"></ul>
+                                    <select class="form-control invisible i_required"
+                                            aria-hidden="true" name="x_career_ID" id="x_career_ID">
+                                        <option id="seleccion_carreras" value="" selected="true">carrera</option>
+                                    </select>
+                                </div> 
+                            </div>   
+                            <div class="row col-md-12 form-group form-field o_fake_not_editable o_website_form_required_custom">
+                                <div class="col-md-12">
+                                    <label class="col-form-label o_fake_editable" for="x_studio_fecha_de_grado_2"> Año de grado </label>
+                                </div>
+                                <div class="col-md-12">
+                                    <div id="fecha_grado" class="input-group">
+                                        <input id="x_studio_fecha_de_grado_2" type="text" class="yearpicker hand form-control" maxlength="4"/>
+                                        <div class="input-group-append">
+                                            <div class="input-group-text b-rad-right">
+                                                <i class="fa fa-calendar"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row col-md-12 form-group form-field o_fake_not_editable o_website_form_required_custom">
+                                <div class="col-md-12">
+                                    <label class="col-form-label o_fake_editable" for="x_enrollment_number"> Número de Matricula </label>
+                                </div>
+                                <div class="col-md-12">
+                                    <input type="text" id="x_enrollment_number" class="form-control i_required"/>
+                                </div> 
+                            </div>   
+                            <div class="row col-md-12 form-group form-field o_fake_not_editable o_website_form_required_custom">
+                                <div class="col-md-12">
+                                    <label class="col-form-label o_fake_editable" for="x_expedition_city"> 
+                                        Ciudad de Expedición del Documento de Identificación 
+                                    </label>
+                                </div>
+                                <div class="col-md-12">
+                                    <select class="form-control i_required" name="x_expedition_city" id="x_expedition_city">
+                                        <option value="">Seleccione...</option>
+                                        <t t-foreach="request.env['x_cpnaa_city'].search([],order='x_name')" t-as="expedition_city">
+                                            <option t-att-value="expedition_city.id">
+                                                <t t-esc="expedition_city.x_name"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div> 
+                            </div>
+                            <hr style="border-top: 1px solid #CCCCCC;"/>
+                            <div class="row col-md-12 form-group form-field o_fake_not_editable o_website_form_required_custom">
+                                <div class="col-md-12">
+                                    <label class="col-form-label o_fake_editable" for="x_request_email"> 
+                                        Ingrese la dirección de correo electrónico a la que enviaremos los datos de acceso 
+                                    </label>
+                                </div>
+                                <div class="col-md-12">
+                                    <input type="text" id="x_request_email" class="form-control i_required"/>
+                                </div> 
+                            </div>   
+                            <div class="form-group row d-flex justify-content-center my-5">
+                                <button id="enviar_respuestas" type="button" 
+                                    class="btn btn-primary btn-lg btn-stadium">Enviar respuestas</button>
+                                <a href="https://cpnaa.gov.co" target="_top" class="btn btn-primary btn-lg btn-stadium ml-3">Ir al inicio</a>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal fade" id="modal_questions" tabindex="-1" role="dialog" 
+                            data-backdrop="static" data-keyboard="false"
+                            aria-labelledby="modal_questionsLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-md" role="document">
+                            <div class="modal-content" style="border-radius:30px;">
+                                <div class="modal-header">
+                                    <h3 id="titulo" class="modal-title formTitle"></h3>
+                                </div>
+                                <div class="modal-body text-center p-2 m-3">
+                                    <div id="result"></div>
+                                </div>
+                                <div class="modal-footer" id="modal_footer">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+    </data>
+</odoo>

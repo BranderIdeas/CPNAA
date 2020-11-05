@@ -226,6 +226,11 @@ label.file-label {
   border-radius: 30px;
   position: relative;
 }
+.o-border{
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  padding: 20px 20px;  
+}
 h2.sectionName {
   position: absolute;
   background-color: white;
@@ -293,6 +298,13 @@ span.help-block {
   cursor: pointer;
   text-decoration: underline;
   display: none;
+}
+.link-modal-prof {
+  color: blue;
+  cursor: pointer;
+  text-decoration: underline;
+  display: none;
+  text-align: left;
 }
 iframe.recibo-pdf, iframe#pdfViewerDiploma, iframe#pdfViewer {
     width: 100% !important;

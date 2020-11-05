@@ -1,0 +1,202 @@
+<odoo>
+  <data>
+      <template id="solicitud_correccion" name="Actualización / Correción de registro">
+          <t t-call="website.layout">
+              <h1 class="formTitle mt-5 mb-5">
+                  <font>ACTUALIZACION DE DATOS Y CORRECCION DEL REGISTRO</font>
+              </h1>
+              <div class="container mt-5">
+                  <div class="container">
+                    <div class="formSection">
+                        <h2 class="sectionName">Información del Registro</h2>
+                        <div class="row">
+                        </div>
+                        <div class="row">
+                            <div class="form-group row col-md-6 form-field">
+                                <div class="col-md-4">
+                                    <label class="col-form-label" for="x_document_type"> Tipo de Documento </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control"
+                                        t-attf-data-tipo="{{tramite.x_user_ID.x_document_type_ID[0].id}}"
+                                        t-attf-value="{{tramite.x_user_ID.x_document_type_ID[0].x_name}}"  disabled="1"/>
+                                </div>
+                            </div>
+                            <div class="row col-md-6 form-group form-field">
+                                <div class="col-md-4">
+                                    <label class="col-form-label" for="x_document"> Documento </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control" 
+                                        t-attf-value="{{tramite.x_user_ID.x_document}}" disabled="1"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group row col-md-6 form-field">
+                                <div class="col-md-4">
+                                    <label class="col-form-label" for="x_name"> Nombres </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control"
+                                        t-attf-value="{{tramite.x_user_ID.x_name}}" disabled="1"/>
+                                </div>
+                            </div>
+                            <div class="row col-md-6 form-group form-field">
+                                <div class="col-md-4">
+                                    <label class="col-form-label" for="x_last_name"> Apellidos </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control"
+                                        t-attf-value="{{tramite.x_user_ID.x_last_name}}"  disabled="1"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group row col-md-6 form-field" disabled="true">
+                                <div class="col-md-4">
+                                    <label class="col-form-label" for="x_req_date"> Fecha del Grado </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control" 
+                                        t-attf-value="{{tramite.x_studio_fecha_de_grado_2.strftime('%d-%m-%Y')}}" disabled="1"/>
+                                </div>
+                            </div>
+                            <div class="row col-md-6 form-group form-field" disabled="true">
+                                <div class="col-md-4">
+                                    <label class="col-form-label" for="x_service_name"> Número de Tarjeta </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control"
+                                        t-attf-value="{{tramite.x_enrollment_number}}" disabled="1"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group row col-md-6 form-field" disabled="true">
+                                <div class="col-md-4">
+                                    <label class="col-form-label" for="x_studio_universidad"> Universidad </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control" 
+                                            t-attf-value="{{tramite.x_studio_universidad_5.x_name}}" disabled="1"/>
+                                </div>
+                            </div>
+                            <div class="row col-md-6 form-group form-field" disabled="true">
+                                <div class="col-md-4">
+                                    <label class="col-form-label" for="x_studio_carrera"> Profesión </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control" 
+                                        t-attf-value="{{tramite.x_studio_carrera_1.x_name}}" disabled="1"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <form id="form_correccion" method="post" class="s_website_form container-fluid mt32 o_fake_not_editable" 
+                              enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="x_service_ID" t-attf-value="{{tramite.x_service_ID.id}}"/>
+                        <input type="hidden" name="x_procedure_ID" t-attf-value="{{tramite.id}}"/>
+                        <div class="formSection">
+                            <h2 class="sectionName">Datos de la Solicitud</h2>
+                            <div class="row">
+                            </div>
+                            <div class="row">
+                                <div class="form-group row col-md-12 form-field">
+                                    <div class="col-md-4">
+                                        <label class="col-form-label" for="x_issue"> Información a Corregir / Actualizar </label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <select class="form-control o_website_form_input i_required" name="x_issue">
+                                            <option value="">Seleccione...</option>
+                                            <t t-foreach="request.env['x_data_correction_issues'].sudo().search([])" t-as="correction_issues">
+                                            <option t-att-data-classification="correction_issues.x_classification.x_name"
+                                                    t-att-value="correction_issues.id" >
+                                                <t t-esc="correction_issues.x_name"/>
+                                            </option>
+                                            </t>
+                                        </select>  
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div id="row_observaciones" class="row col-md-12 form-group form-field">
+                                    <div class="col-md-4">
+                                        <label class="col-form-label" for="x_observations"> Observaciones </label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <input type="text" class="form-control" name="x_observations" maxlength="125" />
+                                    </div>
+                                </div>
+                            </div>
+                            <hr style="border-top: 1px solid #CCCCCC;"/>
+                            <div class="row mt-4">
+                                <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
+                                  <div class="col-md-6">
+                                      <label class="col-form-label o_fake_editable"> Cargue su documento de identidad legible por ambas caras </label>
+                                  </div>
+                                  <div class="col-md-6">
+                                      <label for="x_document" class="file-label"><i class="fa fa-search"></i>
+                                          <span> Seleccionar archivo</span>
+                                      </label>
+                                      <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
+                                      <span class="help-block preview-pdf" id="preview-x_document">Previsualizar</span>
+                                      <input type="file" class="form-control i_required btn-file file-tramites" name="x_document" 
+                                             id="x_document" accept="application/pdf"/>
+                                  </div>
+                                </div>
+                                <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
+                                  <div class="col-md-6">
+                                      <label class="col-form-label o_fake_editable" id="label_soporte" > Documento Soporte </label>
+                                  </div>
+                                  <div class="col-md-6">
+                                      <label for="x_support_document" class="file-label"><i class="fa fa-search"></i>
+                                          <span> Seleccionar archivo</span>
+                                      </label>
+                                      <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
+                                      <span class="help-block preview-pdf" id="preview-x_support_document">Previsualizar</span>
+                                      <input type="file" class="form-control i_required btn-file file-tramites" name="x_support_document" 
+                                             id="x_support_document" accept="application/pdf"/>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                          <div id="div_results_correccion" class="offset-md-2 col-md-8">
+                              <span id="mssg_result_correccion" role="alert"/>
+                          </div>
+                          <div id="div_spinner_correccion" class="offset-md-5 col-md-5" aria-hidden="true">
+                              <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                              </div>
+                          </div>
+                          <div class="col-md-2">
+                              <button id="btn_enviar_correccion" class="btn btn-primary btn-lg btn-stadium">
+                                  Registrar
+                              </button>
+                          </div>
+                        </div>
+                        <div class="offset-md-10 col-md-2"><br></br></div>
+                    </form>
+                    <div class="modal fade" id="viewerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-xl" role="document">
+                          <div class="modal-content">
+                              <div class="modal-header pdfViewer">
+                                  <h3 class="modal-title formTitle">Previsualización de archivo</h3>
+                              </div>
+                              <div class="modal-body pdfViewer">
+                                  <iframe id="pdfViewer" src="#" height="800"></iframe>
+                              </div>
+                              <div class="modal-footer">
+                                  <button type="button" class="btn btn-primary btn-lg btn-stadium" data-dismiss="modal">Cerrar</button>
+                              </div>
+                          </div>
+                      </div>
+                    </div>
+                </div>
+            </div>               
+        </t>
+      </template>
+  </data>
+</odoo>

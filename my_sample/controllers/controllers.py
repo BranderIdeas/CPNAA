@@ -160,10 +160,75 @@ class MySample(http.Controller):
         response = requests.get(base_url + ref_payco)
         return response.json()
     
+    # Ruta que renderiza página de formulario de pqrd
+    @http.route('/pqrs/formulario', auth='public', website=True)
+    def formulario_pqrs(self):
+        return http.request.render('my_sample.formulario_pqrs', {})
+    
+    # Registra la pqrs
+    @http.route('/registrar_pqrs', methods=["POST"], auth='public', website=True)
+    def registrar_pqrs(self, **kw):
+        resp, borrar, attachments_files = {}, [], []
+        _logger.info(kw)
+        for key, value in kw.items():
+            if type(value) != str:
+                borrar.append(key)
+                attachments_files.append(value)
+        for key in borrar:
+            del kw[key]
+        _logger.info(attachments_files)
+        kw['x_issues_ID'] = kw['x_issues_ID'].split(',') if kw['x_issues_ID'] else False
+        try:
+            consecutivo = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=','PQRS')])
+            kw['x_name'] = 'PQRS-'+str(consecutivo.x_value + 1)
+            kw['x_states'] = 'open'
+            pqrs = http.request.env['x_cpnaa_pqrd'].sudo().create(kw)
+            if pqrs:
+                count = 0
+                for at in attachments_files:
+                    count += 1
+                    file = base64.b64encode(at.read())
+                    attachment = {'x_request_ID': pqrs.id, 'x_file': file, 'x_name': 'PRUEBA-'+str(count)+'-'+pqrs.x_name}
+                    ext = str(at.filename.split('.')[-1]).lower()
+                    if ext == 'pdf':
+                        http.request.env['x_pqdr_attachments_pdf'].sudo().create(attachment)
+                    else:
+                        http.request.env['x_pqdr_attachments_img'].sudo().create(attachment)
+                http.request.env['x_cpnaa_consecutive'].browse(consecutivo.id).sudo().write({'x_value':consecutivo.x_value + 1})
+            resp = { 'ok': True, 'message': 'Su solicitud ha sido registrada con el consecutivo '+ pqrs.x_name +' exitosamente.' }
+        except:
+            tb = sys.exc_info()[2]
+            resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }
+            _logger.info(sys.exc_info())
+            return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
+        else:
+            return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
+    
     # Ruta que renderiza página de formulario de denuncias
     @http.route('/denuncias/formulario', auth='public', website=True)
     def formulario_denuncia(self):
         return http.request.render('my_sample.formulario_denuncia', {})
+    
+    # Ruta que renderiza página de seguimiento de denuncias
+    @http.route('/denuncias/seguimiento/<model("x_cpnaa_complaint"):denuncia>', auth='public', website=True)
+    def seguimiento_denuncia(self, denuncia):
+        return http.request.render('my_sample.detalle_denuncia', { 'denuncia': denuncia })  
+    
+    # Ruta que renderiza página de formulario de denuncias
+    @http.route('/get_profesional', methods=["POST"], type="json", auth='public', website=True)
+    def get_profesional(self, **kw):
+        _logger.info(kw)
+        if kw.get('token'):
+            if not self.validar_captcha(kw.get('token')):
+                return { 'ok': False, 'error_captcha': True }
+        campos = ['x_studio_nombres','x_studio_apellidos','x_studio_carrera_1','x_studio_documento_1','x_enrollment_number'] 
+        tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',kw['tipo_doc']),
+                                                                      ('x_studio_documento_1','=',kw['documento']),
+                                                                      ('x_cycle_ID.x_order','=',5)],campos)
+        if tramites:
+            return {'ok': True, 'result': tramites}
+        else:
+            return {'ok': False, 'result': 'No hay registros con la información suministrada'}
     
     # Activa la automatización para la creación y seguimiento del trámite
     @http.route('/registrar_denuncia', methods=["POST"], auth='public', website=True)
@@ -177,6 +242,7 @@ class MySample(http.Controller):
         for key in borrar:
             del kw[key]
         kw['x_complaint_issues_ID'] = kw['x_complaint_issues_ID'].split(',')
+        kw['x_phase_0'] = True
         try:
             consecutivo = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=','DENUNCIAS')])
             kw['x_name'] = 'DENUNCIA-'+str(consecutivo.x_value + 1)
@@ -202,6 +268,19 @@ class MySample(http.Controller):
         else:
             return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
     
+    # Ruta que renderiza página de formulario de denuncias
+    @http.route('/validar_preguntas', methods=["POST"], type="json", auth='public', website=True)
+    def validar_preguntas(self, **kw):
+        _logger.info(kw)
+        campos = ['x_studio_nombres','x_studio_apellidos','x_studio_carrera_1','x_studio_documento_1','x_enrollment_number'] 
+        tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',kw['tipo_doc']),
+                                                                      ('x_studio_documento_1','=',kw['documento']),
+                                                                      ('x_cycle_ID.x_order','=',5)],campos)
+        if tramites:
+            return {'ok': True, 'result': tramites}
+        else:
+            return {'ok': False, 'result': 'No hay registros con la información suministrada'}
+        
     # Ruta que renderiza página de consulta de registro por documento
     @http.route('/consulta_online/por_documento', auth='public', website=True)
     def consulta_por_documento(self):
@@ -412,6 +491,137 @@ class MySample(http.Controller):
     @http.route('/convenios/tramite/por_nombre', auth='public', website=True)
     def inicio_convenio_nombre(self):
         return http.request.render('my_sample.inicio_tramite', {'form': 'convenio', 'inicio_tramite': True, 'por_nombre': True })
+        
+    # Ruta que renderiza el inicio de actualización/coreeción de registro
+    @http.route('/tramites/correccion_datos', auth='public', website=True)
+    def inicio_correccion(self):
+        return http.request.render('my_sample.inicio_correccion', {})
+    
+    # Ruta que renderiza el inicio del trámite actualización/coreeción de registro
+    @http.route('/tramites/solicitud_correccion/<model("x_cpnaa_procedure"):tramite>', auth='public', website=True)
+    def solicitud_correccion(self, tramite):
+        if tramite.x_cycle_ID.x_order != 5:
+            return http.request.redirect('/tramites/correccion_datos')
+        return http.request.render('my_sample.solicitud_correccion', {'tramite': tramite})
+        
+    # Ruta que renderiza el inicio del trámite actualización/coreeción de registro
+    @http.route('/registrar_solicitud_correccion', methods=["POST"], auth='public', website=True)
+    def registrar_solicitud_correccion(self, **kw):
+        resp = {}
+        _logger.info(kw)
+        for key, value in kw.items():
+            if type(value) != str:
+                kw[key] = base64.b64encode(kw[key].read())
+        try:
+            kw['x_issue'] = int(kw['x_issue'])
+            kw['x_service_ID'] = self.asignar_servicio(kw['x_service_ID'])
+            kw['x_procedure_ID'] = int(kw['x_procedure_ID'])
+            kw['x_name'] = http.request.env['ir.sequence'].sudo().next_by_code('x_registry_correction_request.sequence')
+            kw['x_state'] = 'x_VD'
+            _logger.info(kw)
+            solicitud = http.request.env['x_registry_correction_request'].sudo().create(kw)
+            resp = { 'ok': True, 'message': 'Registro: '+kw['x_name']+' creado con exito','id': solicitud.id }
+        except:
+            tb = sys.exc_info()[2]
+            resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }
+            _logger.info(sys.exc_info())
+            return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
+        else:
+            return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
+    
+    def asignar_servicio(self, service_ID):
+        nivel_prof = http.request.env['x_cpnaa_service'].sudo().search([('id','=',service_ID)]).x_studio_nivel_profesional
+        nivel_prof = nivel_prof if len(nivel_prof) == 1 else nivel_prof[0]
+        if nivel_prof.x_name == 'PROFESIONAL':
+            return http.request.env['x_cpnaa_service'].sudo().search([('x_name','=','ACTUALIZACION DE DATOS Y CORRECCION DEL REGISTRO DE ARQUITECTO')]).id
+        else:
+            return http.request.env['x_cpnaa_service'].sudo().search([('x_name','=','ACTUALIZACIÓN DE DATOS Y CORRECIÓN DEL REGISTRO DE AUXILIAR')]).id
+    
+    # Ruta que renderiza el inicio del trámite acceso matrícula virtual
+    @http.route('/tramites/solicitud_virtual', auth='public', website=True)
+    def inicio_mat_virtual(self):
+        return http.request.render('my_sample.inicio_mat_virtual', {})
+    
+    # Ruta que renderiza las preguntas para el trámite acceso matrícula virtual
+    @http.route('/tramites/solicitud_virtual/<model("x_cpnaa_procedure"):tramite>', auth='public', website=True)
+    def preguntas_mat_virtual(self, tramite):
+        return http.request.render('my_sample.preguntas_mat_virtual', {'tramite': tramite})
+    
+    # Retorna los datos del trámite para el formulario de edición
+    @http.route('/validar_respuestas', methods=["POST"], type="json", auth='public', website=True)
+    def validar_respuestas(self, **kw):
+        correctas, tramite_valido, success = None, False, False
+        min_validas = 3
+        data = kw.get('data')
+        _logger.info(data)
+        camposString = ['x_enrollment_number']
+        camposManyTo = ['x_studio_ciudad_de_expedicin','x_studio_carrera_1','x_studio_universidad_5']
+        tramites = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',data['x_doc_type_ID']),
+                                                                        ('x_studio_documento_1','=',data['x_document'])])
+        for tram in tramites:
+            correctas = 0
+            _logger.info(tram['x_studio_fecha_de_grado_2'].year)
+            if str(tram['x_studio_fecha_de_grado_2'].year) == data['x_studio_fecha_de_grado_2']:
+                correctas += 1
+            for val in camposString:
+                if str(tram[val]) == str(data[val]):
+                    correctas += 1
+            for val in camposManyTo:
+                if str(tram[val]['id']) == str(data[val]):
+                    correctas += 1
+            if correctas >= min_validas:
+                tramite_valido = tram
+                success = True
+        _logger.info(tramite_valido)
+        if success:
+            usuario = http.request.env['res.users'].sudo().search([('login','=',tramite_valido.x_studio_correo_electrnico)])
+            # Valida si ya existe un usuario con esa dirección de email
+            search_user = http.request.env["res.users"].sudo().search(['|',("login","=",data.get('x_request_email').lower()),
+                                                                           ("login","=",data.get('x_request_email').upper())])
+            if data.get('x_request_email') == tramite_valido.x_studio_correo_electrnico.lower():
+                pass
+            elif search_user and search_user.login == usuario.login:
+                return { 'ok': False, 'email_existe': True, 'message': 'Ya existe otro usuario registrado con el correo electrónico suministrado' }
+            elif not search_user and data.get('x_request_email') != tramite_valido.x_studio_correo_electrnico.lower():
+                return { 'ok': False, 'email_existe': True, 'message': 'El correo ingresado no coincide con el que tenemos registrado, ¿Desea actualizarlo?',
+                         'id_tramite': tramite_valido.id, 'id_usuario': usuario.id, 'email': data.get('x_request_email')}
+            actualizacion = self.actualizar_usuario(tramite_valido, usuario, data.get('x_request_email'))
+            if actualizacion:
+                return { 'ok': True, 'data': { 'email': data.get('x_request_email'), 
+                                           'servicio': tramite_valido.x_service_ID.x_name } }
+        else:
+            return { 'ok': False, 'respuestas': False,'message': 'No cumple con el minimo de respuestas validas' }
+    
+    # Confirmación de cambio de email en activación virtual 
+    @http.route('/confirmar_email', methods=["POST"], type="json", auth='public', website=True)
+    def confirmacion_email(self, **kw):
+        _logger.info(kw)
+        data = kw.get('data')
+        tramite = http.request.env['x_cpnaa_procedure'].sudo().browse(data.get('id_tramite'))
+        usuario = http.request.env['res.users'].sudo().browse(data.get('id_usuario'))
+        actualizacion = self.actualizar_usuario(tramite, usuario, data.get('x_request_email'))
+        if actualizacion:
+            return { 'ok': True, 'data': { 'email': data.get('x_request_email'), 
+                                           'servicio': tramite.x_service_ID.x_name } }
+        
+    def actualizar_usuario(self, tramite, usuario, email):
+        try:
+            # Asigna contraseña
+            password = str(tramite.id)+str(tramite.x_resolution_ID.x_consecutive)
+            update_user = {'login': email, 'password': password, 'new_password': password}
+            update_tramite = {'x_studio_correo_electrnico': email}
+            http.request.env['res.users'].browse(usuario.id).sudo().write(update_user)
+            http.request.env['x_cpnaa_procedure'].browse(tramite.id).sudo().write(update_tramite)
+            http.request.env['x_virtual_activacion_procedure'].sudo().create({
+                'x_name': 'ACTIVACION-VIRTUAL-'+tramite.x_studio_nombres+'-'+tramite.x_studio_apellidos,
+                'x_procedure_ID': tramite.id,
+                'x_request_email': email,
+            })
+            http.request.env['mail.template'].sudo().browse(29).send_mail(tramite.id,force_send=True)
+            return True
+        except:
+            _logger.info(sys.exc_info())
+            return False
     
     # Ruta que renderiza el inicio del trámite certificado de vigencia virtual
     @http.route('/tramites/certificado_de_vigencia', auth='public', website=True)
@@ -773,23 +983,27 @@ class MySample(http.Controller):
     @http.route('/get_universidades', methods=["POST"], type="json", auth='public', website=True)
     def get_universidades(self, **kw):
         cadena = kw.get('cadena')
-        tipo_universidad = kw.get('tipo_universidad')
-        return {'universidades': http.request.env['x_cpnaa_user'].sudo().search_read([('x_user_type_ID.id','=',3),('x_institution_type_ID.id', '=', tipo_universidad),
+        tipo_universidad = [kw.get('tipo_universidad')]
+        if not kw.get('tipo_universidad'):
+            tipo_universidad = [1,2,3]
+        return {'universidades': http.request.env['x_cpnaa_user'].sudo().search_read([('x_user_type_ID.id','=',3),('x_institution_type_ID.id', 'in', tipo_universidad),
                                                                                ('x_name', 'ilike', cadena)],['id','x_name'], limit=6)}
     
     # Retorna las carreas que coinciden con la cadena y nivel profesional recibidos
     @http.route('/get_carreras', methods=["POST"], type="json", auth='public', website=True)
     def get_carreras(self, **kw):
         cadena = kw.get('cadena')
-        nivel_profesional = kw.get('nivel_profesional')
+        nivel_profesional = [kw.get('nivel_profesional')]
+        if not kw.get('nivel_profesional'):
+            nivel_profesional = [1,2,3]
         id_genero = kw.get('id_genero')
         nombre_carrera = 'x_name'
         _logger.info(id_genero)
         if id_genero == '2':
             nombre_carrera = 'x_female_name'
-        return {'carreras': http.request.env['x_cpnaa_career'].sudo().search_read([('x_level_ID.id','=',nivel_profesional),
+        return {'carreras': http.request.env['x_cpnaa_career'].sudo().search_read([('x_level_ID.id','in',nivel_profesional),
                                                                                        (nombre_carrera, 'ilike', cadena)],
-                                                                                       ['id',nombre_carrera], limit=6)}
+                                                                                       ['id',nombre_carrera], limit=8)}
     
     # Retorna el nombre de la carrera según el genero 
     @http.route('/get_carrera_genero', methods=["POST"], type="json", auth='public', website=True)

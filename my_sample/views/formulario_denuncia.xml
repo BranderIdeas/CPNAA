@@ -14,30 +14,6 @@
                             <div class="formSection">
                                 <h2 class="sectionName">Datos del Quejoso</h2>
                                 <div class="row">
-                                    <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required">
-                                        <div class="col-md-6">
-                                            <label class="col-form-label o_fake_editable" for="x_complainant_names">
-                                                Nombres
-                                            </label>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <input type="text" class="o-letters form-control i_required o_website_form_input"
-                                                   name="x_complainant_names"/>
-                                        </div>
-                                    </div>
-                                    <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required">
-                                        <div class="col-md-6">
-                                            <label class="col-form-label o_fake_editable" for="x_complainant_lastnames">
-                                                Apellidos
-                                            </label>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <input type="text" class="o-letters form-control i_required o_website_form_input"
-                                                   name="x_complainant_lastnames"/>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
                                     <div class="row col-md-6 form-group form-field o_website_form_required">
                                         <div class="col-md-6">
                                         <label class="col-form-label o_fake_editable" for="x_complainant_document_type_ID">
@@ -68,6 +44,30 @@
                                         <div class="col-md-6">
                                             <input type="text" class="form-control o_website_form_input v-document i_required" 
                                                    data-type_doc="x_complainant_document_type_ID" name="x_complainant_document"/>                                            
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required">
+                                        <div class="col-md-6">
+                                            <label class="col-form-label o_fake_editable" for="x_complainant_names">
+                                                Nombres
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="text" class="o-letters form-control i_required o_website_form_input"
+                                                   name="x_complainant_names"/>
+                                        </div>
+                                    </div>
+                                    <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required">
+                                        <div class="col-md-6">
+                                            <label class="col-form-label o_fake_editable" for="x_complainant_lastnames">
+                                                Apellidos
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="text" class="o-letters form-control i_required o_website_form_input"
+                                                   name="x_complainant_lastnames"/>
                                         </div>
                                     </div>
                                 </div>
@@ -105,7 +105,7 @@
                                         <select class="child-place-x_complainant_city_ID form-control 
                                                        o_website_form_input i_required" name="x_complainant_state_ID">
                                             <option value="">Seleccione...</option>
-                                            <t t-foreach="request.env['x_cpnaa_state'].search([('x_name','!=','NO APLICA')],order='x_name')" t-as="expedition_state">
+                                            <t t-foreach="request.env['x_cpnaa_state'].search([('x_name','!=','NO APLICA'),('x_country_ID.x_name','=','COLOMBIA')],order='x_name')" t-as="expedition_state">
                                             <option t-att-value="expedition_state.id">
                                                 <t t-esc="expedition_state.x_name"/>
                                             </option>
@@ -158,7 +158,7 @@
                                     <div class="row col-md-6 form-group form-field o_website_form_required">
                                         <div class="col-md-6">
                                             <label class="col-form-label o_fake_editable" for="x_complainant_email">
-                                                Email de notificación
+                                                Correo Electrónico
                                             </label>
                                         </div>
                                         <div class="col-md-6">
@@ -182,29 +182,7 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                 </div>
                             </div>
                             <div class="formSection">
-                                <h2 class="sectionName">Datos del Arquitecto Implicado</h2>
-                                <div class="row">                                
-                                    <div class="row col-md-6 form-group form-field o_website_form_required">
-                                        <div class="col-md-6">
-                                            <label class="col-form-label o_fake_editable" for="x_implicated_names">
-                                                Nombres
-                                            </label>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <input type="text" class="form-control o_website_form_input o-letters i_required" name="x_implicated_names"/>
-                                        </div>
-                                    </div>
-                                    <div class="row col-md-6 form-group form-field o_website_form_required">
-                                        <div class="col-md-6">
-                                        <label class="col-form-label o_fake_editable" for="x_implicated_lastnames">
-                                                Apellidos
-                                            </label>
-                                        </div>
-                                        <div class="col-md-6">
-                                        <input type="text" class="form-control o_website_form_input o-letters i_required" name="x_implicated_lastnames"/>
-                                        </div>
-                                    </div>
-                                </div>
+                                <h2 class="sectionName">Datos del Implicado</h2>
                                 <div class="row"> 
                                     <div class="row col-md-6 form-group form-field o_website_form_required">
                                         <div class="col-md-6">
@@ -239,7 +217,43 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                         </div>
                                     </div>  
                                 </div>
+                                <div class="row">                                
+                                    <div class="row col-md-6 form-group form-field">
+                                        <div class="col-md-6">
+                                            <label class="col-form-label o_fake_editable" for="x_implicated_names">
+                                                Nombres
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="text" class="form-control o_website_form_input o-letters i_required"
+                                                name="x_implicated_names" disabled="disabled" />
+                                            <span class="help-block link-modal-prof" id="open-modal-prof">Cambiar mi selección</span>
+                                        </div>
+                                    </div>
+                                    <div class="row col-md-6 form-group form-field">
+                                        <div class="col-md-6">
+                                        <label class="col-form-label o_fake_editable" for="x_implicated_lastnames">
+                                                Apellidos
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                        <input type="text" class="form-control o_website_form_input o-letters i_required" 
+                                            name="x_implicated_lastnames" disabled="disabled" />
+                                        </div>
+                                    </div>
+                                </div>                                
                                 <div class="row">
+                                    <div class="row col-md-6 form-group form-field">
+                                        <div class="col-md-6">
+                                            <label class="col-form-label o_fake_editable" for="x_implicated_enrollment_number">
+                                                Número de Matrícula
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="text" class="form-control o_website_form_input upper" 
+                                                   name="x_implicated_enrollment_number" disabled="1"/>
+                                        </div>
+                                    </div>                                    
                                     <div class="row col-md-6 form-group form-field">
                                         <div class="col-md-6">
                                             <label class="col-form-label o_fake_editable" for="x_implicated_phone">
@@ -247,9 +261,12 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                             </label>
                                         </div>
                                         <div class="col-md-6">
-                                            <input type="text" class="form-control o_website_form_input v-telefono" name="x_implicated_phone"/>
+                                            <input type="text" class="form-control o_website_form_input v-telefono" 
+                                                name="x_implicated_phone"/>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="row">
                                     <div class="row col-md-6 form-group form-field o_fake_not_editable">
                                         <div class="col-md-6">
                                             <label class="col-form-label o_fake_editable" for="x_implicated_celular">
@@ -257,29 +274,19 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                             </label>
                                         </div>
                                         <div class="col-md-6">
-                                            <input type="text" class="form-control o_website_form_input v-celular" name="x_implicated_celular"/>
+                                            <input type="text" class="form-control o_website_form_input v-celular" 
+                                                name="x_implicated_celular"/>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="row">
+                                    </div>                                    
                                     <div class="row col-md-6 form-group form-field o_fake_not_editable">
                                         <div class="col-md-6">
                                             <label class="col-form-label o_fake_editable" for="x_implicated_email">
-                                                Email de notificación
+                                                Correo Electrónico
                                             </label>
                                         </div>
                                         <div class="col-md-6">
-                                            <input type="text" class="form-control o_website_form_input v-email" name="x_implicated_email"/>
-                                        </div>
-                                    </div>
-                                    <div class="row col-md-6 form-group form-field">
-                                        <div class="col-md-6">
-                                            <label class="col-form-label o_fake_editable" for="x_implicated_enrollment_number">
-                                                Matrícula (Diligencie este campo si cuenta con la información)
-                                            </label>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <input type="text" class="form-control o_website_form_input upper" name="x_implicated_enrollment_number"/>
+                                            <input type="text" class="form-control o_website_form_input v-email"
+                                                name="x_implicated_email" />
                                         </div>
                                     </div>
                                 </div>
@@ -317,10 +324,12 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                             </label>
                                         </div>
                                         <div class="col-md-7">
-                                            <input type="text" class="form-control o_website_form_input" name="x_complaint_issues_other"/>
+                                            <input type="text" class="form-control o_website_form_input" 
+                                                   maxlength="50" name="x_complaint_issues_other"/>
+                                            <span class="help-block">Máximo 50 caracteres</span>
                                         </div>
                                     </div>
-                                    <hr style="border-top: 1px solid #CCCCCC !important;"/>
+                                    <hr style="border-top: 1px solid #CCCCCC;"/>
                                     <div class="row">
                                         <div class="row col-md-12 form-group form-field o_fake_not_editable m-2 pb-3">
                                             <div class="row col-md-12">
@@ -347,8 +356,7 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                             <select class="child-place-x_facts_city_ID form-control 
                                                            o_website_form_input i_required" name="x_facts_state_ID">
                                                 <option value="">Seleccione...</option>
-                                                <t t-foreach="request.env['x_cpnaa_state'].search([('x_name','!=','NO APLICA')],order='x_name')"
-                                                    t-as="expedition_state">
+                                            <t t-foreach="request.env['x_cpnaa_state'].search([('x_name','!=','NO APLICA'),('x_country_ID.x_name','=','COLOMBIA')],order='x_name')" t-as="expedition_state">
                                                 <option t-att-value="expedition_state.id">
                                                     <t t-esc="expedition_state.x_name"/>
                                                 </option>
@@ -422,6 +430,9 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                         <span class="help-block">Tamaño máximo 3mb</span>
                                         <input type="file" class="form-control i_required btn-file evidencias" id="x_evidence_files" 
                                                accept="application/pdf, image/png, image/jpg, image/jpeg" multiple="1" />
+                                        <div class="col-form-label o_fake_editable mt-3 text-center font-weight-bold">
+                                            *Adjuntar máximo 10 archivos.
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -443,6 +454,7 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                             </div>
                             <div class="col-md-12">
                                 <label class="text-justify mb-3">
+                                <input type="checkbox" value="Yes" class="o_website_form_input" required="true" id="x_juramento"/>
 Bajo la gravedad de juramento me permito manifestar que los hechos narrados en el escrito de queja corresponden a la verdad, teniendo en cuenta las implicaciones legales contenidas en el artículo 442 del código penal colombiano, que en su tenor literal señala: "artículo 442. Falso testimonio. El que, en actuación judicial o administrativa, bajo la gravedad del juramento ante autoridad competente, falte a la verdad o la calle total o parcialmente, incurrirá en prisión de seis (6) a doce (12) años."
                                 </label>
                                 <label class="col-form-label o_fake_editable text-justify" for="x_elec_terminos">
@@ -478,6 +490,21 @@ Bajo la gravedad de juramento me permito manifestar que los hechos narrados en e
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-primary btn-lg btn-stadium" data-dismiss="modal">Cerrar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal fade" id="results_profesional" tabindex="-1" role="dialog" 
+                             aria-labelledby="results_profesionalLabel" aria-hidden="true" style="top:20%;">
+                            <div class="modal-dialog modal-md" role="document">
+                                <div class="modal-content" style="border-radius:30px;">
+                                    <div class="modal-header">
+                                        <h3 class="modal-title formTitle">Seleccione la profesión con la que desea relacionar la denuncia</h3>
+                                    </div>
+                                    <div id="select_profesional" class="modal-body text-center formSection p-2 m-3">
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary btn-lg btn-stadium" data-dismiss="modal">Aceptar</button>
                                     </div>
                                 </div>
                             </div>

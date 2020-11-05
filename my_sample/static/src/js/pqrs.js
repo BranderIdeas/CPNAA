@@ -1,4 +1,4 @@
-odoo.define('website.pqrd', function(require) {
+odoo.define('website.pqrs', function(require) {
 'use strict';
     
         const Class = require('web.Class');
@@ -20,9 +20,6 @@ odoo.define('website.pqrd', function(require) {
               }
               for (let file of files) {
                   formData.append(file.name, file);
-              }
-              for (let value of formData.values()) {
-                  console.log(value); 
               }
               try {
                   const request = new XMLHttpRequest();
@@ -95,10 +92,10 @@ odoo.define('website.pqrd', function(require) {
             const otro = $("select[name='x_issues_ID'] option:selected").text().includes('Otro') ? true : false;
             if(otro){
                 $('#otro_asunto').removeClass('invisible').attr('aria-hidden',false);
-                $('select[name="x_pqrd_issue_other"]').addClass('i_required');
+                $('select[name="x_pqrs_issue_other"]').addClass('i_required');
             }else{
                 $('#otro_asunto').addClass('invisible').attr('aria-hidden',true);
-                $('select[name="x_pqrd_issue_other"]').removeClass('i_required is-invalid').val('');
+                $('select[name="x_pqrs_issue_other"]').removeClass('i_required is-invalid').val('');
             }
         });
 

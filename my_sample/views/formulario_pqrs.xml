@@ -185,7 +185,7 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                             <div class="col-md-6">
                                             <select class="form-control o_website_form_input i_required" name="x_request_type_ID">
                                                 <option value="">Seleccione...</option>
-                                                <t t-foreach="request.env['x_cpnaa_pqrd_request_type'].sudo().search([])" t-as="tipo_solicitud">
+                                                <t t-foreach="request.env['x_cpnaa_pqrs_request_type'].sudo().search([])" t-as="tipo_solicitud">
                                                 <option t-att-value="tipo_solicitud.id">
                                                     <t t-esc="tipo_solicitud.x_name.title()"/>
                                                 </option>
@@ -204,9 +204,9 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                             <div class="col-md-6">
                                                 <select class="form-control o_website_form_input i_required" name="x_issues_ID">
                                                     <option value="">Seleccione...</option>
-                                                    <t t-foreach="request.env['x_pqrd_issues'].search([])" t-as="pqrd_issue">
-                                                    <option t-att-value="pqrd_issue.id">
-                                                        <t t-esc="pqrd_issue.x_name"/>
+                                                    <t t-foreach="request.env['x_pqrs_issues'].search([])" t-as="pqrs_issue">
+                                                    <option t-att-value="pqrs_issue.id">
+                                                        <t t-esc="pqrs_issue.x_name"/>
                                                     </option>
                                                     </t>
                                                 </select>   
@@ -216,12 +216,12 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                     <div class="row invisible" id="otro_asunto" aria-hidden="true">
                                         <div class="row col-md-10 ml-0 mb-2 form-group form-field o_website_form_required">
                                             <div class="col-md-4">
-                                                <label class="col-form-label o_fake_editable" for="x_pqrd_issue_other">
+                                                <label class="col-form-label o_fake_editable" for="x_pqrs_issue_other">
                                                     Otro (Por favor indique cuál)
                                                 </label>
                                             </div>
                                             <div class="col-md-6">
-                                                <input type="text" class="form-control o_website_form_input" name="x_pqrd_issue_other"/>
+                                                <input type="text" class="form-control o_website_form_input" name="x_pqrs_issue_other"/>
                                             </div> 
                                         </div>
                                     </div>

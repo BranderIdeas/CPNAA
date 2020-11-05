@@ -15,7 +15,7 @@
                 <script src="/my_sample/static/src/js/denuncia.js"></script>
                 <script src="/my_sample/static/src/js/activacion.js"></script>
                 <script src="/my_sample/static/src/js/correccion.js"></script>                
-                <script src="/my_sample/static/src/js/pqrd.js"></script>
+                <script src="/my_sample/static/src/js/pqrs.js"></script>
                 <script src='/my_sample/static/src/js/scripts/yearpicker.js'></script>
                 <script src='/my_sample/static/src/js/scripts/libs/png_support/zlib.js'></script>
                 <script src='/my_sample/static/src/js/scripts/libs/png_support/png.js'></script>

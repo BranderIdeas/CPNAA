@@ -160,7 +160,7 @@ class MySample(http.Controller):
         response = requests.get(base_url + ref_payco)
         return response.json()
     
-    # Ruta que renderiza página de formulario de pqrd
+    # Ruta que renderiza página de formulario de pqrs
     @http.route('/pqrs/formulario', auth='public', website=True)
     def formulario_pqrs(self):
         return http.request.render('my_sample.formulario_pqrs', {})
@@ -182,18 +182,18 @@ class MySample(http.Controller):
             consecutivo = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=','PQRS')])
             kw['x_name'] = 'PQRS-'+str(consecutivo.x_value + 1)
             kw['x_states'] = 'open'
-            pqrs = http.request.env['x_cpnaa_pqrd'].sudo().create(kw)
+            pqrs = http.request.env['x_cpnaa_pqrs'].sudo().create(kw)
             if pqrs:
                 count = 0
                 for at in attachments_files:
                     count += 1
                     file = base64.b64encode(at.read())
-                    attachment = {'x_request_ID': pqrs.id, 'x_file': file, 'x_name': 'PRUEBA-'+str(count)+'-'+pqrs.x_name}
+                    attachment = {'x_request_ID': pqrs.id, 'x_file': file, 'x_name': 'ADJUNTO-'+str(count)+'-'+pqrs.x_name}
                     ext = str(at.filename.split('.')[-1]).lower()
                     if ext == 'pdf':
-                        http.request.env['x_pqdr_attachments_pdf'].sudo().create(attachment)
+                        http.request.env['x_pqrs_attachments_pdf'].sudo().create(attachment)
                     else:
-                        http.request.env['x_pqdr_attachments_img'].sudo().create(attachment)
+                        http.request.env['x_pqrs_attachments_img'].sudo().create(attachment)
                 http.request.env['x_cpnaa_consecutive'].browse(consecutivo.id).sudo().write({'x_value':consecutivo.x_value + 1})
             resp = { 'ok': True, 'message': 'Su solicitud ha sido registrada con el consecutivo '+ pqrs.x_name +' exitosamente.' }
         except:

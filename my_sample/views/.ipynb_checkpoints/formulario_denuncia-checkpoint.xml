@@ -246,7 +246,7 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                     <div class="row col-md-6 form-group form-field">
                                         <div class="col-md-6">
                                             <label class="col-form-label o_fake_editable" for="x_implicated_enrollment_number">
-                                                Matrícula (Diligencie este campo si cuenta con la información)
+                                                Número de Matrícula
                                             </label>
                                         </div>
                                         <div class="col-md-6">
@@ -504,7 +504,7 @@ Bajo la gravedad de juramento me permito manifestar que los hechos narrados en e
                                     <div id="select_profesional" class="modal-body text-center formSection p-2 m-3">
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary btn-lg btn-stadium" data-dismiss="modal">Cerrar</button>
+                                        <button type="button" class="btn btn-primary btn-lg btn-stadium" data-dismiss="modal">Aceptar</button>
                                     </div>
                                 </div>
                             </div>

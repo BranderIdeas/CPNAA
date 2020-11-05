@@ -178,10 +178,10 @@ class MySample(http.Controller):
             del kw[key]
         _logger.info(attachments_files)
         kw['x_issues_ID'] = kw['x_issues_ID'].split(',') if kw['x_issues_ID'] else False
-#         kw['x_phase_0'] = True
         try:
             consecutivo = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=','PQRS')])
             kw['x_name'] = 'PQRS-'+str(consecutivo.x_value + 1)
+            kw['x_states'] = 'open'
             pqrs = http.request.env['x_cpnaa_pqrd'].sudo().create(kw)
             if pqrs:
                 count = 0
@@ -344,20 +344,20 @@ class MySample(http.Controller):
         ahora = datetime.now() - timedelta(hours=5)
         tramite = http.request.env['x_cpnaa_procedure'].search([('id','=',int(data['id_tramite']))])
         numero_recibo = tramite.x_voucher_number
-        numero_radicado = tramite.x_rad_number
+#         numero_radicado = tramite.x_rad_number
         if (not data['corte'] and numero_recibo) and (data['corte'] == tramite.x_origin_name and numero_recibo):
             pass
         elif not numero_recibo or (data['corte'] and data['corte'] != tramite.x_origin_name):
             consecutivo = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Consecutivo Recibo de Pago')])
             numero_recibo = int(consecutivo.x_value) + 1
-            numero_radicado = Sevenet.sevenet_consulta(tramite.id, 'Recibo')
-            update = {'x_voucher_number': numero_recibo, 'x_radicacion_date': ahora, 'x_rad_number': numero_radicado }
+#             numero_radicado = Sevenet.sevenet_consulta(tramite.id)
+            update = {'x_voucher_number': numero_recibo } #, 'x_radicacion_date': ahora, 'x_rad_number': numero_radicado
             if data['corte']:
-                update = {'x_voucher_number': numero_recibo,'x_origin_name': data['corte'],
-                          'x_radicacion_date': ahora, 'x_rad_number': numero_radicado}
+                update = {'x_voucher_number': numero_recibo,'x_origin_name': data['corte']}
+#                           'x_radicacion_date': ahora, 'x_rad_number': numero_radicado}
             http.request.env['x_cpnaa_parameter'].browse(consecutivo.id).sudo().write({'x_value':str(numero_recibo)})
             http.request.env['x_cpnaa_procedure'].browse(tramite.id).sudo().write(update)
-        return {'ok': True, 'numero_recibo': str(numero_recibo), 'numero_radicado': str(numero_radicado)+'-'+str(ahora.year)}
+        return {'ok': True, 'numero_recibo': str(numero_recibo)} #, 'numero_radicado': str(numero_radicado)+'-'+str(ahora.year)
     
     # Envia la información necesaria para el recibo de pago o para el pago desde la pasarela
     @http.route('/tramite_fase_inicial', methods=["POST"], type="json", auth='public', website=True)
@@ -395,7 +395,7 @@ class MySample(http.Controller):
         datetime_str = datetime.strptime(data['fecha_pago'], '%Y-%m-%d %H:%M:%S')
         datetime_str = datetime_str + timedelta(hours=5)
         _logger.info('Hora del pago UTC: '+str(datetime_str))
-        numero_radicado = False
+#         numero_radicado = False
         id_user, error, tramite, pago_registrado, mailthread_registrado, origin_name, grado = False, False, False, False, False, False, False
         try:
             tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',data["id_tramite"])])
@@ -404,7 +404,7 @@ class MySample(http.Controller):
                 if tramite.x_cycle_ID.x_order > 0:
                     raise Exception('Este pago ya fue registrado')
                 if tramite.x_cycle_ID.x_order == 0:
-                    numero_radicado = Sevenet.sevenet_consulta(tramite.id, data['tipo_pago'])
+#                     numero_radicado = Sevenet.sevenet_consulta(tramite.id)
                     if (tramite.x_origin_type.x_name == 'CORTE'):
                         corte_vigente = self.buscar_corte(tramite.x_origin_name)
                         origin_name = corte_vigente['x_name']
@@ -414,9 +414,9 @@ class MySample(http.Controller):
                     ciclo_ID = http.request.env["x_cpnaa_cycle"].sudo().search(["&",("x_service_ID.id","=",tramite["x_service_ID"].id),("x_order","=",1)])
                     update = {'x_cycle_ID': ciclo_ID.id,'x_radicacion_date': datetime_str, 'x_pay_datetime': datetime_str,
                               'x_pay_type': data['tipo_pago'],'x_consignment_number': data['numero_pago'], 'x_bank': data['banco'],
-                              'x_consignment_price': data['monto_pago'],'x_origin_name': origin_name, 'x_rad_number': numero_radicado}
+                              'x_consignment_price': data['monto_pago'],'x_origin_name': origin_name} #, 'x_rad_number': numero_radicado
                     pago_registrado = http.request.env['x_cpnaa_procedure'].browse(tramite['id']).sudo().write(update)
-                    numero_radicado = str(numero_radicado) +'-'+ str(datetime_str.year)
+#                     numero_radicado = str(numero_radicado) +'-'+ str(datetime_str.year)
                     if not pago_registrado:
                         raise Exception('Su pago ha sido exitoso pero no se pudo completar el trámite, por favor envie esta información al correo info@cpnaa.gov.co')
             else:
@@ -435,13 +435,13 @@ class MySample(http.Controller):
                 error = 'Se registro el pago pero no se escribio el mailthread'+'\nTrámite ID: '+str(tramite.id)+'\n'+str(sys.exc_info())
         if not error and mailthread_registrado:
             return { 'ok': True, 'message': 'Trámite actualizado con exito y registrado en el mailthread', 
-                    'mailthread': mailthread_registrado.id, 'error': False, 'id_user': user.id, 'numero_radicado': numero_radicado }
+                    'mailthread': mailthread_registrado.id, 'error': False, 'id_user': user.id } #'numero_radicado': numero_radicado, 
         if pago_registrado and error:
             _logger.info(error)
             return { 'ok': True, 'message': 'Trámite actualizado con exito', 'error': error, 
-                    'id_user': user.id, 'numero_radicado': numero_radicado } 
+                    'id_user': user.id } #'numero_radicado': numero_radicado, 
         if not pago_registrado:        
-            return { 'ok': False, 'error': error, 'id_user': user.id, 'numero_radicado': numero_radicado }
+            return { 'ok': False, 'error': error, 'id_user': user.id } #, 'numero_radicado': numero_radicado
         
     def grado_check_pagos(self, grado):
         _logger.info(grado)
@@ -738,7 +738,7 @@ class MySample(http.Controller):
     @http.route('/validar_tramites', methods=["POST"], type="json", auth='public', website=True)
     def validar_tramites(self, **kw):
         data = kw.get('data')
-        user = False
+        user, data_user = False, False
         if self.validar_captcha(kw.get('token')):
             result, por_nombre, matricula, certificado, tramite_en_curso = {}, False, False, False, False
             graduando = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select','=',int(data['doc_type'])),
@@ -765,17 +765,19 @@ class MySample(http.Controller):
                     user = tramite.x_user_ID
                     result = {'carrera': tramite.x_studio_carrera_1.x_name, 'tipo_documento': tramite.x_studio_tipo_de_documento_1.x_name, 
                               'documento': tramite.x_studio_documento_1 }
+                if user:
+                    data_user = { 'tipo_documento': user.x_document_type_ID.x_name, 'documento': user.x_document, 'carrera': user.x_institute_career.x_name }
             _logger.info(user)
             if len(graduando) > 1:
                 graduando = graduando[-1]
             if (tramite_en_curso):
                 return { 'ok': True, 'id': user.id, 'tramite_en_curso': tramite_en_curso }
             if (matricula or certificado):
-                return { 'ok': True, 'id': user.id, 'matricula': matricula, 'certificado': certificado, 'result': result }
+                return { 'ok': True, 'id': user.id, 'matricula': matricula, 'certificado': certificado, 'result': result, 'data_user': data_user }
             elif (grado):
                 return { 'ok': True, 'id': graduando.id, 'convenio': True }
             elif (user):
-                return { 'ok': True, 'id': user.id, 'convenio': False }
+                return { 'ok': True, 'id': user.id, 'convenio': False, 'user': data_user }
             else:
                 return { 'ok': False, 'id': False, 'convenio': False }
         else:

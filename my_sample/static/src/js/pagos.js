@@ -134,8 +134,8 @@ odoo.define('website.pagos', function(require) {
         fecha.getDate() < 10 ? dia = `0${fecha.getDate()}` : dia = `${fecha.getDate()}`;
         let fecha_imp = [`${fecha.getFullYear()}`, mes, dia];
         let lugar_expedicion = dataPDF.tramite.x_studio_pas_de_expedicin_1[1] == 'COLOMBIA' 
-                             ? dataPDF.tramite.x_studio_ciudad_de_expedicin[1]
-                             : dataPDF.tramite.x_studio_pas_de_expedicin_1[1];
+                                ? dataPDF.tramite.x_studio_ciudad_de_expedicin[1]
+                                : dataPDF.tramite.x_studio_pas_de_expedicin_1[1];
         while (num_recibo.length < 12) {
             num_recibo = '0' + num_recibo;
         }
@@ -212,7 +212,7 @@ odoo.define('website.pagos', function(require) {
         $('#imprimir').click(()=>{
             let img = `<span role="img" aria-label="Logo of CPNAA OFICINA VIRTUAL" title="CPNAA OFICINA VIRTUAL">
                             <img src="/web/image/website/1/logo/CPNAA%20OFICINA%20VIRTUAL?unique=7291d2f"
-                                 class="img img-fluid" alt="CPNAA OFICINA VIRTUAL"></span>`;
+                                    class="img img-fluid" alt="CPNAA OFICINA VIRTUAL"></span>`;
             $('#logo').attr('aria-hidden',false).html(img);
             let contenido = $('#resumenPago').html();
             $('body').html(contenido);

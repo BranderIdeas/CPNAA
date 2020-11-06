@@ -160,7 +160,7 @@ class MySample(http.Controller):
         response = requests.get(base_url + ref_payco)
         return response.json()
     
-    # Ruta que renderiza página de formulario de pqrs
+    # Ruta que renderiza página de formulario de pqrd
     @http.route('/pqrs/formulario', auth='public', website=True)
     def formulario_pqrs(self):
         return http.request.render('my_sample.formulario_pqrs', {})
@@ -177,7 +177,6 @@ class MySample(http.Controller):
         for key in borrar:
             del kw[key]
         _logger.info(attachments_files)
-        kw['x_issues_ID'] = kw['x_issues_ID'].split(',') if kw['x_issues_ID'] else False
         try:
             consecutivo = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=','PQRS')])
             kw['x_name'] = 'PQRS-'+str(consecutivo.x_value + 1)
@@ -608,16 +607,21 @@ class MySample(http.Controller):
         try:
             # Asigna contraseña
             password = str(tramite.id)+str(tramite.x_resolution_ID.x_consecutive)
+            cambio_email = '.' if tramite.x_studio_correo_electrnico == email else ' y ha actualizado su email "%s" por "%s".' % (tramite.x_studio_correo_electrnico, email)
             update_user = {'login': email, 'password': password, 'new_password': password}
             update_tramite = {'x_studio_correo_electrnico': email}
             http.request.env['res.users'].browse(usuario.id).sudo().write(update_user)
             http.request.env['x_cpnaa_procedure'].browse(tramite.id).sudo().write(update_tramite)
             http.request.env['x_virtual_activacion_procedure'].sudo().create({
-                'x_name': 'ACTIVACION-VIRTUAL-'+tramite.x_studio_nombres+'-'+tramite.x_studio_apellidos,
+                'x_name': 'ACTIVACION-VIRTUAL-%s-%s' % (tramite.x_studio_nombres, tramite.x_studio_apellidos),
                 'x_procedure_ID': tramite.id,
                 'x_request_email': email,
             })
             http.request.env['mail.template'].sudo().browse(29).send_mail(tramite.id,force_send=True)
+            subject = '%s %s ha realizado la activación virtual' % (tramite.x_studio_nombres, tramite.x_studio_apellidos)
+            body = '%s %s ha realizado la activación virtual%s' % (tramite.x_studio_nombres, tramite.x_studio_apellidos, cambio_email)
+            self.mailthread_tramite(tramite.id, tramite.x_studio_nombres, tramite.x_studio_apellidos,
+                                    subject, body, tramite.x_user_ID.x_partner_ID.id)
             return True
         except:
             _logger.info(sys.exc_info())
@@ -1322,8 +1326,8 @@ class MySample(http.Controller):
             return {'ok': False, 'error': error}
         
     def validar_captcha(self, token):
-        base_url = 'https://www.google.com/recaptcha/api/siteverify?response=';
-        secret = '&secret=6Lf2UcMZAAAAAPUtz3_vPL7H-z8j8cQ1if9fT1Cn';
+        base_url = 'https://www.google.com/recaptcha/api/siteverify?response='
+        secret = '&secret=6Lf2UcMZAAAAAPUtz3_vPL7H-z8j8cQ1if9fT1Cn'
         response = requests.post(base_url + token + secret)
         _logger.info(response.json()['success'])
         return response.json()['success']

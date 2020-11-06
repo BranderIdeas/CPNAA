@@ -46,14 +46,33 @@
                                 * Si va a realizar el pago en línea por favor evite utilizar el modo incógnito de su navegador.
                             </h1>
                             <div class="row col-sm-12 justify-content-md-center mb-5 mt-4">
-                                <div>
-                                    <button id="recibo" type="button" class="btn btn-primary btn-stadium mb-2" disabled="1">
-                                        Imprimir recibo para pago en oficina
-                                    </button>
+                                <div class="container text-center">
+                                    <form>
+                                       <script src='https://checkout.epayco.co/checkout.js'
+                                            data-epayco-key='57d20fccb29db60eb4e1be5ff866548f'
+                                            class='epayco-button'
+                                            t-attf-data-epayco-amount="{{ tramite['x_rate'] }}"
+                                            t-attf-data-epayco-description="{{ tramite['x_service_ID'][1] }}"
+                                            t-attf-data-epayco-name-billing="{{ tramite['x_studio_nombres'] }} {{ tramite['x_studio_apellidos'] }}"
+                                            t-attf-data-epayco-address-billing="{{ tramite['x_studio_direccin'] }}"
+                                            t-attf-data-epayco-mobilephone-billing="{{ tramite['x_user_celular'] }}"
+                                            t-attf-data-epayco-number-doc-billing="{{ tramite['x_studio_documento_1'] }}"
+                                            t-attf-data-epayco-extra1="{{ tramite['id'] }}"
+                                            data-epayco-tax='0'
+                                            data-epayco-tax-base='0'
+                                            data-epayco-name='PAGO CPNAA'
+                                            data-epayco-currency='cop'    
+                                            data-epayco-country='CO'
+                                            data-epayco-test='true'
+                                            data-epayco-external='false'
+                                            data-epayco-response='https://branderideas-cpnaa-dev-brander-1576909.dev.odoo.com/pagos/confirmacion'>
+                                       </script>
+                                    </form>
                                 </div>
                                 <div>
-                                    <button id="epayco" type="button" class="btn btn-primary btn-stadium ml-3" disabled="1">
-                                        Pago con tarjeta o PSE
+                                    <button id="recibo" type="button" class="btn btn-secondary my-2" disabled="1" 
+                                            style="border: 1px solid #7b7b7b; border-radius: 5px; font-weight: 600; color: #7b7b7b;">
+                                        Imprimir recibo para pago en oficina
                                     </button>
                                 </div>
                             </div>
@@ -83,7 +102,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <script type="text/javascript" src="https://checkout.epayco.co/checkout.js"/>
+<!--                             <script type="text/javascript" src="https://checkout.epayco.co/checkout.js"/> -->
                         </div>
                     </div>
             </t>

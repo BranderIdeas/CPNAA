@@ -48,6 +48,7 @@
                             <div class="row col-sm-12 justify-content-md-center mb-5 mt-4">
                                 <div class="container text-center">
                                     <form>
+                                       <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                        <script src='https://checkout.epayco.co/checkout.js'
                                             data-epayco-key='57d20fccb29db60eb4e1be5ff866548f'
                                             class='epayco-button'

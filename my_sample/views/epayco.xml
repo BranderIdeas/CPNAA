@@ -48,7 +48,7 @@
                             <div class="row col-sm-12 justify-content-md-center mb-5 mt-4">
                                 <div class="container text-center">
                                     <form>
-                                       <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                       <!-- <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/> -->
                                        <script src='https://checkout.epayco.co/checkout.js'
                                             data-epayco-key='57d20fccb29db60eb4e1be5ff866548f'
                                             class='epayco-button'
@@ -66,7 +66,7 @@
                                             data-epayco-country='CO'
                                             data-epayco-test='false'
                                             data-epayco-external='false'
-                                            data-epayco-response='https://branderideas-cpnaa-dev-brander-1576909.dev.odoo.com/pagos/confirmacion'>
+                                            data-epayco-response='https://oficinavirtual.cpnaa.com/pagos/confirmacion'>
                                        </script>
                                     </form>
                                 </div>

@@ -114,7 +114,9 @@ class MySample(http.Controller):
     # Ruta que renderiza pagina de pagos, si no existe un trámite por pagar lo redirige al inicio del trámite
     @http.route('/pagos/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)
     def epayco(self, tipo_doc, documento):
-        campos = ['id','x_studio_tipo_de_documento_1','x_studio_documento_1','x_service_ID','x_rate']
+        campos = ['id','x_studio_tipo_de_documento_1','x_studio_documento_1',
+                  'x_service_ID','x_rate','x_studio_nombres','x_studio_apellidos',
+                  'x_studio_direccin','x_user_celular']
         tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
                                                                       ('x_studio_documento_1','=',documento),
                                                                       ('x_cycle_ID.x_order','=',0)],campos)

@@ -17,13 +17,7 @@
                 <script src="/my_sample/static/src/js/correccion.js"></script>                
                 <script src="/my_sample/static/src/js/pqrs.js"></script>
                 <script src='/my_sample/static/src/js/scripts/yearpicker.js'></script>
-                <script src='/my_sample/static/src/js/scripts/libs/png_support/zlib.js'></script>
-                <script src='/my_sample/static/src/js/scripts/libs/png_support/png.js'></script>
-                <script src="/my_sample/static/src/js/scripts/libs/downloadify/js/swfobject.js"></script>
-                <script src="/my_sample/static/src/js/scripts/libs/downloadify/js/downloadify.min.js"></script>
-                <script src='/my_sample/static/src/js/scripts/libs/deflate.js'></script>
-                <script src="/my_sample/static/src/js/scripts/dist/jspdf.debug.js"></script>
-                <script src="/my_sample/static/src/js/scripts/plugins/addimage.js"></script>
+                <script src="/my_sample/static/src/js/scripts/dist/jspdf.min.js"></script>
                 <script src="/my_sample/static/src/js/scripts/JsBarcode.all.min.js"></script>
                 <script src="/my_sample/static/src/js/scripts/pdfFunctions.js"></script>
             </xpath>

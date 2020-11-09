@@ -50,27 +50,29 @@
                                     <form>
                                        <!-- <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/> -->
                                        <script src='https://checkout.epayco.co/checkout.js'
-                                            data-epayco-key='57d20fccb29db60eb4e1be5ff866548f'
                                             class='epayco-button'
+                                            t-attf-data-epayco-key="{{ key_epayco }}"
                                             t-attf-data-epayco-amount="{{ tramite['x_rate'] }}"
                                             t-attf-data-epayco-description="{{ tramite['x_service_ID'][1] }}"
                                             t-attf-data-epayco-name-billing="{{ tramite['x_studio_nombres'] }} {{ tramite['x_studio_apellidos'] }}"
                                             t-attf-data-epayco-address-billing="{{ tramite['x_studio_direccin'] }}"
                                             t-attf-data-epayco-mobilephone-billing="{{ tramite['x_user_celular'] }}"
+                                            t-attf-data-epayco-type-doc-billing="{{ tipo_documento }}"
                                             t-attf-data-epayco-number-doc-billing="{{ tramite['x_studio_documento_1'] }}"
                                             t-attf-data-epayco-extra1="{{ tramite['id'] }}"
+                                            t-attf-data-epayco-test="{{ str(modo_test).lower() }}"
+                                            t-attf-data-epayco-response="{{ response }}"
                                             data-epayco-tax='0'
                                             data-epayco-tax-base='0'
                                             data-epayco-name='PAGO CPNAA'
                                             data-epayco-currency='cop'    
                                             data-epayco-country='CO'
-                                            data-epayco-test='false'
                                             data-epayco-external='false'
-                                            data-epayco-response='https://oficinavirtual.cpnaa.gov.co/pagos/confirmacion'>
+                                            >
                                        </script>
                                     </form>
                                 </div>
-                                <div>
+                                <div class="container text-center">
                                     <button id="recibo" type="button" class="btn btn-secondary my-2" disabled="1" 
                                             style="border: 1px solid #7b7b7b; border-radius: 5px; font-weight: 600; color: #7b7b7b;">
                                         Imprimir recibo para pago en oficina

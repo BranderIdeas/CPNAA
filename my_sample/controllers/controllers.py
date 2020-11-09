@@ -114,6 +114,10 @@ class MySample(http.Controller):
     # Ruta que renderiza pagina de pagos, si no existe un trámite por pagar lo redirige al inicio del trámite
     @http.route('/pagos/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)
     def epayco(self, tipo_doc, documento):
+        url_base   = http.request.env['ir.config_parameter'].get_param('web.base.url')
+        modo_test  = '.dev.odoo.com' in url_base
+        response   = '%s/pagos/confirmacion' % url_base
+        key_epayco = '9e73b510f7dfd7568b5e876a970962cb' if modo_test else '57d20fccb29db60eb4e1be5ff866548f'
         campos = ['id','x_studio_tipo_de_documento_1','x_studio_documento_1',
                   'x_service_ID','x_rate','x_studio_nombres','x_studio_apellidos',
                   'x_studio_direccin','x_user_celular']
@@ -121,14 +125,21 @@ class MySample(http.Controller):
                                                                       ('x_studio_documento_1','=',documento),
                                                                       ('x_cycle_ID.x_order','=',0)],campos)
         if (tramites):
-            return http.request.render('my_sample.epayco', {'tramite': tramites[0]})
+            tipo_documento = 'CC'
+            if tramites[0]['x_studio_tipo_de_documento_1'][0] == 2:
+                tipo_documento = 'CE'
+            elif tramites[0]['x_studio_tipo_de_documento_1'][0] == 5:
+                tipo_documento = 'PPN'
+            return http.request.render('my_sample.epayco', {'tramite': tramites[0], 'modo_test': modo_test, 
+                                                            'response': response, 'key_epayco': key_epayco,
+                                                            'tipo_documento': tipo_documento })
         else:
             return http.request.redirect('/cliente/tramite/matricula')
     
     # Ruta que renderiza página de respuesta de pasarela de pagos
     @http.route('/pagos/respuesta', auth='public', website=True)
     def respuesta_epayco(self):
-        return http.request.render('my_sample.respuesta_pago', {})
+        return http.request.redirect('/pagos/confirmacion')
     
     # Ruta que renderiza página de confirmación de pasarela de pagos
     @http.route('/pagos/confirmacion', auth='public', website=True)
@@ -668,7 +679,7 @@ class MySample(http.Controller):
     @http.route('/tramites/certificado_de_vigencia/<model("x_cpnaa_procedure"):tramite>', auth='public', website=True)
     def certificado_vigencia(self, tramite):
         _logger.info(tramite.x_legal_status)
-        if tramite and tramite.x_legal_status != 'SANCIONADO':
+        if tramite:
             return http.request.render('my_sample.certificado_vigencia', {'tramite': tramite})
         else:
             return http.request.redirect('/tramites/certificado_de_vigencia')
@@ -685,12 +696,7 @@ class MySample(http.Controller):
                                                                           ['id','x_studio_carrera_1','x_legal_status'])
             if tramites:
                 mensaje = 'Si existen registros para este tipo y número de documento'
-                for tramite in tramites:
-                    _logger.info(tramite)
-                    if tramite['x_legal_status'] == 'SANCIONADO':
-                        mensaje = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','MENSAJE PROFESIONAL SANCIONADO')]).x_value
-                        tramite['mensaje'] = mensaje
-                return {'ok': True, 'mensaje': 'Si existen registros', 'tramites': tramites }
+                return {'ok': True, 'mensaje': mensaje, 'tramites': tramites }
             else:
                 return {'ok': False, 'mensaje': 'No existen registros para este tipo y número de documento', 'tramites': tramites }
         else:

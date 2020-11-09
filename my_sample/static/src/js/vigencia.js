@@ -109,26 +109,14 @@ odoo.define('website.vigencia', function(require) {
                     div_msj.removeClass('invisible').attr('aria-hidden',false);
                     div_msj.find('div').text(response.mensaje);
                 } else if (response.tramites.length == 1){
-                    if(response.tramites[0].mensaje){
-                        div_msj.removeClass('invisible').attr('aria-hidden',false);
-                        div_msj.find('div').removeClass('alert-primary').addClass('alert-info');
-                        let texto = `<h5 class="text-center">${response.tramites[0].mensaje}</h5>
-                                        <a href="https://cpnaa.gov.co/profesionales-sancionados-y-amonestaciones/" target="_top">
-                                        <h5 class="text-center">Ir a sancionados</h5>
-                                    </a>`;
-                        div_msj.find('div').html(texto);
-                    }else{
-                        $(location).attr('href','/tramites/certificado_de_vigencia/'+response.tramites[0].id);
-                    }
+                    $(location).attr('href','/tramites/certificado_de_vigencia/'+response.tramites[0].id);
                 } else if (response.tramites.length > 1){
                     div_msj.removeClass('invisible').attr('aria-hidden',false);
                     div_msj.find('div').removeClass('alert-primary').addClass('alert-info');
                     let texto = '<h5 class="text-center">Se han encontrado varias coincidencias, por favor selecciona</h5>';
                     response.tramites.forEach((tram)=>{
-                        let mensaje = tram.x_legal_status == 'SANCIONADO' ? tram.mensaje : 'Seleccione para generar certificado';
-                        let enlace = tram.x_legal_status == 'SANCIONADO' 
-                                    ? 'href="https://cpnaa.gov.co/profesionales-sancionados-y-amonestaciones/" target="_top"' 
-                                    : `href="/tramites/certificado_de_vigencia/${tram.id}"`;
+                        let mensaje = 'Seleccione para generar certificado';
+                        let enlace = `href="/tramites/certificado_de_vigencia/${tram.id}"`;
                         texto += `<a class="card card-link fw700" ${enlace}>
                                     <div class="card-header results-vigencia">
                                         PROFESIÓN: ${tram.x_studio_carrera_1[1]}

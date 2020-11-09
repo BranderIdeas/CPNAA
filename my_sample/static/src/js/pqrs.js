@@ -35,7 +35,7 @@ odoo.define('website.pqrs', function(require) {
                                   $('#mssg_result').text('').removeClass('alert alert-danger');
                                   $('#mssg_result').addClass('alert alert-info').text(resp.message);
                                   setTimeout(()=>{ 
-                                      window.top.location.href = 'https://www.cpnaa.gov.co/';
+                                      window.top.location.href = 'https://cpnaa.gov.co/';
                                   },1200);
                               }else{
                                   ocultarSpinner();

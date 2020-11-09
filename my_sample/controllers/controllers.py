@@ -86,7 +86,7 @@ class MySample(http.Controller):
         try:
             user = http.request.env['x_cpnaa_user'].search([('x_document_type_ID.id','=',kw.get('x_document_type_ID')),
                                                                ('x_document','=',kw.get('x_document'))])
-            tramite = http.request.env['x_cpnaa_procedure'].search([('x_user_ID','=',user.id)])[0]
+            tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_user_ID','=',user.id)])[0]
             update = {'x_studio_carrera_1':kw.get('x_institute_career'),'x_studio_universidad_5': kw.get('x_institution_ID'),
                       'x_full_name': kw.get('x_name')+' '+kw.get('x_last_name'), 'x_validation_refuse': False,
                       'x_name': tramite.x_service_ID.x_name+'-'+kw.get('x_name')+'-'+kw.get('x_last_name')}
@@ -121,7 +121,7 @@ class MySample(http.Controller):
         campos = ['id','x_studio_tipo_de_documento_1','x_studio_documento_1',
                   'x_service_ID','x_rate','x_studio_nombres','x_studio_apellidos',
                   'x_studio_direccin','x_user_celular']
-        tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
+        tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
                                                                       ('x_studio_documento_1','=',documento),
                                                                       ('x_cycle_ID.x_order','=',0)],campos)
         if (tramites):
@@ -234,7 +234,7 @@ class MySample(http.Controller):
             if not self.validar_captcha(kw.get('token')):
                 return { 'ok': False, 'error_captcha': True }
         campos = ['x_studio_nombres','x_studio_apellidos','x_studio_carrera_1','x_studio_documento_1','x_enrollment_number'] 
-        tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',kw['tipo_doc']),
+        tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',kw['tipo_doc']),
                                                                       ('x_studio_documento_1','=',kw['documento']),
                                                                       ('x_cycle_ID.x_order','=',5)],campos)
         if tramites:
@@ -285,7 +285,7 @@ class MySample(http.Controller):
     def validar_preguntas(self, **kw):
         _logger.info(kw)
         campos = ['x_studio_nombres','x_studio_apellidos','x_studio_carrera_1','x_studio_documento_1','x_enrollment_number'] 
-        tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',kw['tipo_doc']),
+        tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',kw['tipo_doc']),
                                                                       ('x_studio_documento_1','=',kw['documento']),
                                                                       ('x_cycle_ID.x_order','=',5)],campos)
         if tramites:
@@ -322,10 +322,10 @@ class MySample(http.Controller):
                       'x_studio_ciudad_de_expedicin','x_studio_carrera_1','x_studio_gnero','x_studio_fecha_de_resolucin',
                       'x_studio_nombres','x_studio_apellidos','x_enrollment_number','x_fecha_resolucion_corte']
             if data['numero_tarjeta'] != '':
-                tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_enrollment_number','=',data['numero_tarjeta']),
+                tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_enrollment_number','=',data['numero_tarjeta']),
                                                                               ('x_cycle_ID.x_order','=',5)],campos)
             else:
-                tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',data['doc_type']),
+                tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',data['doc_type']),
                                                                               ('x_studio_documento_1','=',data['doc']),
                                                                               ('x_cycle_ID.x_order','=',5)],campos)
             _logger.info(tramites)
@@ -354,7 +354,7 @@ class MySample(http.Controller):
         data = kw.get('data')
         _logger.info(data)
         ahora = datetime.now() - timedelta(hours=5)
-        tramite = http.request.env['x_cpnaa_procedure'].search([('id','=',int(data['id_tramite']))])
+        tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',int(data['id_tramite']))])
         numero_recibo = tramite.x_voucher_number
 #         numero_radicado = tramite.x_rad_number
         if (not data['corte'] and numero_recibo) and (data['corte'] == tramite.x_origin_name and numero_recibo):
@@ -379,7 +379,7 @@ class MySample(http.Controller):
                   'x_user_celular','x_studio_pas_de_expedicin_1','x_studio_ciudad_de_expedicin','x_studio_direccin','x_studio_telfono',
                   'x_req_date','x_rate','x_studio_universidad_5','x_studio_carrera_1','x_studio_departamento_estado','x_origin_type',
                   'x_studio_fecha_de_grado_2','x_studio_ciudad_1','x_origin_name','x_studio_nombres','x_studio_apellidos','x_grade_ID']
-        tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',data['doc_type']),
+        tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',data['doc_type']),
                                                                       ('x_studio_documento_1','=',data['doc']),
                                                                       ('x_cycle_ID.x_order','=',0)],campos)
         if tramites:
@@ -690,7 +690,7 @@ class MySample(http.Controller):
         data = kw.get('data')
         sancionado = False
         if self.validar_captcha(kw.get('token')):
-            tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',data['tipo_doc']),
+            tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',data['tipo_doc']),
                                                                           ('x_studio_documento_1','=',data['documento']),
                                                                           ('x_cycle_ID.x_order','=',5)],
                                                                           ['id','x_studio_carrera_1','x_legal_status'])
@@ -761,7 +761,7 @@ class MySample(http.Controller):
                     _logger.info('Graduando reportado por IES con plazo vencido => ['+data['doc_type']+':'+data['doc']+']')
                 else:
                     grado = False
-            tramites = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1','=',int(data['doc_type'])),
+            tramites = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1','=',int(data['doc_type'])),
                                                                      ('x_studio_documento_1','=',data['doc'])])
             for tramite in tramites:
                 _logger.info(tramite)
@@ -856,7 +856,7 @@ class MySample(http.Controller):
             servicio = 'CERTIFICADO DE INSCRIPCIÓN PROFESIONAL'
         if origen == validos[2]:
             servicio = 'LICENCIA TEMPORAL ESPECIAL'
-        tramites = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
+        tramites = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
                                                                  ('x_studio_documento_1','=',documento)])
         if tramites:
             for tramite in tramites:
@@ -1315,7 +1315,7 @@ class MySample(http.Controller):
             data['profesion_id'] = ['110','109']
         else:
             data['profesion_id'] = [data['profesion_id']]
-        tramite = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1.id','=',self.validar_tipo_doc(data['tipo_doc'])),
+        tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',self.validar_tipo_doc(data['tipo_doc'])),
                                                                 ('x_studio_documento_1','=',data['numero_doc']),
                                                                 ('x_studio_carrera_1.id','in',data['profesion_id'])])
         egresado = http.request.env['x_procedure_temp'].search([('x_tipo_documento_select.id','=',self.validar_tipo_doc(data['tipo_doc'])),

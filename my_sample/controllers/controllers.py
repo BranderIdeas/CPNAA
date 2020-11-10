@@ -84,9 +84,10 @@ class MySample(http.Controller):
             if type(value) != str:
                 kw[key] = base64.b64encode(kw[key].read())
         try:
-            user = http.request.env['x_cpnaa_user'].search([('x_document_type_ID.id','=',kw.get('x_document_type_ID')),
-                                                               ('x_document','=',kw.get('x_document'))])
-            tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_user_ID','=',user.id)])[0]
+            tramite = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1.id','=',kw['x_document_type_ID']),
+                                                                    ('x_studio_documento_1','=',kw['x_document']),
+                                                                    ('x_cycle_ID.x_order','<',5)])
+            user = tramite.x_user_ID
             update = {'x_studio_carrera_1':kw.get('x_institute_career'),'x_studio_universidad_5': kw.get('x_institution_ID'),
                       'x_full_name': kw.get('x_name')+' '+kw.get('x_last_name'), 'x_validation_refuse': False,
                       'x_name': tramite.x_service_ID.x_name+'-'+kw.get('x_name')+'-'+kw.get('x_last_name')}

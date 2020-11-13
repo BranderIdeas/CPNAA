@@ -1015,8 +1015,9 @@ class MySample(http.Controller):
         if id_genero == '2':
             nombre_carrera = 'x_female_name'
         return {'carreras': http.request.env['x_cpnaa_career'].sudo().search_read([('x_level_ID.id','in',nivel_profesional),
-                                                                                       (nombre_carrera, 'ilike', cadena)],
-                                                                                       ['id',nombre_carrera], limit=8)}
+                                                                                   ('x_profession_type_ID.x_name','not ilike','NO ACTIVA'),
+                                                                                   (nombre_carrera, 'ilike', cadena)],
+                                                                                    ['id',nombre_carrera], limit=8)}
     
     # Retorna el nombre de la carrera según el genero 
     @http.route('/get_carrera_genero', methods=["POST"], type="json", auth='public', website=True)

@@ -24,7 +24,7 @@
                             </div>
                             <div class="row col-md-6 form-group form-field">
                                 <div class="col-md-4">
-                                    <label class="col-form-label" for="x_document"> Documento </label>
+                                    <label class="col-form-label" for="x_document_number"> Documento </label>
                                 </div>
                                 <div class="col-md-8">
                                     <input type="text" class="form-control" 
@@ -96,11 +96,17 @@
                     <form id="form_correccion" method="post" class="s_website_form container-fluid mt32 o_fake_not_editable" 
                               enctype="multipart/form-data">
                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                        <input type="hidden" name="x_service_ID" t-attf-value="{{tramite.x_service_ID.id}}"/>
-                        <input type="hidden" name="x_procedure_ID" t-attf-value="{{tramite.id}}"/>
+                        <input t-if="not solicitud" type="hidden" name="x_service_ID" t-attf-value="{{tramite.x_service_ID.id}}"/>
+                        <input t-if="not solicitud" type="hidden" name="x_procedure_ID" t-attf-value="{{tramite.id}}"/>
+                        <input t-if="solicitud" type="hidden" name="id_solicitud" t-attf-value="{{solicitud.id}}"/>
                         <div class="formSection">
                             <h2 class="sectionName">Datos de la Solicitud</h2>
                             <div class="row">
+                            </div>
+                            <div t-if="solicitud" class="col-md-12 text-center">
+                                <label class="col-form-label o_fake_editable text-justify mb-3">
+                                    <t t-esc="solicitud.x_name"/> creada el <t t-esc="solicitud.create_date.strftime('%d-%m-%Y')"/>
+                                </label>
                             </div>
                             <div class="row">
                                 <div class="form-group row col-md-12 form-field">
@@ -108,12 +114,25 @@
                                         <label class="col-form-label" for="x_issue"> Información a Corregir / Actualizar </label>
                                     </div>
                                     <div class="col-md-8">
-                                        <select class="form-control o_website_form_input i_required" name="x_issue">
+                                        <select t-if="solicitud" class="form-control o_website_form_input i_required" name="x_issue">
                                             <option value="">Seleccione...</option>
-                                            <t t-foreach="request.env['x_data_correction_issues'].sudo().search([])" t-as="correction_issues">
-                                            <option t-att-data-classification="correction_issues.x_classification.x_name"
-                                                    t-att-value="correction_issues.id" >
-                                                <t t-esc="correction_issues.x_name"/>
+                                            <t t-foreach="request.env['x_data_correction_issues'].sudo().search([])" t-as="issue">
+                                            <option t-if="solicitud.x_issue.x_name != issue.x_name" t-att-value="issue.id"
+                                                    t-att-data-classification="issue.x_classification.x_name">
+                                                <t t-esc="issue.x_name"/>
+                                            </option>
+                                            <option t-else="" t-att-value="issue.id" selected="true" 
+                                                    t-att-data-classification="issue.x_classification.x_name">
+                                                <t t-esc="issue.x_name"/>
+                                            </option>
+                                            </t>
+                                        </select>  
+                                        <select t-else="" class="form-control o_website_form_input i_required" name="x_issue">
+                                            <option value="">Seleccione...</option>
+                                            <t t-foreach="request.env['x_data_correction_issues'].sudo().search([])" t-as="issue">
+                                            <option t-att-data-classification="issue.x_classification.x_name"
+                                                    t-att-value="issue.id" >
+                                                <t t-esc="issue.x_name"/>
                                             </option>
                                             </t>
                                         </select>  
@@ -126,7 +145,9 @@
                                         <label class="col-form-label" for="x_observations"> Observaciones </label>
                                     </div>
                                     <div class="col-md-8">
-                                        <input type="text" class="form-control" name="x_observations" maxlength="125" />
+                                        <input t-if="solicitud" type="text" class="form-control" name="x_observations" 
+                                            maxlength="125" t-attf-value="{{solicitud.x_observations}}" />
+                                        <input t-else="" type="text" class="form-control" name="x_observations" maxlength="125" />
                                     </div>
                                 </div>
                             </div>
@@ -163,8 +184,8 @@
                             </div>
                         </div>
                         <div class="row mt-3">
-                          <div id="div_results_correccion" class="offset-md-2 col-md-8 d-flex text-center">
-                              <span id="mssg_result_correccion" role="alert"/>
+                          <div id="div_results_correccion" class="offset-md-2 col-md-8">
+                              <span class="d-flex" id="mssg_result_correccion" role="alert"/>
                           </div>
                           <div id="div_spinner_correccion" class="offset-md-5 col-md-5" aria-hidden="true">
                               <div class="spinner-border text-primary" role="status">
@@ -172,7 +193,10 @@
                               </div>
                           </div>
                           <div class="col-md-2">
-                              <button id="btn_enviar_correccion" class="btn btn-primary btn-lg btn-stadium">
+                              <button t-if="solicitud" id="btn_enviar_correccion" class="btn btn-primary btn-lg btn-stadium">
+                                  Actualizar
+                              </button>
+                              <button t-else="" id="btn_enviar_correccion" class="btn btn-primary btn-lg btn-stadium">
                                   Registrar
                               </button>
                           </div>

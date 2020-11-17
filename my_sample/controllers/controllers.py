@@ -122,7 +122,7 @@ class MySample(http.Controller):
         campos = ['id','x_studio_tipo_de_documento_1','x_studio_documento_1',
                   'x_service_ID','x_rate','x_studio_nombres','x_studio_apellidos',
                   'x_studio_direccin','x_user_celular']
-        tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
+        tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
                                                                       ('x_studio_documento_1','=',documento),
                                                                       ('x_cycle_ID.x_order','=',0)],campos)
         if (tramites):
@@ -170,7 +170,7 @@ class MySample(http.Controller):
         return http.request.render('my_sample.epayco_confirmacion', {'ok': success, 'data': data, 'resultado_pago': resultado_pago})
     
     def validar_ref_epayco(self, ref_payco):
-        base_url = 'https://secure.epayco.co/validation/v1/reference/';
+        base_url = 'https://secure.epayco.co/validation/v1/reference/'
         response = requests.get(base_url + ref_payco)
         return response.json()
     
@@ -190,7 +190,6 @@ class MySample(http.Controller):
                 attachments_files.append(value)
         for key in borrar:
             del kw[key]
-        _logger.info(attachments_files)
         try:
             consecutivo = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=','PQRS')])
             kw['x_name'] = 'PQRS-'+str(consecutivo.x_value + 1)
@@ -357,20 +356,20 @@ class MySample(http.Controller):
         ahora = datetime.now() - timedelta(hours=5)
         tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',int(data['id_tramite']))])
         numero_recibo = tramite.x_voucher_number
-#         numero_radicado = tramite.x_rad_number
+        numero_radicado = tramite.x_rad_number
         if (not data['corte'] and numero_recibo) and (data['corte'] == tramite.x_origin_name and numero_recibo):
             pass
         elif not numero_recibo or (data['corte'] and data['corte'] != tramite.x_origin_name):
             consecutivo = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Consecutivo Recibo de Pago')])
             numero_recibo = int(consecutivo.x_value) + 1
-#             numero_radicado = Sevenet.sevenet_consulta(tramite.id)
-            update = {'x_voucher_number': numero_recibo } #, 'x_radicacion_date': ahora, 'x_rad_number': numero_radicado
+            numero_radicado = Sevenet.sevenet_consulta(tramite.id, 'Recibo')
+            update = {'x_voucher_number': numero_recibo, 'x_radicacion_date': ahora, 'x_rad_number': numero_radicado }
             if data['corte']:
-                update = {'x_voucher_number': numero_recibo,'x_origin_name': data['corte']}
-#                           'x_radicacion_date': ahora, 'x_rad_number': numero_radicado}
+                update = {'x_voucher_number': numero_recibo,'x_origin_name': data['corte'],
+                          'x_radicacion_date': ahora, 'x_rad_number': numero_radicado}
             http.request.env['x_cpnaa_parameter'].browse(consecutivo.id).sudo().write({'x_value':str(numero_recibo)})
             http.request.env['x_cpnaa_procedure'].browse(tramite.id).sudo().write(update)
-        return {'ok': True, 'numero_recibo': str(numero_recibo)} #, 'numero_radicado': str(numero_radicado)+'-'+str(ahora.year)
+        return {'ok': True, 'numero_recibo': str(numero_recibo), 'numero_radicado': str(numero_radicado)+'-'+str(ahora.year)}
     
     # Envia la información necesaria para el recibo de pago o para el pago desde la pasarela
     @http.route('/tramite_fase_inicial', methods=["POST"], type="json", auth='public', website=True)
@@ -408,7 +407,7 @@ class MySample(http.Controller):
         datetime_str = datetime.strptime(data['fecha_pago'], '%Y-%m-%d %H:%M:%S')
         datetime_str = datetime_str + timedelta(hours=5)
         _logger.info('Hora del pago UTC: '+str(datetime_str))
-#         numero_radicado = False
+        numero_radicado = False
         id_user, error, tramite, pago_registrado, mailthread_registrado, origin_name, grado = False, False, False, False, False, False, False
         try:
             tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',data["id_tramite"])])
@@ -417,7 +416,7 @@ class MySample(http.Controller):
                 if tramite.x_cycle_ID.x_order > 0:
                     raise Exception('Este pago ya fue registrado')
                 if tramite.x_cycle_ID.x_order == 0:
-#                     numero_radicado = Sevenet.sevenet_consulta(tramite.id)
+                    numero_radicado = Sevenet.sevenet_consulta(tramite.id, data['tipo_pago'])
                     if (tramite.x_origin_type.x_name == 'CORTE'):
                         corte_vigente = self.buscar_corte(tramite.x_origin_name)
                         origin_name = corte_vigente['x_name']
@@ -427,9 +426,9 @@ class MySample(http.Controller):
                     ciclo_ID = http.request.env["x_cpnaa_cycle"].sudo().search(["&",("x_service_ID.id","=",tramite["x_service_ID"].id),("x_order","=",1)])
                     update = {'x_cycle_ID': ciclo_ID.id,'x_radicacion_date': datetime_str, 'x_pay_datetime': datetime_str,
                               'x_pay_type': data['tipo_pago'],'x_consignment_number': data['numero_pago'], 'x_bank': data['banco'],
-                              'x_consignment_price': data['monto_pago'],'x_origin_name': origin_name} #, 'x_rad_number': numero_radicado
+                              'x_consignment_price': data['monto_pago'],'x_origin_name': origin_name, 'x_rad_number': numero_radicado}
                     pago_registrado = http.request.env['x_cpnaa_procedure'].browse(tramite['id']).sudo().write(update)
-#                     numero_radicado = str(numero_radicado) +'-'+ str(datetime_str.year)
+                    numero_radicado = str(numero_radicado) +'-'+ str(datetime_str.year)
                     if not pago_registrado:
                         raise Exception('Su pago ha sido exitoso pero no se pudo completar el trámite, por favor envie esta información al correo info@cpnaa.gov.co')
             else:
@@ -448,13 +447,13 @@ class MySample(http.Controller):
                 error = 'Se registro el pago pero no se escribio el mailthread'+'\nTrámite ID: '+str(tramite.id)+'\n'+str(sys.exc_info())
         if not error and mailthread_registrado:
             return { 'ok': True, 'message': 'Trámite actualizado con exito y registrado en el mailthread', 
-                    'mailthread': mailthread_registrado.id, 'error': False, 'id_user': user.id } #'numero_radicado': numero_radicado, 
+                    'mailthread': mailthread_registrado.id, 'error': False, 'id_user': user.id, 'numero_radicado': numero_radicado }
         if pago_registrado and error:
             _logger.info(error)
             return { 'ok': True, 'message': 'Trámite actualizado con exito', 'error': error, 
-                    'id_user': user.id } #'numero_radicado': numero_radicado, 
+                    'id_user': user.id, 'numero_radicado': numero_radicado } 
         if not pago_registrado:        
-            return { 'ok': False, 'error': error, 'id_user': user.id } #, 'numero_radicado': numero_radicado
+            return { 'ok': False, 'error': error, 'id_user': user.id, 'numero_radicado': numero_radicado }
         
     def grado_check_pagos(self, grado):
         _logger.info(grado)
@@ -510,18 +509,67 @@ class MySample(http.Controller):
     def inicio_correccion(self):
         return http.request.render('my_sample.inicio_correccion', {})
     
+    # Ruta que renderiza página de formulario de denuncias
+    @http.route('/get_correccion', methods=["POST"], type="json", auth='public', website=True)
+    def get_correccion(self, **kw):
+        registros = []
+        solicitud_en_curso = False
+        if kw.get('token'):
+            if not self.validar_captcha(kw.get('token')):
+                return { 'ok': False, 'error_captcha': True }
+        campos = ['x_names','x_lastnames','x_document_type_ID','x_document_number','x_issue','x_state', 'x_procedure_ID', 'x_name', 'x_rejected'] 
+        correccion = http.request.env['x_registry_correction_request'].sudo().search_read([('x_document_type_ID.id','=',kw['tipo_doc']),
+                                                                      ('x_document_number','=',kw['documento'])],campos)
+        campos_tramites = ['x_studio_nombres','x_studio_apellidos','x_studio_carrera_1','x_studio_documento_1','x_enrollment_number'] 
+        tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',kw['tipo_doc']),
+                                                                      ('x_studio_documento_1','=',kw['documento']),
+                                                                      ('x_cycle_ID.x_order','=',5)],campos_tramites)
+        if len(correccion) > 0:
+            for corr in correccion:
+                if corr['x_state'] != 'x_completed':
+                    campos = ['x_studio_nombres','x_studio_apellidos','x_studio_carrera_1','x_studio_documento_1','x_enrollment_number'] 
+                    tramite = http.request.env['x_cpnaa_procedure'].search_read([('id','=',corr['x_procedure_ID'][0])],campos)
+                    tramite[0]['solicitud_en_curso'] = True
+                    tramite[0]['nombre_solicitud'] = corr['x_name']
+                    tramite[0]['tiene_rechazo'] = corr['x_rejected']
+                    registros.append(tramite[0])
+            for tram in tramites:
+                for reg in registros:
+                    if reg['id'] != tram['id']:
+                        tram['solicitud_en_curso'] = False
+                        registros.append(tram)
+        else:
+            for tram in tramites:
+                tram['solicitud_en_curso'] = False
+                registros.append(tram)
+        _logger.info(tramites)
+        _logger.info(registros)
+        if len(registros) < 1:
+            return {'ok': False, 'result': 'No hay registros con la información suministrada'}
+        return {'ok': True, 'result': registros}
+        
     # Ruta que renderiza el inicio del trámite actualización/coreeción de registro
     @http.route('/tramites/solicitud_correccion/<model("x_cpnaa_procedure"):tramite>', auth='public', website=True)
     def solicitud_correccion(self, tramite):
-        if tramite.x_cycle_ID.x_order != 5:
+        solicitud = http.request.env['x_registry_correction_request'].sudo().search([('x_procedure_ID','=',tramite.id),
+                                                                                     ('x_state','!=','x_complete')])
+        if tramite.x_cycle_ID.x_order != 5 or solicitud:
             return http.request.redirect('/tramites/correccion_datos')
         return http.request.render('my_sample.solicitud_correccion', {'tramite': tramite})
-        
+    
+    # Ruta que renderiza el inicio del trámite actualización/coreeción de registro
+    @http.route('/tramites/editar/solicitud_correccion/<model("x_cpnaa_procedure"):tramite>', auth='public', website=True)
+    def edit_solicitud_correccion(self, tramite):
+        solicitud = http.request.env['x_registry_correction_request'].sudo().search([('x_procedure_ID','=',tramite.id),
+                                                                                     ('x_rejected','=',True)])
+        if tramite.x_cycle_ID.x_order != 5 or not solicitud:
+            return http.request.redirect('/tramites/correccion_datos')
+        return http.request.render('my_sample.solicitud_correccion', {'tramite': tramite, 'solicitud': solicitud})
+    
     # Ruta que renderiza el inicio del trámite actualización/coreeción de registro
     @http.route('/registrar_solicitud_correccion', methods=["POST"], auth='public', website=True)
     def registrar_solicitud_correccion(self, **kw):
         resp = {}
-        _logger.info(kw)
         for key, value in kw.items():
             if type(value) != str:
                 kw[key] = base64.b64encode(kw[key].read())
@@ -531,9 +579,9 @@ class MySample(http.Controller):
             kw['x_procedure_ID'] = int(kw['x_procedure_ID'])
             kw['x_name'] = http.request.env['ir.sequence'].sudo().next_by_code('x_registry_correction_request.sequence')
             kw['x_state'] = 'x_VD'
-            _logger.info(kw)
+            message = 'Su solicitud ha sido recibida correctamente con el radicado No. %s y a vuelta de correo electrónico recibira la respuesta.' % kw['x_name']
             solicitud = http.request.env['x_registry_correction_request'].sudo().create(kw)
-            resp = { 'ok': True, 'message': 'Registro: '+kw['x_name']+' creado con exito','id': solicitud.id }
+            resp = { 'ok': True, 'message': message, 'id': solicitud.id }
         except:
             tb = sys.exc_info()[2]
             resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }
@@ -550,6 +598,42 @@ class MySample(http.Controller):
         else:
             return http.request.env['x_cpnaa_service'].sudo().search([('x_name','=','ACTUALIZACIÓN DE DATOS Y CORRECIÓN DEL REGISTRO DE AUXILIAR')]).id
     
+    # Ruta que actualiza el trámite actualización/correción de registro
+    @http.route('/update_solicitud_correccion', methods=["POST"], auth='public', website=True)
+    def update_solicitud_correccion(self, **kw):
+        resp = {}
+        _logger.info(kw)
+        id_solicitud = kw.get('id_solicitud')
+        del kw['id_solicitud']
+        for key, value in kw.items():
+            if type(value) != str:
+                kw[key] = base64.b64encode(kw[key].read())
+        try:
+            kw['x_issue'] = int(kw['x_issue'])
+            kw['x_rejected'] = False
+            solicitud = http.request.env['x_registry_correction_request'].sudo().browse(int(id_solicitud))
+            solicitud.write(kw)
+            message = 'Su solicitud %s ha sido actualizada correctamente y a vuelta de correo electrónico recibira la respuesta.' % solicitud.x_name
+            resp = { 'ok': True, 'message': message, 'id': solicitud.id }
+            mailthread = {
+                'subject': '%s %s ha sido corregido su solicitud' % (solicitud.x_names, solicitud.x_lastnames),
+                'model': 'x_registry_correction_request',
+                'email_from': solicitud.x_names+' '+solicitud.x_lastnames,
+                'subtype_id': 2,
+                'body': '%s %s ha sido corregido su solicitud' % (solicitud.x_names, solicitud.x_lastnames),
+                'author_id': 4,
+                'message_type': 'notification',
+                'res_id': solicitud.id
+            }
+            http.request.env['mail.message'].sudo().create(mailthread)
+        except:
+            tb = sys.exc_info()[2]
+            resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }
+            _logger.info(sys.exc_info())
+            return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
+        else:
+            return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
+        
     # Ruta que renderiza el inicio del trámite acceso matrícula virtual
     @http.route('/tramites/solicitud_virtual', auth='public', website=True)
     def inicio_mat_virtual(self):
@@ -1317,7 +1401,7 @@ class MySample(http.Controller):
             data['profesion_id'] = ['110','109']
         else:
             data['profesion_id'] = [data['profesion_id']]
-        tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',self.validar_tipo_doc(data['tipo_doc'])),
+        tramite = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1.id','=',self.validar_tipo_doc(data['tipo_doc'])),
                                                                 ('x_studio_documento_1','=',data['numero_doc']),
                                                                 ('x_studio_carrera_1.id','in',data['profesion_id'])])
         egresado = http.request.env['x_procedure_temp'].search([('x_tipo_documento_select.id','=',self.validar_tipo_doc(data['tipo_doc'])),

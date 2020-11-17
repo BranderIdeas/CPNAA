@@ -33,7 +33,7 @@ odoo.define('website.pagos', function(require) {
                     $('#recibo').removeAttr('disabled');
                     $('#epayco').removeAttr('disabled');
                 }else{
-                    window.top.location.href = 'https://www.cpnaa.gov.co/';
+                    window.top.location.href = 'https://cpnaa.gov.co/';
                 }
             })
         },
@@ -194,7 +194,7 @@ odoo.define('website.pagos', function(require) {
         if($('[name="x_service_name"]').val().indexOf('CERTIFICADO') != -1){
             tramite = 'inscripciontt';
         }
-        window.top.location.href = 'https://www.cpnaa.gov.co/';
+        window.top.location.href = 'https://cpnaa.gov.co/';
     })
 
     if(location.href.indexOf(`/pagos/[`) != -1){
@@ -223,7 +223,7 @@ odoo.define('website.pagos', function(require) {
         })
 
         $('#volver').click(()=>{
-            window.top.location.href = 'https://www.cpnaa.gov.co/';
+            window.top.location.href = 'https://cpnaa.gov.co/';
         })
     
     }

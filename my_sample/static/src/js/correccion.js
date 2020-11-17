@@ -35,7 +35,7 @@ odoo.define('website.correccion', function(require) {
             buscar_tramite: function(token, elem, _this){
                 console.log(data);
                 rpc.query({
-                    route: '/get_profesional',
+                    route: '/get_correccion',
                     params: {'tipo_doc': data.tipo_doc, 'documento': data.documento, 'token': token}
                 }).then(function(response){
                     console.log(response);
@@ -54,16 +54,71 @@ odoo.define('website.correccion', function(require) {
             },
             mostrar_resultado: function(response, elem, _this){
                 let div_results = $('#msj_result');
+                let texto = '';
                 if (response.error_captcha){
                     grecaptcha.reset();
                     return;
                 } else if (!response.ok){
                     div_results.removeClass('invisible').attr('aria-hidden',false);
-                    let texto = `<h5><i class="fa fa-exclamation-triangle"></i> ${response.result}</h5>
-                                 <h5>Por favor envie su solicitud al correo electrónico info@cpnaa.gov.co</h5>`;
+                    texto = `<h5><i class="fa fa-exclamation-triangle"></i> ${response.result}</h5>
+                             <h5>Por favor envie su solicitud al correo electrónico info@cpnaa.gov.co</h5>`;
                     div_results.find('#data_result').html(texto);
-                } else if (response.result && response.result.length > 0){
-                    $(location).attr('href','/tramites/solicitud_correccion/'+ response.result[0].id);
+                } else if (response.result && response.result.length == 1){
+                    if(response.result[0].solicitud_en_curso){
+                        div_results.removeClass('invisible').attr('aria-hidden',false);
+                        if(response.result[0].tiene_rechazo){
+                            texto = `<h5><i class="fa fa-info-circle"></i> 
+                                         ${response.result[0].x_studio_nombres} ${response.result[0].x_studio_apellidos} <br/>
+                                         Profesión: ${response.result[0].x_studio_carrera_1[1]} <br/>
+                                         Su solicitud ${response.result[0].nombre_solicitud} fue devuelta, 
+                                         <a href="/tramites/editar/solicitud_correccion/${response.result[0].id}">
+                                         click aquí </a> para continuar con su trámite <br/>
+                                        * Recuerde cargar nuevamente todos los archivos que le solicita el formulario para completar su trámite
+                                    </h5>`;
+                        }else{
+                            texto = `<h5><i class="fa fa-info-circle"></i> 
+                                         ${response.result[0].x_studio_nombres} ${response.result[0].x_studio_apellidos} <br/>
+                                         Profesión: ${response.result[0].x_studio_carrera_1[1]} <br/>
+                                         Su solicitud ${response.result[0].nombre_solicitud} está en proceso, la respuesta la recibiras por
+                                        correo electrónico
+                                     </h5>`;
+                        }
+                        div_results.find('#data_result').html(texto);
+                    }else{
+                        $(location).attr('href','/tramites/solicitud_correccion/'+ response.result[0].id);
+                    }
+                } else if (response.result && response.result.length > 1){    
+                    response.result.forEach((res) => {
+                        if(res.solicitud_en_curso){
+                            if(res.tiene_rechazo){
+                                texto += `<h5><i class="fa fa-info-circle"></i> 
+                                             ${res.x_studio_nombres} ${res.x_studio_apellidos} <br/>
+                                             Profesión: ${res.x_studio_carrera_1[1]}
+                                             Su solicitud ${res.nombre_solicitud} fue devuelta, 
+                                             <a href="/tramites/editar/solicitud_correccion/${res.id}">
+                                             click aquí </a> para continuar con su trámite <br/>
+                                            * Recuerde cargar nuevamente todos los archivos que le solicita el formulario para completar su trámite
+                                        </h5>`;
+                            }else{
+                                texto += `<h5><i class="fa fa-info-circle"></i> 
+                                             ${res.x_studio_nombres} ${res.x_studio_apellidos} <br/>
+                                             Profesión: ${res.x_studio_carrera_1[1]} <br/>
+                                             Su solicitud ${res.nombre_solicitud} está en proceso, la respuesta la recibiras por
+                                             correo electrónico
+                                         </h5>`;
+                            }
+                        }else{
+                                texto += `<h5>
+                                             ${res.x_studio_nombres} ${response.result[0].x_studio_apellidos} <br/>
+                                             Profesión: ${res.x_studio_carrera_1[1]} <br/>
+                                                Para iniciar una solicitud, 
+                                             <a href="/tramites/solicitud_correccion/${res.id}">
+                                             click aquí </a> <br/>
+                                        </h5>`;
+                        }
+                    })
+                    div_results.removeClass('invisible').attr('aria-hidden',false);
+                    div_results.find('#data_result').html(texto);
                 }
             },
             validar_form: function(){
@@ -103,7 +158,11 @@ odoo.define('website.correccion', function(require) {
             enviar_form: function(){
                 try {
                     const request = new XMLHttpRequest();
-                    request.open("POST", "/registrar_solicitud_correccion");
+                    if($('[name=id_solicitud]').length > 0){
+                        request.open("POST", "/update_solicitud_correccion");     
+                    }else{
+                        request.open("POST", "/registrar_solicitud_correccion"); 
+                    }
                     request.send(formData);
                     request.onreadystatechange = function (aEvt) {
                         if (request.readyState == 4) {
@@ -113,9 +172,9 @@ odoo.define('website.correccion', function(require) {
                                 if(resp.ok){
                                     ocultarSpinner();
                                     $('#mssg_result_correccion').addClass('alert alert-info').text(resp.message);
-//                                     setTimeout(()=>{ 
-//                                         window.top.location.href = 'https://www.cpnaa.gov.co/';
-//                                     },1200);
+                                    setTimeout(()=>{ 
+                                        window.top.location.href = 'https://cpnaa.gov.co/';
+                                    },1600);
                                 }else{
                                     ocultarSpinner();
                                     $('#mssg_result_correccion').addClass('alert alert-danger').text('Error: '+resp.message.slice(0,80));
@@ -161,13 +220,6 @@ odoo.define('website.correccion', function(require) {
     
         // Colocar obligatorio el campo observaciones si selecciona otro
         $("select[name='x_issue']").change((e) => {
-            if ($("select[name='x_issue'] option:selected").val() === '8') {
-                $('#row_observaciones').addClass('o_website_form_required');
-                $('input[name="x_observation"]').addClass('i_required');
-            }else{
-                $('#row_observaciones').removeClass('o_website_form_required');
-                $('input[name="x_observation"]').removeClass('i_required');
-            }
             switch ($("select[name='x_issue'] option:selected").data('classification')) {
               case 'PERSONAL':
                 $('#label_soporte').text('Escritura Pública');
@@ -181,7 +233,7 @@ odoo.define('website.correccion', function(require) {
                 $('#label_soporte').text('Documento Soporte');
                 $('#x_support_document').attr('name','x_support_document');
             }
-        });
+        }).change();
     
         $('#form_correccion').submit(function(e) {
             e.preventDefault();

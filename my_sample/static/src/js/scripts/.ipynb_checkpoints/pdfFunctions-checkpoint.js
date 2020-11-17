@@ -315,7 +315,7 @@ function drawOthers(pdf, invoiceData, BcodeIMG) {
 
     pdf.setFontSize(8.0261);
     pdf.setFont("arial", "normal");
-    pdf.text(47.49, 759.64, "www.cpnaa.gov.co");
+    pdf.text(47.49, 759.64, "cpnaa.gov.co");
 
     pdf.setFontSize(8.0261);
     pdf.setFont("arial", "normal");

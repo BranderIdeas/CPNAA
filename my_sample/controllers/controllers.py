@@ -626,6 +626,8 @@ class MySample(http.Controller):
                 'res_id': solicitud.id
             }
             http.request.env['mail.message'].sudo().create(mailthread)
+            rechazos = http.request.env['x_refuse_correction_request'].sudo().search([('x_request_ID','=',solicitud.id)])
+            rechazos[-1].write({'x_corrected': True})
         except:
             tb = sys.exc_info()[2]
             resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }

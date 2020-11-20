@@ -165,7 +165,7 @@ class MySample(http.Controller):
                 }
                 resultado_pago = self.tramite_fase_verificacion(data_tramite)
             else:
-                resultado_pago = { 'ok': False, 'message': 'La transacción no fue aprobada','error': False }
+                resultado_pago = { 'ok': False, 'message': 'La transacción no fue aprobada','error': False, 'numero_radicado': False }
             _logger.info(resultado_pago)
         return http.request.render('my_sample.epayco_confirmacion', {'ok': success, 'data': data, 'resultado_pago': resultado_pago})
     

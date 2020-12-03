@@ -69,6 +69,9 @@ odoo.define('website.vigencia', function(require) {
             $('#documento_prof').text(data.profesional[0].x_studio_documento_1);
             $('#nombres_prof').text(data.profesional[0].x_studio_nombres+' '+data.profesional[0].x_studio_apellidos);
             $('#fecha_vencimiento').text(validaciones.dateTimeToString(data.certificado.expiration_date));
+            $("html, body").animate({
+                scrollTop: $('#btn_vigencia_auth').offset().top
+            }, 800);
         },
         generar_certificado: function(email, _this){
             rpc.query({
@@ -106,32 +109,20 @@ odoo.define('website.vigencia', function(require) {
                     div_msj.removeClass('invisible').attr('aria-hidden',false);
                     div_msj.find('div').text(response.mensaje);
                 } else if (response.tramites.length == 1){
-                    if(response.tramites[0].mensaje){
-                        div_msj.removeClass('invisible').attr('aria-hidden',false);
-                        div_msj.find('div').removeClass('alert-primary').addClass('alert-info');
-                        let texto = `<h5 class="text-center">${response.tramites[0].mensaje}</h5>
-                                        <a href="https://cpnaa.gov.co/profesionales-sancionados-y-amonestaciones/" target="_top">
-                                        <h5 class="text-center">Ir a sancionados</h5>
-                                    </a>`;
-                        div_msj.find('div').html(texto);
-                    }else{
-                        $(location).attr('href','/tramites/certificado_de_vigencia/'+response.tramites[0].id);
-                    }
+                    $(location).attr('href','/tramites/certificado_de_vigencia/'+response.tramites[0].id);
                 } else if (response.tramites.length > 1){
                     div_msj.removeClass('invisible').attr('aria-hidden',false);
                     div_msj.find('div').removeClass('alert-primary').addClass('alert-info');
                     let texto = '<h5 class="text-center">Se han encontrado varias coincidencias, por favor selecciona</h5>';
                     response.tramites.forEach((tram)=>{
-                        let mensaje = tram.x_legal_status == 'SANCIONADO' ? tram.mensaje : 'Seleccione para generar certificado';
-                        let enlace = tram.x_legal_status == 'SANCIONADO' 
-                                   ? 'href="https://cpnaa.gov.co/profesionales-sancionados-y-amonestaciones/" target="_top"' 
-                                   : `href="/tramites/certificado_de_vigencia/${tram.id}"`;
+                        let mensaje = 'Seleccione para generar certificado';
+                        let enlace = `href="/tramites/certificado_de_vigencia/${tram.id}"`;
                         texto += `<a class="card card-link fw700" ${enlace}>
                                     <div class="card-header results-vigencia">
                                         PROFESIÓN: ${tram.x_studio_carrera_1[1]}
                                         <h5>${mensaje}</h5>
                                     </div>
-                                  </a></br>`;
+                                    </a></br>`;
                     })
                     div_msj.find('div').html(texto);
                 }
@@ -203,9 +194,9 @@ odoo.define('website.vigencia', function(require) {
     $('#btn_generar_certificado').click(()=>{
         let el = $('#email_vigencia');
         if(el.val().length < 1){
-           vigencia.class_invalido(el);
-           validaciones.mostrar_alerta_vacio('correo electrónico');
-           return;
+            vigencia.class_invalido(el);
+            validaciones.mostrar_alerta_vacio('correo electrónico');
+            return;
         }
         let valido = vigencia.validar_email(el, vigencia); 
         if(valido){
@@ -251,8 +242,8 @@ odoo.define('website.vigencia', function(require) {
     $('#btn_validar_vigencia').click(()=>{
         let el = $('#email_vigencia');
         if(el.val().length < 1){
-           vigencia.class_invalido(el);
-           validaciones.mostrar_alerta_vacio('correo electrónico');
+            vigencia.class_invalido(el);
+            validaciones.mostrar_alerta_vacio('correo electrónico');
         }
         let valido = vigencia.validar_email(el, vigencia); 
         if(!el.hasClass('invalido')){

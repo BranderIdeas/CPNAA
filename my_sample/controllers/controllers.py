@@ -1,4 +1,5 @@
 from odoo import http
+from odoo.exceptions import ValidationError
 from datetime import date, datetime, timedelta, timezone
 from random import choice
 import logging
@@ -84,9 +85,10 @@ class MySample(http.Controller):
             if type(value) != str:
                 kw[key] = base64.b64encode(kw[key].read())
         try:
-            user = http.request.env['x_cpnaa_user'].search([('x_document_type_ID.id','=',kw.get('x_document_type_ID')),
-                                                               ('x_document','=',kw.get('x_document'))])
-            tramite = http.request.env['x_cpnaa_procedure'].search([('x_user_ID','=',user.id)])[0]
+            tramite = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1.id','=',kw['x_document_type_ID']),
+                                                                    ('x_studio_documento_1','=',kw['x_document']),
+                                                                    ('x_cycle_ID.x_order','<',5)])
+            user = tramite.x_user_ID
             update = {'x_studio_carrera_1':kw.get('x_institute_career'),'x_studio_universidad_5': kw.get('x_institution_ID'),
                       'x_full_name': kw.get('x_name')+' '+kw.get('x_last_name'), 'x_validation_refuse': False,
                       'x_name': tramite.x_service_ID.x_name+'-'+kw.get('x_name')+'-'+kw.get('x_last_name')}
@@ -114,19 +116,32 @@ class MySample(http.Controller):
     # Ruta que renderiza pagina de pagos, si no existe un trámite por pagar lo redirige al inicio del trámite
     @http.route('/pagos/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)
     def epayco(self, tipo_doc, documento):
-        campos = ['id','x_studio_tipo_de_documento_1','x_studio_documento_1','x_service_ID','x_rate']
+        url_base   = http.request.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        modo_test  = '.dev.odoo.com' in url_base
+        response   = '%s/pagos/confirmacion' % url_base
+        key_epayco = '9e73b510f7dfd7568b5e876a970962cb' if modo_test else '57d20fccb29db60eb4e1be5ff866548f'
+        campos = ['id','x_studio_tipo_de_documento_1','x_studio_documento_1',
+                  'x_service_ID','x_rate','x_studio_nombres','x_studio_apellidos',
+                  'x_studio_direccin','x_user_celular']
         tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
                                                                       ('x_studio_documento_1','=',documento),
                                                                       ('x_cycle_ID.x_order','=',0)],campos)
         if (tramites):
-            return http.request.render('my_sample.epayco', {'tramite': tramites[0]})
+            tipo_documento = 'CC'
+            if tramites[0]['x_studio_tipo_de_documento_1'][0] == 2:
+                tipo_documento = 'CE'
+            elif tramites[0]['x_studio_tipo_de_documento_1'][0] == 5:
+                tipo_documento = 'PPN'
+            return http.request.render('my_sample.epayco', {'tramite': tramites[0], 'modo_test': modo_test, 
+                                                            'response': response, 'key_epayco': key_epayco,
+                                                            'tipo_documento': tipo_documento })
         else:
             return http.request.redirect('/cliente/tramite/matricula')
     
     # Ruta que renderiza página de respuesta de pasarela de pagos
     @http.route('/pagos/respuesta', auth='public', website=True)
     def respuesta_epayco(self):
-        return http.request.render('my_sample.respuesta_pago', {})
+        return http.request.redirect('/pagos/confirmacion')
     
     # Ruta que renderiza página de confirmación de pasarela de pagos
     @http.route('/pagos/confirmacion', auth='public', website=True)
@@ -142,21 +157,32 @@ class MySample(http.Controller):
         if success:
             if data['data']['x_response'] == 'Aceptada':
                 data_tramite = {
-                    'numero_pago': data['data']['x_transaction_id'],
-                    'fecha_pago': data['data']['x_transaction_date'],
-                    'banco': data['data']['x_bank_name'],
-                    'monto_pago': data['data']['x_amount'],
-                    'tipo_pago': data['data']['x_type_payment'],
-                    'id_tramite': data['data']['x_extra1']
+                    'numero_pago' : data['data']['x_transaction_id'],
+                    'fecha_pago'  : data['data']['x_transaction_date'],
+                    'banco'       : data['data']['x_bank_name'],
+                    'monto_pago'  : data['data']['x_amount'],
+                    'tipo_pago'   : data['data']['x_type_payment'],
+                    'id_tramite'  : data['data']['x_extra1']
                 }
                 resultado_pago = self.tramite_fase_verificacion(data_tramite)
+            elif data['data']['x_response'] == 'Pendiente':
+                registrado = http.request.env['x_cpnaa_temp_payments_pending'].sudo().search([('x_epayco_ref','=',ref_payco)])
+                if not registrado:
+                    http.request.env['x_cpnaa_temp_payments_pending'].sudo().create({
+                        'x_epayco_ref'   : ref_payco,
+                        'x_procedure_ID' : data['data']['x_extra1'],
+                        'x_motive'       : data['data']['x_response_reason_text'],
+                        'x_type_payment' : data['data']['x_type_payment'],
+                        'x_name'         : 'PAGO-PENDIENTE-%s' % data['data']['x_ref_payco']
+                    })
+                resultado_pago = { 'ok': False, 'message': 'La transacción esta pendiente','error': False, 'numero_radicado': False }
             else:
-                resultado_pago = { 'ok': False, 'message': 'La transacción no fue aprobada','error': False }
+                resultado_pago = { 'ok': False, 'message': 'La transacción no fue aprobada','error': False, 'numero_radicado': False }
             _logger.info(resultado_pago)
         return http.request.render('my_sample.epayco_confirmacion', {'ok': success, 'data': data, 'resultado_pago': resultado_pago})
     
     def validar_ref_epayco(self, ref_payco):
-        base_url = 'https://secure.epayco.co/validation/v1/reference/';
+        base_url = 'https://secure.epayco.co/validation/v1/reference/'
         response = requests.get(base_url + ref_payco)
         return response.json()
     
@@ -176,28 +202,26 @@ class MySample(http.Controller):
                 attachments_files.append(value)
         for key in borrar:
             del kw[key]
-        _logger.info(attachments_files)
-        kw['x_issues_ID'] = kw['x_issues_ID'].split(',') if kw['x_issues_ID'] else False
         try:
-            consecutivo = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=','PQRS')])
-            kw['x_name'] = 'PQRS-'+str(consecutivo.x_value + 1)
+            consecutivo    = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=','PQRS')])
+            kw['x_name']   = 'PQRS-'+str(consecutivo.x_value + 1)
             kw['x_states'] = 'open'
-            pqrs = http.request.env['x_cpnaa_pqrd'].sudo().create(kw)
+            pqrs           = http.request.env['x_cpnaa_pqrs'].sudo().create(kw)
             if pqrs:
                 count = 0
                 for at in attachments_files:
                     count += 1
-                    file = base64.b64encode(at.read())
-                    attachment = {'x_request_ID': pqrs.id, 'x_file': file, 'x_name': 'PRUEBA-'+str(count)+'-'+pqrs.x_name}
-                    ext = str(at.filename.split('.')[-1]).lower()
+                    file       = base64.b64encode(at.read())
+                    ext        = str(at.filename.split('.')[-1]).lower()
+                    attachment = {'x_request_ID': pqrs.id, 'x_file': file, 'x_name': 'ADJUNTO-'+str(count)+'-'+pqrs.x_name}
                     if ext == 'pdf':
-                        http.request.env['x_pqdr_attachments_pdf'].sudo().create(attachment)
+                        http.request.env['x_pqrs_attachments_pdf'].sudo().create(attachment)
                     else:
-                        http.request.env['x_pqdr_attachments_img'].sudo().create(attachment)
+                        http.request.env['x_pqrs_attachments_img'].sudo().create(attachment)
                 http.request.env['x_cpnaa_consecutive'].browse(consecutivo.id).sudo().write({'x_value':consecutivo.x_value + 1})
             resp = { 'ok': True, 'message': 'Su solicitud ha sido registrada con el consecutivo '+ pqrs.x_name +' exitosamente.' }
         except:
-            tb = sys.exc_info()[2]
+            tb   = sys.exc_info()[2]
             resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }
             _logger.info(sys.exc_info())
             return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
@@ -222,7 +246,7 @@ class MySample(http.Controller):
             if not self.validar_captcha(kw.get('token')):
                 return { 'ok': False, 'error_captcha': True }
         campos = ['x_studio_nombres','x_studio_apellidos','x_studio_carrera_1','x_studio_documento_1','x_enrollment_number'] 
-        tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',kw['tipo_doc']),
+        tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',kw['tipo_doc']),
                                                                       ('x_studio_documento_1','=',kw['documento']),
                                                                       ('x_cycle_ID.x_order','=',5)],campos)
         if tramites:
@@ -242,10 +266,9 @@ class MySample(http.Controller):
         for key in borrar:
             del kw[key]
         kw['x_complaint_issues_ID'] = kw['x_complaint_issues_ID'].split(',')
-        kw['x_phase_0'] = True
+        kw['x_origin'] = http.request.env["x_cpnaa_origin_complaint"].sudo().search([("x_name","=",'QUEJA EXTERNA')]).id
         try:
-            consecutivo = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=','DENUNCIAS')])
-            kw['x_name'] = 'DENUNCIA-'+str(consecutivo.x_value + 1)
+            hoy = date.today()
             denuncia = http.request.env['x_cpnaa_complaint'].sudo().create(kw)
             if denuncia:
                 count = 0
@@ -257,9 +280,12 @@ class MySample(http.Controller):
                     if ext == 'pdf':
                         http.request.env['x_evidence_files_pdf'].sudo().create(evidence)
                     else:
+                        evidence['x_extention'] = ext
                         http.request.env['x_evidence_files_img'].sudo().create(evidence)
-                http.request.env['x_cpnaa_consecutive'].browse(consecutivo.id).sudo().write({'x_value':consecutivo.x_value + 1})
-            resp = { 'ok': True, 'message': 'Su queja ha sido registrada con el consecutivo '+ denuncia.x_name +' exitosamente.' }
+            numero_radicado = Sevenet.sevenet_denuncia(denuncia.id)
+            denuncia.write({'x_radicate_number': numero_radicado, 'x_radicate_date': hoy})
+            message = 'Su queja ha sido registrada con el radicado %s-%s exitosamente.' % (denuncia.x_radicate_number, hoy.year)
+            resp = { 'ok': True, 'message': message }
         except:
             tb = sys.exc_info()[2]
             resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }
@@ -273,13 +299,47 @@ class MySample(http.Controller):
     def validar_preguntas(self, **kw):
         _logger.info(kw)
         campos = ['x_studio_nombres','x_studio_apellidos','x_studio_carrera_1','x_studio_documento_1','x_enrollment_number'] 
-        tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',kw['tipo_doc']),
+        tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',kw['tipo_doc']),
                                                                       ('x_studio_documento_1','=',kw['documento']),
                                                                       ('x_cycle_ID.x_order','=',5)],campos)
         if tramites:
             return {'ok': True, 'result': tramites}
         else:
             return {'ok': False, 'result': 'No hay registros con la información suministrada'}
+        
+    # Guarda el recurso de apelacion, actualiza el trámite, escribe en el mailthread y envia un mail al usuario interno encargado
+    @http.route('/save_apelacion', methods=["POST"], type="json", auth='public', website=True) 
+    def save_apelacion(self, **kw):
+        archivo      = kw.get('archivo_pdf')
+        id_denuncia  = kw.get('id_denuncia')
+        archivo_temp = unicodedata.normalize('NFKD', archivo)
+        archivo_pdf  = archivo_temp.lstrip('data:application/pdf;base64,')
+        denuncia     = http.request.env['x_cpnaa_complaint'].sudo().search([('id','=',id_denuncia)])
+        actualizado  = False
+        try:
+            update = {'x_appeal_resource_file': archivo_pdf, 'x_state_for_buttons': 'x_appeal_file_received',
+                      'x_state': 'x_archive_appeal', 'x_phase_5': True}
+            actualizado = http.request.env['x_cpnaa_complaint'].browse(id_denuncia).sudo().write(update)
+        except:
+            _logger.info(sys.exc_info())
+            return {'ok': False, 'error': str(sys.exc_info()[1])}
+        if actualizado:
+            subject = '%s %s ha cargado el archivo de Recurso de Apelación' % (denuncia.x_complainant_names, denuncia.x_complainant_lastnames)
+            mailthread = {
+                'subject': subject,
+                'model': 'x_cpnaa_complaint',
+                'email_from': denuncia.x_complainant_names+' '+denuncia.x_complainant_lastnames,
+                'subtype_id': 2,
+                'body': subject,
+                'author_id': 4,
+                'message_type': 'notification',
+                'res_id': denuncia.id
+            }
+            http.request.env['mail.message'].sudo().create(mailthread)
+#             http.request.env['mail.template'].sudo().search([('name','=','cpnaa_template_load_CD')])[0].sudo().send_mail(id_tramite,force_send=True)
+            return {'ok': True, 'message': 'Denuncia Actualizada, se guardo el archivo de apelación en PDF.'}
+        else:
+            return {'ok': False, 'error': 'Denuncia no pudo ser actualizada, intente nuevamente.'}
         
     # Ruta que renderiza página de consulta de registro por documento
     @http.route('/consulta_online/por_documento', auth='public', website=True)
@@ -310,10 +370,10 @@ class MySample(http.Controller):
                       'x_studio_ciudad_de_expedicin','x_studio_carrera_1','x_studio_gnero','x_studio_fecha_de_resolucin',
                       'x_studio_nombres','x_studio_apellidos','x_enrollment_number','x_fecha_resolucion_corte']
             if data['numero_tarjeta'] != '':
-                tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_enrollment_number','=',data['numero_tarjeta']),
+                tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_enrollment_number','=',data['numero_tarjeta']),
                                                                               ('x_cycle_ID.x_order','=',5)],campos)
             else:
-                tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',data['doc_type']),
+                tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',data['doc_type']),
                                                                               ('x_studio_documento_1','=',data['doc']),
                                                                               ('x_cycle_ID.x_order','=',5)],campos)
             _logger.info(tramites)
@@ -342,7 +402,7 @@ class MySample(http.Controller):
         data = kw.get('data')
         _logger.info(data)
         ahora = datetime.now() - timedelta(hours=5)
-        tramite = http.request.env['x_cpnaa_procedure'].search([('id','=',int(data['id_tramite']))])
+        tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',int(data['id_tramite']))])
         numero_recibo = tramite.x_voucher_number
         numero_radicado = tramite.x_rad_number
         if (not data['corte'] and numero_recibo) and (data['corte'] == tramite.x_origin_name and numero_recibo):
@@ -367,7 +427,7 @@ class MySample(http.Controller):
                   'x_user_celular','x_studio_pas_de_expedicin_1','x_studio_ciudad_de_expedicin','x_studio_direccin','x_studio_telfono',
                   'x_req_date','x_rate','x_studio_universidad_5','x_studio_carrera_1','x_studio_departamento_estado','x_origin_type',
                   'x_studio_fecha_de_grado_2','x_studio_ciudad_1','x_origin_name','x_studio_nombres','x_studio_apellidos','x_grade_ID']
-        tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',data['doc_type']),
+        tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',data['doc_type']),
                                                                       ('x_studio_documento_1','=',data['doc']),
                                                                       ('x_cycle_ID.x_order','=',0)],campos)
         if tramites:
@@ -497,18 +557,67 @@ class MySample(http.Controller):
     def inicio_correccion(self):
         return http.request.render('my_sample.inicio_correccion', {})
     
+    # Ruta que renderiza página de formulario de denuncias
+    @http.route('/get_correccion', methods=["POST"], type="json", auth='public', website=True)
+    def get_correccion(self, **kw):
+        registros = []
+        solicitud_en_curso = False
+        if kw.get('token'):
+            if not self.validar_captcha(kw.get('token')):
+                return { 'ok': False, 'error_captcha': True }
+        campos = ['x_names','x_lastnames','x_document_type_ID','x_document_number','x_issue','x_state', 'x_procedure_ID', 'x_name', 'x_rejected'] 
+        correccion = http.request.env['x_registry_correction_request'].sudo().search_read([('x_document_type_ID.id','=',kw['tipo_doc']),
+                                                                      ('x_document_number','=',kw['documento'])],campos)
+        campos_tramites = ['x_studio_nombres','x_studio_apellidos','x_studio_carrera_1','x_studio_documento_1','x_enrollment_number'] 
+        tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',kw['tipo_doc']),
+                                                                      ('x_studio_documento_1','=',kw['documento']),
+                                                                      ('x_cycle_ID.x_order','=',5)],campos_tramites)
+        if len(correccion) > 0:
+            for corr in correccion:
+                if corr['x_state'] != 'x_completed':
+                    campos = ['x_studio_nombres','x_studio_apellidos','x_studio_carrera_1','x_studio_documento_1','x_enrollment_number'] 
+                    tramite = http.request.env['x_cpnaa_procedure'].search_read([('id','=',corr['x_procedure_ID'][0])],campos)
+                    tramite[0]['solicitud_en_curso'] = True
+                    tramite[0]['nombre_solicitud'] = corr['x_name']
+                    tramite[0]['tiene_rechazo'] = corr['x_rejected']
+                    registros.append(tramite[0])
+            for tram in tramites:
+                for reg in registros:
+                    if reg['id'] != tram['id']:
+                        tram['solicitud_en_curso'] = False
+                        registros.append(tram)
+        else:
+            for tram in tramites:
+                tram['solicitud_en_curso'] = False
+                registros.append(tram)
+        _logger.info(tramites)
+        _logger.info(registros)
+        if len(registros) < 1:
+            return {'ok': False, 'result': 'No hay registros con la información suministrada'}
+        return {'ok': True, 'result': registros}
+        
     # Ruta que renderiza el inicio del trámite actualización/coreeción de registro
     @http.route('/tramites/solicitud_correccion/<model("x_cpnaa_procedure"):tramite>', auth='public', website=True)
     def solicitud_correccion(self, tramite):
-        if tramite.x_cycle_ID.x_order != 5:
+        solicitud = http.request.env['x_registry_correction_request'].sudo().search([('x_procedure_ID','=',tramite.id),
+                                                                                     ('x_state','!=','x_complete')])
+        if tramite.x_cycle_ID.x_order != 5 or solicitud:
             return http.request.redirect('/tramites/correccion_datos')
         return http.request.render('my_sample.solicitud_correccion', {'tramite': tramite})
-        
+    
+    # Ruta que renderiza el inicio del trámite actualización/coreeción de registro
+    @http.route('/tramites/editar/solicitud_correccion/<model("x_cpnaa_procedure"):tramite>', auth='public', website=True)
+    def edit_solicitud_correccion(self, tramite):
+        solicitud = http.request.env['x_registry_correction_request'].sudo().search([('x_procedure_ID','=',tramite.id),
+                                                                                     ('x_rejected','=',True)])
+        if tramite.x_cycle_ID.x_order != 5 or not solicitud:
+            return http.request.redirect('/tramites/correccion_datos')
+        return http.request.render('my_sample.solicitud_correccion', {'tramite': tramite, 'solicitud': solicitud})
+    
     # Ruta que renderiza el inicio del trámite actualización/coreeción de registro
     @http.route('/registrar_solicitud_correccion', methods=["POST"], auth='public', website=True)
     def registrar_solicitud_correccion(self, **kw):
         resp = {}
-        _logger.info(kw)
         for key, value in kw.items():
             if type(value) != str:
                 kw[key] = base64.b64encode(kw[key].read())
@@ -518,9 +627,9 @@ class MySample(http.Controller):
             kw['x_procedure_ID'] = int(kw['x_procedure_ID'])
             kw['x_name'] = http.request.env['ir.sequence'].sudo().next_by_code('x_registry_correction_request.sequence')
             kw['x_state'] = 'x_VD'
-            _logger.info(kw)
+            message = 'Su solicitud ha sido recibida correctamente con el radicado No. %s y a vuelta de correo electrónico recibira la respuesta.' % kw['x_name']
             solicitud = http.request.env['x_registry_correction_request'].sudo().create(kw)
-            resp = { 'ok': True, 'message': 'Registro: '+kw['x_name']+' creado con exito','id': solicitud.id }
+            resp = { 'ok': True, 'message': message, 'id': solicitud.id }
         except:
             tb = sys.exc_info()[2]
             resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }
@@ -537,6 +646,44 @@ class MySample(http.Controller):
         else:
             return http.request.env['x_cpnaa_service'].sudo().search([('x_name','=','ACTUALIZACIÓN DE DATOS Y CORRECIÓN DEL REGISTRO DE AUXILIAR')]).id
     
+    # Ruta que actualiza el trámite actualización/correción de registro
+    @http.route('/update_solicitud_correccion', methods=["POST"], auth='public', website=True)
+    def update_solicitud_correccion(self, **kw):
+        resp = {}
+        _logger.info(kw)
+        id_solicitud = kw.get('id_solicitud')
+        del kw['id_solicitud']
+        for key, value in kw.items():
+            if type(value) != str:
+                kw[key] = base64.b64encode(kw[key].read())
+        try:
+            kw['x_issue'] = int(kw['x_issue'])
+            kw['x_rejected'] = False
+            solicitud = http.request.env['x_registry_correction_request'].sudo().browse(int(id_solicitud))
+            solicitud.write(kw)
+            message = 'Su solicitud %s ha sido actualizada correctamente y a vuelta de correo electrónico recibira la respuesta.' % solicitud.x_name
+            resp = { 'ok': True, 'message': message, 'id': solicitud.id }
+            mailthread = {
+                'subject': '%s %s ha sido corregido su solicitud' % (solicitud.x_names, solicitud.x_lastnames),
+                'model': 'x_registry_correction_request',
+                'email_from': solicitud.x_names+' '+solicitud.x_lastnames,
+                'subtype_id': 2,
+                'body': '%s %s ha sido corregido su solicitud' % (solicitud.x_names, solicitud.x_lastnames),
+                'author_id': 4,
+                'message_type': 'notification',
+                'res_id': solicitud.id
+            }
+            http.request.env['mail.message'].sudo().create(mailthread)
+            rechazos = http.request.env['x_refuse_correction_request'].sudo().search([('x_request_ID','=',solicitud.id)])
+            rechazos[-1].write({'x_corrected': True})
+        except:
+            tb = sys.exc_info()[2]
+            resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }
+            _logger.info(sys.exc_info())
+            return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
+        else:
+            return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
+        
     # Ruta que renderiza el inicio del trámite acceso matrícula virtual
     @http.route('/tramites/solicitud_virtual', auth='public', website=True)
     def inicio_mat_virtual(self):
@@ -608,16 +755,21 @@ class MySample(http.Controller):
         try:
             # Asigna contraseña
             password = str(tramite.id)+str(tramite.x_resolution_ID.x_consecutive)
+            cambio_email = '.' if tramite.x_studio_correo_electrnico == email else ' y ha actualizado su email "%s" por "%s".' % (tramite.x_studio_correo_electrnico, email)
             update_user = {'login': email, 'password': password, 'new_password': password}
             update_tramite = {'x_studio_correo_electrnico': email}
             http.request.env['res.users'].browse(usuario.id).sudo().write(update_user)
             http.request.env['x_cpnaa_procedure'].browse(tramite.id).sudo().write(update_tramite)
             http.request.env['x_virtual_activacion_procedure'].sudo().create({
-                'x_name': 'ACTIVACION-VIRTUAL-'+tramite.x_studio_nombres+'-'+tramite.x_studio_apellidos,
+                'x_name': 'ACTIVACION-VIRTUAL-%s-%s' % (tramite.x_studio_nombres, tramite.x_studio_apellidos),
                 'x_procedure_ID': tramite.id,
                 'x_request_email': email,
             })
             http.request.env['mail.template'].sudo().browse(29).send_mail(tramite.id,force_send=True)
+            subject = '%s %s ha realizado la activación virtual' % (tramite.x_studio_nombres, tramite.x_studio_apellidos)
+            body = '%s %s ha realizado la activación virtual%s' % (tramite.x_studio_nombres, tramite.x_studio_apellidos, cambio_email)
+            self.mailthread_tramite(tramite.id, tramite.x_studio_nombres, tramite.x_studio_apellidos,
+                                    subject, body, tramite.x_user_ID.x_partner_ID.id)
             return True
         except:
             _logger.info(sys.exc_info())
@@ -662,7 +814,7 @@ class MySample(http.Controller):
     @http.route('/tramites/certificado_de_vigencia/<model("x_cpnaa_procedure"):tramite>', auth='public', website=True)
     def certificado_vigencia(self, tramite):
         _logger.info(tramite.x_legal_status)
-        if tramite and tramite.x_legal_status != 'SANCIONADO':
+        if tramite:
             return http.request.render('my_sample.certificado_vigencia', {'tramite': tramite})
         else:
             return http.request.redirect('/tramites/certificado_de_vigencia')
@@ -673,18 +825,13 @@ class MySample(http.Controller):
         data = kw.get('data')
         sancionado = False
         if self.validar_captcha(kw.get('token')):
-            tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',data['tipo_doc']),
+            tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',data['tipo_doc']),
                                                                           ('x_studio_documento_1','=',data['documento']),
                                                                           ('x_cycle_ID.x_order','=',5)],
                                                                           ['id','x_studio_carrera_1','x_legal_status'])
             if tramites:
                 mensaje = 'Si existen registros para este tipo y número de documento'
-                for tramite in tramites:
-                    _logger.info(tramite)
-                    if tramite['x_legal_status'] == 'SANCIONADO':
-                        mensaje = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','MENSAJE PROFESIONAL SANCIONADO')]).x_value
-                        tramite['mensaje'] = mensaje
-                return {'ok': True, 'mensaje': 'Si existen registros', 'tramites': tramites }
+                return {'ok': True, 'mensaje': mensaje, 'tramites': tramites }
             else:
                 return {'ok': False, 'mensaje': 'No existen registros para este tipo y número de documento', 'tramites': tramites }
         else:
@@ -738,7 +885,7 @@ class MySample(http.Controller):
     @http.route('/validar_tramites', methods=["POST"], type="json", auth='public', website=True)
     def validar_tramites(self, **kw):
         data = kw.get('data')
-        user = False
+        user, data_user = False, False
         if self.validar_captcha(kw.get('token')):
             result, por_nombre, matricula, certificado, tramite_en_curso = {}, False, False, False, False
             graduando = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select','=',int(data['doc_type'])),
@@ -749,7 +896,7 @@ class MySample(http.Controller):
                     _logger.info('Graduando reportado por IES con plazo vencido => ['+data['doc_type']+':'+data['doc']+']')
                 else:
                     grado = False
-            tramites = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1','=',int(data['doc_type'])),
+            tramites = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1','=',int(data['doc_type'])),
                                                                      ('x_studio_documento_1','=',data['doc'])])
             for tramite in tramites:
                 _logger.info(tramite)
@@ -765,17 +912,19 @@ class MySample(http.Controller):
                     user = tramite.x_user_ID
                     result = {'carrera': tramite.x_studio_carrera_1.x_name, 'tipo_documento': tramite.x_studio_tipo_de_documento_1.x_name, 
                               'documento': tramite.x_studio_documento_1 }
+                if user:
+                    data_user = { 'tipo_documento': user.x_document_type_ID.x_name, 'documento': user.x_document, 'carrera': user.x_institute_career.x_name }
             _logger.info(user)
             if len(graduando) > 1:
                 graduando = graduando[-1]
             if (tramite_en_curso):
                 return { 'ok': True, 'id': user.id, 'tramite_en_curso': tramite_en_curso }
             if (matricula or certificado):
-                return { 'ok': True, 'id': user.id, 'matricula': matricula, 'certificado': certificado, 'result': result }
+                return { 'ok': True, 'id': user.id, 'matricula': matricula, 'certificado': certificado, 'result': result, 'data_user': data_user }
             elif (grado):
                 return { 'ok': True, 'id': graduando.id, 'convenio': True }
             elif (user):
-                return { 'ok': True, 'id': user.id, 'convenio': False }
+                return { 'ok': True, 'id': user.id, 'convenio': False, 'user': data_user }
             else:
                 return { 'ok': False, 'id': False, 'convenio': False }
         else:
@@ -842,7 +991,7 @@ class MySample(http.Controller):
             servicio = 'CERTIFICADO DE INSCRIPCIÓN PROFESIONAL'
         if origen == validos[2]:
             servicio = 'LICENCIA TEMPORAL ESPECIAL'
-        tramites = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
+        tramites = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
                                                                  ('x_studio_documento_1','=',documento)])
         if tramites:
             for tramite in tramites:
@@ -1000,8 +1149,9 @@ class MySample(http.Controller):
         if id_genero == '2':
             nombre_carrera = 'x_female_name'
         return {'carreras': http.request.env['x_cpnaa_career'].sudo().search_read([('x_level_ID.id','in',nivel_profesional),
-                                                                                       (nombre_carrera, 'ilike', cadena)],
-                                                                                       ['id',nombre_carrera], limit=8)}
+                                                                                   ('x_profession_type_ID.x_name','not ilike','NO ACTIVA'),
+                                                                                   (nombre_carrera, 'ilike', cadena)],
+                                                                                    ['id',nombre_carrera], limit=8)}
     
     # Retorna el nombre de la carrera según el genero 
     @http.route('/get_carrera_genero', methods=["POST"], type="json", auth='public', website=True)
@@ -1042,7 +1192,7 @@ class MySample(http.Controller):
     def form_archivo_csv(self, universidad, convenio):
         if universidad.x_email != http.request.session.login or universidad.x_user_type_ID.x_name != 'IES':
             return http.request.redirect('/')
-        profesiones = http.request.env['x_cpnaa_career'].search([])
+        profesiones = http.request.env['x_cpnaa_career'].search([('x_profession_type_ID.x_name','not ilike','NO ACTIVA')], order="x_name")
         convenios = http.request.env['x_cpnaa_agreement'].search([('x_user_ID','=',universidad.id)])
         return http.request.render('my_sample.convenios_archivo_csv', {'profesiones': profesiones, 'convenios': convenios,
                                                                        'universidad':universidad, 'convenio':convenio})
@@ -1052,7 +1202,7 @@ class MySample(http.Controller):
     def form_archivo_csv_grado(self, universidad, grado):
         if universidad.x_email != http.request.session.login or universidad.x_user_type_ID.x_name != 'IES':
             return http.request.redirect('/')
-        profesiones = http.request.env['x_cpnaa_career'].search([])
+        profesiones = http.request.env['x_cpnaa_career'].search([('x_profession_type_ID.x_name','not ilike','NO ACTIVA')], order="x_name")
         convenios = http.request.env['x_cpnaa_agreement'].search([('x_user_ID','=',universidad.id)])
         convenio = http.request.env['x_cpnaa_agreement'].search([('id','=',grado.x_agreement_ID.id)])
         return http.request.render('my_sample.convenios_archivo_csv', {'profesiones': profesiones, 'convenios': convenios,
@@ -1076,7 +1226,7 @@ class MySample(http.Controller):
     def form_archivo_actas_grado(self, universidad, grado):
         if universidad.x_email != http.request.session.login or universidad.x_user_type_ID.x_name != 'IES':
             return http.request.redirect('/')
-        profesiones = http.request.env['x_cpnaa_career'].search([])
+        profesiones = http.request.env['x_cpnaa_career'].search([('x_profession_type_ID.x_name','not ilike','NO ACTIVA')], order="x_name")
         convenios = http.request.env['x_cpnaa_agreement'].search([('x_user_ID','=',universidad.id)])
         convenio = http.request.env['x_cpnaa_agreement'].search([('id','=',grado.x_agreement_ID.id)])
         return http.request.render('my_sample.convenios_grado_actas', {'profesiones': profesiones, 'convenios': convenios,
@@ -1087,7 +1237,7 @@ class MySample(http.Controller):
     def detalles_grado(self, universidad, grado):
         if universidad.x_email != http.request.session.login or universidad.x_user_type_ID.x_name != 'IES':
             return http.request.redirect('/')
-        profesiones = http.request.env['x_cpnaa_career'].search([])
+        profesiones = http.request.env['x_cpnaa_career'].search([('x_profession_type_ID.x_name','not ilike','NO ACTIVA')], order="x_name")
         convenios = http.request.env['x_cpnaa_agreement'].search([('x_user_ID','=',universidad.id)])
         convenio = http.request.env['x_cpnaa_agreement'].search([('id','=',grado.x_agreement_ID.id)])
         return http.request.render('my_sample.detalles_grado', {'profesiones': profesiones, 'convenios': convenios,
@@ -1320,8 +1470,8 @@ class MySample(http.Controller):
             return {'ok': False, 'error': error}
         
     def validar_captcha(self, token):
-        base_url = 'https://www.google.com/recaptcha/api/siteverify?response=';
-        secret = '&secret=6Lf2UcMZAAAAAPUtz3_vPL7H-z8j8cQ1if9fT1Cn';
+        base_url = 'https://www.google.com/recaptcha/api/siteverify?response='
+        secret = '&secret=6Lf2UcMZAAAAAPUtz3_vPL7H-z8j8cQ1if9fT1Cn'
         response = requests.post(base_url + token + secret)
         _logger.info(response.json()['success'])
         return response.json()['success']

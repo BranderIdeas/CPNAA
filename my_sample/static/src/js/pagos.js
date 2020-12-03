@@ -33,7 +33,7 @@ odoo.define('website.pagos', function(require) {
                     $('#recibo').removeAttr('disabled');
                     $('#epayco').removeAttr('disabled');
                 }else{
-                    window.top.location.href = 'https://www.cpnaa.gov.co/';
+                    window.top.location.href = 'https://cpnaa.gov.co/';
                 }
             })
         },
@@ -70,14 +70,15 @@ odoo.define('website.pagos', function(require) {
                 //atributo deshabilitación metodo de pago
                 methodsDisable: ["SP","CASH","DP"]
 
-            }
-            handler.open(dataTran);
-            handler.onCloseModal = function () {
-                alert('Close OnePage');
-                const div = document.querySelector('#overlay-epayco');
-                if(div){ div.remove(); }
-                handler.onCloseModal = null;
-            }
+            }           
+            
+//             handler.open(dataTran);
+//             handler.onCloseModal = function () {
+//                 console.log('Close OnePage');
+//                 const div = document.querySelector('#overlay-epayco');
+//                 if(div){ div.remove(); }
+//                 handler.onCloseModal = null;
+//             }
         },
         numero_recibo_radicado: async function() {
             let corte = dataPDF.corte ? dataPDF.corte.x_name : false;
@@ -193,7 +194,7 @@ odoo.define('website.pagos', function(require) {
         if($('[name="x_service_name"]').val().indexOf('CERTIFICADO') != -1){
             tramite = 'inscripciontt';
         }
-        window.top.location.href = 'https://www.cpnaa.gov.co/';
+        window.top.location.href = 'https://cpnaa.gov.co/';
     })
 
     if(location.href.indexOf(`/pagos/[`) != -1){
@@ -222,7 +223,7 @@ odoo.define('website.pagos', function(require) {
         })
 
         $('#volver').click(()=>{
-            window.top.location.href = 'https://www.cpnaa.gov.co/';
+            window.top.location.href = 'https://cpnaa.gov.co/';
         })
     
     }

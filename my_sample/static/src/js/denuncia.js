@@ -142,7 +142,44 @@ odoo.define('website.denuncia', function(require) {
                 $("input[name='x_implicated_enrollment_number']").val(prof.x_enrollment_number)
                 $("input[name='x_implicated_names']").val(prof.x_studio_nombres)
                 $("input[name='x_implicated_lastnames']").val(prof.x_studio_apellidos)
-            }
+            },
+            guardar_apelacion: function(archivo_pdf, id_denuncia){
+                Swal.fire({
+                    toast: true,
+                    title: `¿Confirmar envio del archivo PDF?`,
+                    showConfirmButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Confirmar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#c8112d',
+                    showLoaderOnConfirm: true,
+                      preConfirm: (response) => {
+                        return rpc.query({
+                                route: '/save_apelacion',
+                                params: {'archivo_pdf': archivo_pdf, 'id_denuncia': id_denuncia}
+                            }).then(function(response){
+                                if (!response.ok) {
+                                  throw new Error(response.error.message)
+                                }
+                                return response;
+                            }).catch((error) => {
+                                let message = error.message.message == undefined ? error : error.message.message;
+                                Swal.showValidationMessage(
+                                  `Error: ${message}`
+                                )
+                            })
+                      },
+                }).then((result) => {
+                    if (result.value) {
+                        validaciones.alert_success_toast(`${result.value.message}`,'center')
+                        if(result.value.ok){
+                            setTimeout(()=>{
+                                location.reload();
+                            },1000)
+                        }
+                    }
+                })
+            },
         })
         
         const denuncia = new Denuncia();
@@ -251,6 +288,35 @@ odoo.define('website.denuncia', function(require) {
                 },400);
             }
         });
+    
+        // Mostrar modal preview del cargue de diploma en PDF
+        $("#btn_apelacion").change(function(ev){
+            let file = ev.target.files[0];
+            let ext = $('#btn_apelacion').val().split('.').pop();
+            let objElm = $("#pdfViewerApelacion");
+            if(file){
+                if (file.size > 1024000 || ext != 'pdf'){
+                    validaciones.alert_error_toast( "El archivo debe ser formato PDF y no exceder de 1Mb.", 'top');
+                    return;
+                }
+                $('#viewerModalApelacion').on('show.bs.modal', function (e) {
+                    let reader = new FileReader();
+                    reader.onload = function(e) {
+                        objElm.attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                });
+                $("#viewerModalApelacion").modal('show');          
+            }
+        });
+
+        // Guardar el Archivo de Apelación PDF
+        $("#guardarApelacion").click(function(e){
+            e.preventDefault();
+            let id_denuncia = $(this).data('denuncia_id');
+            let archivo_b64 = $("#pdfViewerApelacion").attr('src');
+            denuncia.guardar_apelacion(archivo_b64, id_denuncia); 
+        })
         
         function mostrarSpinner(){
             $('#div_spinner_denuncia').attr('aria-hidden', false).removeClass('invisible');

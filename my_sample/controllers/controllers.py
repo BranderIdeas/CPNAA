@@ -1,4 +1,5 @@
 from odoo import http
+from odoo.exceptions import ValidationError
 from datetime import date, datetime, timedelta, timezone
 from random import choice
 import logging
@@ -156,14 +157,25 @@ class MySample(http.Controller):
         if success:
             if data['data']['x_response'] == 'Aceptada':
                 data_tramite = {
-                    'numero_pago': data['data']['x_transaction_id'],
-                    'fecha_pago': data['data']['x_transaction_date'],
-                    'banco': data['data']['x_bank_name'],
-                    'monto_pago': data['data']['x_amount'],
-                    'tipo_pago': data['data']['x_type_payment'],
-                    'id_tramite': data['data']['x_extra1']
+                    'numero_pago' : data['data']['x_transaction_id'],
+                    'fecha_pago'  : data['data']['x_transaction_date'],
+                    'banco'       : data['data']['x_bank_name'],
+                    'monto_pago'  : data['data']['x_amount'],
+                    'tipo_pago'   : data['data']['x_type_payment'],
+                    'id_tramite'  : data['data']['x_extra1']
                 }
                 resultado_pago = self.tramite_fase_verificacion(data_tramite)
+            elif data['data']['x_response'] == 'Pendiente':
+                registrado = http.request.env['x_cpnaa_temp_payments_pending'].sudo().search([('x_epayco_ref','=',ref_payco)])
+                if not registrado:
+                    http.request.env['x_cpnaa_temp_payments_pending'].sudo().create({
+                        'x_epayco_ref'   : ref_payco,
+                        'x_procedure_ID' : data['data']['x_extra1'],
+                        'x_motive'       : data['data']['x_response_reason_text'],
+                        'x_type_payment' : data['data']['x_type_payment'],
+                        'x_name'         : 'PAGO-PENDIENTE-%s' % data['data']['x_ref_payco']
+                    })
+                resultado_pago = { 'ok': False, 'message': 'La transacción esta pendiente','error': False, 'numero_radicado': False }
             else:
                 resultado_pago = { 'ok': False, 'message': 'La transacción no fue aprobada','error': False, 'numero_radicado': False }
             _logger.info(resultado_pago)
@@ -191,17 +203,17 @@ class MySample(http.Controller):
         for key in borrar:
             del kw[key]
         try:
-            consecutivo = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=','PQRS')])
-            kw['x_name'] = 'PQRS-'+str(consecutivo.x_value + 1)
+            consecutivo    = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=','PQRS')])
+            kw['x_name']   = 'PQRS-'+str(consecutivo.x_value + 1)
             kw['x_states'] = 'open'
-            pqrs = http.request.env['x_cpnaa_pqrs'].sudo().create(kw)
+            pqrs           = http.request.env['x_cpnaa_pqrs'].sudo().create(kw)
             if pqrs:
                 count = 0
                 for at in attachments_files:
                     count += 1
-                    file = base64.b64encode(at.read())
+                    file       = base64.b64encode(at.read())
+                    ext        = str(at.filename.split('.')[-1]).lower()
                     attachment = {'x_request_ID': pqrs.id, 'x_file': file, 'x_name': 'ADJUNTO-'+str(count)+'-'+pqrs.x_name}
-                    ext = str(at.filename.split('.')[-1]).lower()
                     if ext == 'pdf':
                         http.request.env['x_pqrs_attachments_pdf'].sudo().create(attachment)
                     else:
@@ -209,7 +221,7 @@ class MySample(http.Controller):
                 http.request.env['x_cpnaa_consecutive'].browse(consecutivo.id).sudo().write({'x_value':consecutivo.x_value + 1})
             resp = { 'ok': True, 'message': 'Su solicitud ha sido registrada con el consecutivo '+ pqrs.x_name +' exitosamente.' }
         except:
-            tb = sys.exc_info()[2]
+            tb   = sys.exc_info()[2]
             resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }
             _logger.info(sys.exc_info())
             return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
@@ -292,6 +304,40 @@ class MySample(http.Controller):
             return {'ok': True, 'result': tramites}
         else:
             return {'ok': False, 'result': 'No hay registros con la información suministrada'}
+        
+    # Guarda el recurso de apelacion, actualiza el trámite, escribe en el mailthread y envia un mail al usuario interno encargado
+    @http.route('/save_apelacion', methods=["POST"], type="json", auth='public', website=True) 
+    def save_apelacion(self, **kw):
+        archivo      = kw.get('archivo_pdf')
+        id_denuncia  = kw.get('id_denuncia')
+        archivo_temp = unicodedata.normalize('NFKD', archivo)
+        archivo_pdf  = archivo_temp.lstrip('data:application/pdf;base64,')
+        denuncia     = http.request.env['x_cpnaa_complaint'].sudo().search([('id','=',id_denuncia)])
+        actualizado  = False
+        try:
+            update = {'x_appeal_resource_file': archivo_pdf, 'x_state_for_buttons': 'x_appeal_file_received',
+                      'x_state': 'x_archive_appeal', 'x_phase_5': True}
+            actualizado = http.request.env['x_cpnaa_complaint'].browse(id_denuncia).sudo().write(update)
+        except:
+            _logger.info(sys.exc_info())
+            return {'ok': False, 'error': str(sys.exc_info()[1])}
+        if actualizado:
+            subject = '%s %s ha cargado el archivo de Recurso de Apelación' % (denuncia.x_complainant_names, denuncia.x_complainant_lastnames)
+            mailthread = {
+                'subject': subject,
+                'model': 'x_cpnaa_complaint',
+                'email_from': denuncia.x_complainant_names+' '+denuncia.x_complainant_lastnames,
+                'subtype_id': 2,
+                'body': subject,
+                'author_id': 4,
+                'message_type': 'notification',
+                'res_id': denuncia.id
+            }
+            http.request.env['mail.message'].sudo().create(mailthread)
+#             http.request.env['mail.template'].sudo().search([('name','=','cpnaa_template_load_CD')])[0].sudo().send_mail(id_tramite,force_send=True)
+            return {'ok': True, 'message': 'Denuncia Actualizada, se guardo el archivo de apelación en PDF.'}
+        else:
+            return {'ok': False, 'error': 'Denuncia no pudo ser actualizada, intente nuevamente.'}
         
     # Ruta que renderiza página de consulta de registro por documento
     @http.route('/consulta_online/por_documento', auth='public', website=True)

@@ -811,7 +811,7 @@ class MySample(http.Controller):
         pdf64 = base64.b64encode(pdf)
         pdfStr = pdf64.decode('ascii')
         cert = http.request.env['ir.attachment'].sudo().create({
-            'name': 'Certificado',
+            'name': 'certificado-vigencia-profesional-%s.pdf' % tramite.x_studio_documento_1,
             'type': 'binary',
             'datas': pdf64,
             'mimetype': 'application/x-pdf'

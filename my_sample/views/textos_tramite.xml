@@ -45,10 +45,14 @@
                             </div>
                         </div>
                         <div class="embed-responsive embed-responsive-4by3">
-                            <iframe t-if="form == 'matricula'" class="embed-responsive-item" src="https://www.youtube.com/embed/vIOF5W6kZbM" frameborder="0"></iframe>
-                            <iframe t-if="form == 'inscripciontt'" class="embed-responsive-item" src="https://www.youtube.com/embed/BwCN5udmlq0" frameborder="0"></iframe>
-                            <iframe t-if="form == 'convenio'" class="embed-responsive-item" src="https://www.youtube.com/embed/hxadCw-4kTk" frameborder="0"></iframe>
-                            <iframe t-if="form == 'licencia'" class="embed-responsive-item" src="https://www.youtube.com/embed/28UkIxv_4mY" frameborder="0"></iframe>
+                            <iframe t-if="form == 'matricula'" class="embed-responsive-item" 
+                                src="https://www.youtube.com/embed/vIOF5W6kZbM" frameborder="0" allowfullscreen="true"></iframe>
+                            <iframe t-if="form == 'inscripciontt'" class="embed-responsive-item" 
+                                src="https://www.youtube.com/embed/BwCN5udmlq0" frameborder="0" allowfullscreen="true"></iframe>
+                            <iframe t-if="form == 'convenio'" class="embed-responsive-item" 
+                                src="https://www.youtube.com/embed/hxadCw-4kTk" frameborder="0" allowfullscreen="true"></iframe>
+                            <iframe t-if="form == 'licencia'" class="embed-responsive-item" 
+                                src="https://www.youtube.com/embed/28UkIxv_4mY" frameborder="0" allowfullscreen="true"></iframe>
                         </div>
                         <span class="font-italic font-weight-bold">Video Tutorial</span>
                     </div>

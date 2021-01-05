@@ -126,6 +126,10 @@ class MySample(http.Controller):
         tramites = http.request.env['x_cpnaa_procedure'].search_read([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
                                                                       ('x_studio_documento_1','=',documento),
                                                                       ('x_cycle_ID.x_order','=',0)],campos)
+        for tram in tramites:
+            servicio       = http.request.env['x_cpnaa_service'].browse(tram['x_service_ID'][0])
+            tram['x_rate'] = servicio.x_rate
+            http.request.env['x_cpnaa_procedure'].browse(tram['id']).sudo().write({'x_rate': servicio.x_rate})
         if (tramites):
             tipo_documento = 'CC'
             if tramites[0]['x_studio_tipo_de_documento_1'][0] == 2:

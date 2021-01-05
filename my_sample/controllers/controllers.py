@@ -128,8 +128,9 @@ class MySample(http.Controller):
                                                                       ('x_cycle_ID.x_order','=',0)],campos)
         for tram in tramites:
             servicio       = http.request.env['x_cpnaa_service'].browse(tram['x_service_ID'][0])
-            tram['x_rate'] = servicio.x_rate
-            http.request.env['x_cpnaa_procedure'].browse(tram['id']).sudo().write({'x_rate': servicio.x_rate})
+            tarifa         = servicio.x_rate - servicio.x_discount
+            tram['x_rate'] = tarifa
+            http.request.env['x_cpnaa_procedure'].browse(tram['id']).sudo().write({'x_rate': tarifa})
         if (tramites):
             tipo_documento = 'CC'
             if tramites[0]['x_studio_tipo_de_documento_1'][0] == 2:

@@ -72,15 +72,21 @@ odoo.define('website.consulta', function(require) {
                 }
                 div_results.removeClass('invisible').attr('aria-hidden',false);
                 let texto = `<b>${sr} ${tramite.x_studio_nombres} ${tramite.x_studio_apellidos} </b><br/>
-                             ${identificado} con ${_this.capitalize(tramite.x_studio_tipo_de_documento_1[1])}: 
-                             ${tramite.x_studio_documento_1}${de}${_this.capitalize(expedicion)},  
-                             Se encuentra ${registrado} como `;
+                                ${identificado} con ${_this.capitalize(tramite.x_studio_tipo_de_documento_1[1])}: 
+                                ${tramite.x_studio_documento_1}${de}${_this.capitalize(expedicion)},  
+                                Se encuentra ${registrado} como `;
                 response.tramites.forEach((tram, idx)=>{
-                    let text_final = (response.tramites.length - 1) === idx ? ', en el CPNAA.' : ' y ';
-                    let carrera = tram.x_studio_gnero[0] === 1 ? tram.x_studio_carrera_1[1] : tram.x_female_career ;
+                    const antecedentes = !tram.x_legal_status 
+                        ? `no registra ANTECEDENTES ni SANCIONES VIGENTES en el ejercicio de su profesión por parte del Consejo 
+                            Profesional Nacional de Arquitectura y sus Profesiones Auxiliares.`
+                        : tram.x_sanction.slice(15);
+                    const status = tram.x_legal_status != 'SUSPENDIDO' ? 'VIGENTE' : 'SUSPENDIDA';
+                    const text_final = (response.tramites.length - 1) === idx ? '' : ' y ';
+                    const carrera = tram.x_studio_gnero[0] === 1 ? tram.x_studio_carrera_1[1] : tram.x_female_career ;
                     texto += `${_this.capitalize(carrera)} con número de ${_this.capitalize(_this.quitarConvenio(tram.x_service_ID[1]))}: 
-                              ${tram.x_enrollment_number} de acuerdo a la resolución Nro. ${tram.x_resolution_number} de fecha 
-                              ${validaciones.dateTimeToString(tram.x_resolution_date)}`;
+                                ${tram.x_enrollment_number} de acuerdo a la resolución Nro. ${tram.x_resolution_number} de fecha 
+                                ${validaciones.dateTimeToString(tram.x_resolution_date)}, se encuentra <b>${status}</b> 
+                                y ${antecedentes}`;
                     texto += text_final;
                 })
                 div_results.find('#data_result').html(texto);

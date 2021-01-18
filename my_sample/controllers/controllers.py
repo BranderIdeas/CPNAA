@@ -368,8 +368,8 @@ class MySample(http.Controller):
         if self.validar_captcha(kw.get('token')):
             ahora = datetime.now() - timedelta(hours=5)
             hora_consulta = ahora.strftime('%Y-%m-%d %H:%M:%S')
-            campos = ['id','x_studio_tipo_de_documento_1', 'x_studio_documento_1','x_service_ID','x_origin_type',
-                      'x_studio_pas_de_expedicin_1','x_studio_ciudad_de_expedicin','x_resolution_ID',
+            campos = ['id','x_studio_tipo_de_documento_1', 'x_studio_documento_1','x_service_ID','x_studio_pas_de_expedicin_1',
+                      'x_origin_type', 'x_studio_ciudad_de_expedicin','x_resolution_ID', 'x_legal_status', 'x_sanction',
                       'x_studio_ciudad_de_expedicin','x_studio_carrera_1','x_studio_gnero','x_studio_fecha_de_resolucin',
                       'x_studio_nombres','x_studio_apellidos','x_enrollment_number','x_fecha_resolucion_corte']
             if data['numero_tarjeta'] != '':
@@ -841,7 +841,7 @@ class MySample(http.Controller):
             return { 'ok': False, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página', 'error_captcha': True  }
     
     # Enviar el certificado de vigencia al email y lo retorna al navegador para su descarga
-    @http.route('/enviar_certificado_vigencia', methods=["POST"], type="json", auth='public', website=True)
+    @http.route('/enviar_certificado_vigencia', methods=["POST"], type="json", auth='public')
     def enviar_certificado_vigencia(self, **kw):
         tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',kw.get('id_tramite'))])
         template_obj = http.request.env['mail.template'].sudo().search_read([('name','=','cpnaa_template_validity_certificate')])[0]

@@ -58,16 +58,9 @@
                     </div>
                     <div class="col-sm-12 col-md-7">
                         <div class="row bg-red mr-cuadro border-gray sombra-sobre-rojo">
-                            <div class="col-sm-12 col-md-5 vertical-center">
-                                <h6>
-                                    <a href="https://cpnaa.gov.co/wp-content/uploads/2020/06/Circular-No.3-de-2020_0.pdf" 
-                                       target="_blank" class="link-portal">
-                                        <i class="fa fa-file-text"></i> Circular No 3 del 2020
-                                    </a>
-                                </h6>
-                            </div>
-                            <div class="col-sm-12 col-md-7 ft12 p-0">
-                                Conozca las disposiciones del CPNAA, en el marco de la emergencia sanitaria por el riesgo de contagio del virus COVID-19, sobre el trámite de Matrícula Profesional de Arquitectura.
+                            <div class="col-sm-12 vertical-center ft08 text-justify">
+                                Tenga en cuenta que los artículos 18 y 19 del decreto 2106 de 2019, “Por el cual se dictan normas para simplificar, suprimir y reformar trámites, procesos y procedimientos innecesarios existentes en la administración pública”, en cumplimiento de lo antes mencionado, el CPNAA expide la Matrícula Profesional de Arquitectura y/o Certificado de Inscripción Profesional y/o Licencia Temporal Especial y/o Renovación de manera virtual, eliminando el plástico y su impresión.
+                                La consulta de los registros públicos por parte de las autoridades que requieren la información para la gestión de un trámite, vinculación a un cargo público o para suscribir contratos con el Estado, exime a los ciudadanos de aportar la tarjeta profesional física o cualquier medio de acreditación.
                             </div>
                         </div>
                         <div class="row vertical-center border-gray mr-cuadro bg-red mt-2 sombra-sobre-rojo">
@@ -78,13 +71,13 @@
                                 Para realizar el trámite lea y acepte los siguientes términos y condiciones de uso del sistema, consulte nuestra Política de Seguridad y Privacidad de la Información
                             </div>
                         </div>
-                        <div class="row mr-cuadro border-gray p-1">
-                            <ul class="ft12">
-                                <li>NOTA: Si usted es ARQUITECTO CONSTRUCTOR, el trámite de la matrícula profesional debe realizarlo con el COPNIA (Consejo Profesional Nacional de Ingeniería).</li>
-                                <br/>
-                                <li>'El Consejo Profesional Nacional de Arquitectura y sus Profesiones Auxiliares conforme los lincamientos establecidos en la Ley 1581 de 2012 y sus decretos reglamentarios, como responsable de la recolección de los datos personales suministrados en el presente documento, garantiza la seguridad y confidencialidad respecto del tratamiento de los datos sensibles o personales suministrados para los fines de la presente solicitud, igualmente propenderá por su debida custodia, uso. circulación y supresión.’.</li>
-                            </ul>
-                        </div>
+                    </div>
+                    <div class="text-justify px-4 mt-4" style="margin-left: -35px;">
+                        <ul class="ft12">
+                            <li>NOTA: Si usted es ARQUITECTO CONSTRUCTOR, el trámite de la matrícula profesional debe realizarlo con el COPNIA (Consejo Profesional Nacional de Ingeniería).</li>
+                            <br/>
+                            <li>'El Consejo Profesional Nacional de Arquitectura y sus Profesiones Auxiliares conforme los lincamientos establecidos en la Ley 1581 de 2012 y sus decretos reglamentarios, como responsable de la recolección de los datos personales suministrados en el presente documento, garantiza la seguridad y confidencialidad respecto del tratamiento de los datos sensibles o personales suministrados para los fines de la presente solicitud, igualmente propenderá por su debida custodia, uso. circulación y supresión.’.</li>
+                        </ul>
                     </div>
                 </div>
             </div>

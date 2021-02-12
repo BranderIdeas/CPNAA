@@ -4,7 +4,8 @@
             <t t-call="website.layout">
                 <t t-set="additional_title">Certificado de Vigencia</t>
                 <h1 class="formTitle mt-5 mb-5" data-tramite="matricula">
-                    <font>SOLICITUD DE CERTIFICADO DE VIGENCIA PROFESIONAL DIGITAL</font>
+                    <font t-if="digital">SOLICITUD DE CERTIFICADO DE VIGENCIA PROFESIONAL DIGITAL</font>
+                    <font t-if="exterior">SOLICITUD DE CERTIFICADO DE VIGENCIA PROFESIONAL CON DESTINO AL EXTERIOR</font>
                 </h1>
                 <div class="container">
                     <div class="formSection mt-3">
@@ -41,7 +42,10 @@
                                 <div class="alert alert-primary text-center" role="alert"></div>
                             </div>                            
                             <div class="form-group row d-flex justify-content-center mb-5 mt-3">
-                                <button type="submit" id="btn_enviar_vigencia" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="true">Enviar</button>
+                                <button t-if="digital" type="submit" id="btn_enviar_vigencia" 
+                                        class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="true">Enviar</button>
+                                <button t-if="exterior" type="submit" id="btn_enviar_exterior" 
+                                        class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="true">Enviar</button>
                             </div>
                         </form>
                     </div>

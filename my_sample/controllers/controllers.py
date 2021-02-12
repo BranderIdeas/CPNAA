@@ -777,11 +777,6 @@ class MySample(http.Controller):
         except:
             _logger.info(sys.exc_info())
             return False
-    
-    # Ruta que renderiza el inicio del trámite certificado de vigencia virtual
-    @http.route('/tramites/certificado_de_vigencia', auth='public', website=True)
-    def inicio_cert_vigencia(self):
-        return http.request.render('my_sample.inicio_cert_vigencia', {})
         
     # Ruta que renderiza el validacion de autenticiadad del certificado de vigencia virtual
     @http.route('/tramites/validacion_cert_de_vigencia', auth='public', website=True)
@@ -813,12 +808,22 @@ class MySample(http.Controller):
         else:
             return { 'ok': False, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página', 'error_captcha': True }
     
+    # Ruta que renderiza el inicio del trámite certificado de vigencia con destino al exterior
+    @http.route('/tramites/certificado_vigencia_exterior', auth='public', website=True)
+    def inicio_cert_exterior(self):
+        return http.request.render('my_sample.inicio_cert_vigencia', {'exterior': True})
+        
+    # Ruta que renderiza el inicio del trámite certificado de vigencia virtual
+    @http.route('/tramites/certificado_de_vigencia', auth='public', website=True)
+    def inicio_cert_vigencia(self):
+        return http.request.render('my_sample.inicio_cert_vigencia', {'digital': True})
+    
     # Ruta que renderiza el resultado del trámite certificado de vigencia virtual
     @http.route('/tramites/certificado_de_vigencia/<model("x_cpnaa_procedure"):tramite>', auth='public', website=True)
     def certificado_vigencia(self, tramite):
         _logger.info(tramite.x_legal_status)
         if tramite:
-            return http.request.render('my_sample.certificado_vigencia', {'tramite': tramite})
+            return http.request.render('my_sample.certificado_vigencia', {'tramite': tramite, 'digital': True})
         else:
             return http.request.redirect('/tramites/certificado_de_vigencia')
     
@@ -883,6 +888,37 @@ class MySample(http.Controller):
         except:
             _logger.info(sys.exc_info())
             return {'ok': False, 'mensaje': 'No se podido completar su solicitud', 'cert': False}
+
+    # Enviar el certificado de vigencia que subieron ya firmado al email que lo solicito
+    @http.route('/generar_certificado_exterior', methods=["POST"], type="json", auth='public')
+    def generar_certificado_exterior(self, **kw):
+        nombre_tramite = 'CERTIFICADO DE VIGENCIA CON DESTINO AL EXTERIOR'
+        tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',kw.get('id_tramite'))])
+        cert_template = http.request.env['x_cpnaa_template'].sudo().search([('x_name','=',nombre_tramite)])
+        consecutivo = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=',nombre_tramite)])
+        servicio = http.request.env['x_cpnaa_service'].sudo().search([('x_name','like',nombre_tramite),
+                   ('x_studio_nivel_profesional.x_name','=',tramite.x_service_ID.x_studio_nivel_profesional[0].x_name)])
+        certificado = http.request.env['x_procedure_service_exterior'].sudo().create({
+            'x_doc_gen': cert_template.x_html_content,
+            'x_procedure_ID': tramite.id,
+            'x_service_ID': servicio.id,
+            'x_consecutive': consecutivo.x_value + 1,
+            'x_state': 'x_process',
+            'x_name': 'CERT-VIG-EXT-%s-%s' % (tramite.x_studio_nombres, tramite.x_studio_apellidos),
+            'x_email': kw.get('email')
+        })
+        if certificado:
+            numero_radicado = Sevenet.sevenet_certificado_exterior(certificado.id)
+            certificado.sudo().write({'x_radicate_number': numero_radicado })
+            mail_template = http.request.env['mail.template'].sudo().search([('name','=','x_cpnaa_template_certificate_exterior')])[0]
+            mail_template.send_mail(certificado.id,force_send=True)
+            consecutivo.sudo().write({'x_value': consecutivo.x_value + 1})
+        try:
+            mensaje = 'Su certificado de vigencia con destino al exterior será tramitado de 1 a 5 días hábiles y enviado a su correo electrónico "%s" para que sea presentado en el Ministerio de relaciones exteriores". Su solicitud fue radicada con el número R-%s' % (kw.get('email'), numero_radicado)
+            return {'ok': True, 'mensaje': mensaje}
+        except:
+            _logger.info(sys.exc_info())
+            return {'ok': False, 'mensaje': 'No se podido completar su solicitud'}
     
     # Valida tipo y número de documento, valida si es un usuario nuevo, si tiene trámite o si es un graduando
     @http.route('/validar_tramites', methods=["POST"], type="json", auth='public', website=True)

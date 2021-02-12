@@ -84,6 +84,155 @@ def sevenet_consulta(id_tramite, tipo_pago):
         _logger.info('Error al radicar en sevenet: %s' % mensaje_respuesta)
     return radicado
 
+def sevenet_denuncia(id_tramite):
+    pruebas_pdf = None
+    pruebas_img = None
+    url = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','URL SERVICIO SEVENET')]).x_value
+    tramite = http.request.env['x_cpnaa_complaint'].browse(id_tramite)
+    if tramite:
+        pruebas_pdf = http.request.env['x_evidence_files_pdf'].sudo().search_read([('x_complaint_ID','=',id_tramite)])
+        pruebas_img = http.request.env['x_evidence_files_img'].sudo().search_read([('x_complaint_ID','=',id_tramite)])
+    datos = """ 
+            <datos>
+            #tramite #nombre #apellido #numdocumento #ciudad #genero 
+            #tipoinst #nombrinst #profesion #fechagrado #docminis 
+            #residdirecc #residciudad #residindica #residtelefo #celular 
+            #email #enviodirrec #enviocelula #envioindica #enviotelefo 
+            #enviociudad #enviotelefo #enviociudad #medioelectr #autornombre 
+            #adicionala #adicionalb #pqrdescrip #autordocume #tdepago #adjuntos
+            </datos>
+            """
+
+    datos = datos.replace('#tramite','<tramite>%s</tramite>' % tramite.x_service_ID.x_abbreviation_name)
+    datos = datos.replace('#nombre','<nombre>%s</nombre>' % tramite.x_complainant_names)
+    datos = datos.replace('#apellido','<apellido>%s</apellido>' % tramite.x_complainant_lastnames)
+    datos = datos.replace('#numdocumento','<numdocumento>%s</numdocumento>' % tramite.x_complainant_document)
+    datos = datos.replace('#ciudad','<ciudad>%s</ciudad>' % '')
+    datos = datos.replace('#genero','<genero>%s</genero>' % '')
+    datos = datos.replace('#tipoinst','<tipoinst>%s</tipoinst>' % '')
+    datos = datos.replace('#nombrinst','<nombreinst>%s</nombreinst>' % '')
+    datos = datos.replace('#profesion','<profesion>%s</profesion>' % '')
+    datos = datos.replace('#fechagrado','<fechagrado>%s</fechagrado>' % '')
+    datos = datos.replace('#docminis','<docminis>%s</docminis>' % '')
+    datos = datos.replace('#residdirecc','<residdirecc>%s</residdirecc>' % tramite.x_complainant_address)
+    datos = datos.replace('#residciudad','<residciudad>%s</residciudad>' % tramite.x_complainant_city_ID.id)
+    datos = datos.replace('#residindica','<residindica>%s</residindica>' % '')
+    datos = datos.replace('#residtelefo','<residtelefo>%s</residtelefo>' % tramite.x_complainant_phone)
+    datos = datos.replace('#celular','<celular>%s</celular>' % tramite.x_complainant_celular)
+    datos = datos.replace('#email','<email>%s</email>' % tramite.x_complainant_email)
+    datos = datos.replace('#enviodirrec','<enviodirrec></enviodirrec>')
+    datos = datos.replace('#enviocelula','<enviocelula></enviocelula>')
+    datos = datos.replace('#envioindica','<envioindica></envioindica>')
+    datos = datos.replace('#enviotelefo','<enviotelefo></enviotelefo>')
+    datos = datos.replace('#enviociudad','<enviociudad></enviociudad>')
+    datos = datos.replace('#enviotelefo','<enviotelefo></enviotelefo>')
+    datos = datos.replace('#enviociudad','<enviociudad></enviociudad>')
+    datos = datos.replace('#medioelectr','<medioelectr>%s</medioelectr>' % '')
+    datos = datos.replace('#autornombre','<autornombre></autornombre>')
+    datos = datos.replace('#adicionala','<adicionala>%s</adicionala>' % 'queja')
+    datos = datos.replace('#adicionalb','<adicionalb>%s</adicionalb>' % 'pqrd')
+    datos = datos.replace('#pqrdescrip','<pqrdescrip>%s</pqrdescrip>' % tramite.x_name)
+    datos = datos.replace('#autordocume','<autordocume>%s</autordocume>' % '')
+    datos = datos.replace('#tdepago','<tipodepago>%s</tipodepago>' % '')
+    
+    docs = []
+    for prueba in pruebas_pdf:
+        _logger.info(prueba['x_file'])
+        documento = '<documento> #documento </documento>'
+        nombre_original = '<nombreoriginal>%s.pdf</nombreoriginal>' % prueba['x_name']
+        cuerpo = '<cuerpo>%s</cuerpo>' % str(prueba['x_file'])[2:-1]
+        documento = documento.replace('#documento','%s %s' % (nombre_original, cuerpo))
+        docs.append(documento)
+    for prueba in pruebas_img:
+        documento = '<documento> #documento </documento>'
+        nombre_original = '<nombreoriginal>%s.%s</nombreoriginal>' % (prueba['x_name'], prueba['x_extention'])
+        cuerpo = '<cuerpo>%s</cuerpo>' % str(prueba['x_file'])[2:-1]
+        documento = documento.replace('#documento','%s %s' % (nombre_original, cuerpo))
+        _logger.info(cuerpo)
+        docs.append(documento)
+    
+    adjuntos = '<adjuntos> #documentos </adjuntos>'
+    adjuntos = adjuntos.replace('#documentos',' '.join(docs))
+    
+    datos = datos.replace('#adjuntos',adjuntos)
+    client = Client(url)
+    resp = client.service.Registrar(datos)
+    _logger.info(datos)
+
+    root = etree.XML(resp)
+    body = etree.SubElement(root, "textoRespuesta")
+
+    radicado = 0
+    mensaje_respuesta = root.xpath("//text()")[1]
+    codigo_respuesta  = int(root.xpath("//text()")[0])
+    if codigo_respuesta == 0:
+        radicado = int(mensaje_respuesta[10:].split('-')[0])
+    else:
+        _logger.info('Error al radicar en sevenet: %s' % mensaje_respuesta)
+    return radicado
+
+def sevenet_certificado_exterior(id_tramite):
+    url = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','URL SERVICIO SEVENET')]).x_value
+    tramite = http.request.env['x_procedure_service_exterior'].browse(id_tramite)
+    datos = """ 
+            <datos>
+            #tramite #nombre #apellido #numdocumento #ciudad #genero 
+            #tipoinst #nombrinst #profesion #fechagrado #docminis 
+            #residdirecc #residciudad #residindica #residtelefo #celular 
+            #email #enviodirrec #enviocelula #envioindica #enviotelefo 
+            #enviociudad #enviotelefo #enviociudad #medioelectr #autornombre 
+            #adicionala #adicionalb #pqrdescrip #autordocume #tdepago
+            <adjuntos></adjuntos>
+            </datos>
+            """
+
+    datos = datos.replace('#tramite','<tramite>%s</tramite>' % '') #tramite.x_service_ID.x_abbreviation_name
+    datos = datos.replace('#nombre','<nombre>%s</nombre>' % tramite.x_names)
+    datos = datos.replace('#apellido','<apellido>%s</apellido>' % tramite.x_lastnames)
+    datos = datos.replace('#numdocumento','<numdocumento>%s</numdocumento>' % tramite.x_document_number)
+    datos = datos.replace('#ciudad','<ciudad>%s</ciudad>' % tramite.x_procedure_ID.x_studio_ciudad_de_expedicin.x_name)
+    datos = datos.replace('#genero','<genero>%s</genero>' % tramite.x_procedure_ID.x_studio_gnero.x_name)
+    datos = datos.replace('#tipoinst','<tipoinst>%s</tipoinst>' % '')
+    datos = datos.replace('#nombrinst','<nombreinst>%s</nombreinst>' % '')
+    datos = datos.replace('#profesion','<profesion>%s</profesion>' % '')
+    datos = datos.replace('#fechagrado','<fechagrado>%s</fechagrado>' % '')
+    datos = datos.replace('#docminis','<docminis>%s</docminis>' % '')
+    datos = datos.replace('#residdirecc','<residdirecc>%s</residdirecc>' % tramite.x_procedure_ID.x_studio_direccin)
+    datos = datos.replace('#residciudad','<residciudad>%s</residciudad>' % tramite.x_procedure_ID.x_studio_ciudad_1.x_name)
+    datos = datos.replace('#residindica','<residindica>%s</residindica>' % '')
+    datos = datos.replace('#residtelefo','<residtelefo>%s</residtelefo>' % '')
+    datos = datos.replace('#celular','<celular>%s</celular>' % '')
+    datos = datos.replace('#email','<email>%s</email>' % tramite.x_email)
+    datos = datos.replace('#enviodirrec','<enviodirrec></enviodirrec>')
+    datos = datos.replace('#enviocelula','<enviocelula></enviocelula>')
+    datos = datos.replace('#envioindica','<envioindica></envioindica>')
+    datos = datos.replace('#enviotelefo','<enviotelefo></enviotelefo>')
+    datos = datos.replace('#enviociudad','<enviociudad></enviociudad>')
+    datos = datos.replace('#enviotelefo','<enviotelefo></enviotelefo>')
+    datos = datos.replace('#enviociudad','<enviociudad></enviociudad>')
+    datos = datos.replace('#medioelectr','<medioelectr>%s</medioelectr>' % '')
+    datos = datos.replace('#autornombre','<autornombre></autornombre>')
+    datos = datos.replace('#adicionala','<adicionala>%s</adicionala>' % '')
+    datos = datos.replace('#adicionalb','<adicionalb>%s</adicionalb>' % '')
+    datos = datos.replace('#pqrdescrip','<pqrdescrip>%s</pqrdescrip>' % '')
+    datos = datos.replace('#autordocume','<autordocume>%s</autordocume>' % '')
+    datos = datos.replace('#tdepago','<tipodepago>%s</tipodepago>' % '')
+    
+    client = Client(url)
+    resp = client.service.Registrar(datos)
+    _logger.info(datos)
+
+    root = etree.XML(resp)
+    body = etree.SubElement(root, "textoRespuesta")
+
+    radicado = 0
+    mensaje_respuesta = root.xpath("//text()")[1]
+    codigo_respuesta  = int(root.xpath("//text()")[0])
+    if codigo_respuesta == 0:
+        radicado = int(mensaje_respuesta[10:].split('-')[0])
+    else:
+        _logger.info('Error al radicar en sevenet: %s' % mensaje_respuesta)
+    return radicado
 
 # Reemplaza la key del diccionario por el nombre que se va a guardar en sevenet
 def key_to_name(key):

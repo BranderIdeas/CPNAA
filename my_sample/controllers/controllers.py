@@ -812,6 +812,15 @@ class MySample(http.Controller):
     @http.route('/tramites/certificado_vigencia_exterior', auth='public', website=True)
     def inicio_cert_exterior(self):
         return http.request.render('my_sample.inicio_cert_vigencia', {'exterior': True})
+
+    # Ruta que renderiza el resultado del trámite certificado de vigencia con destino al exterior
+    @http.route('/tramites/certificado_vigencia_exterior/<model("x_cpnaa_procedure"):tramite>', auth='public', website=True)
+    def certificado_vigencia_exterior(self, tramite):
+        _logger.info(tramite.x_legal_status)
+        if tramite:
+            return http.request.render('my_sample.certificado_vigencia', {'tramite': tramite, 'exterior': True})
+        else:
+            return http.request.redirect('/tramites/certificado_vigencia')
         
     # Ruta que renderiza el inicio del trámite certificado de vigencia virtual
     @http.route('/tramites/certificado_de_vigencia', auth='public', website=True)

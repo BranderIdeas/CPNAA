@@ -186,7 +186,7 @@ def sevenet_certificado_exterior(id_tramite):
             </datos>
             """
 
-    datos = datos.replace('#tramite','<tramite>%s</tramite>' % '') #tramite.x_service_ID.x_abbreviation_name
+    datos = datos.replace('#tramite','<tramite>%s</tramite>' % tramite.x_service_ID.x_abbreviation_name)
     datos = datos.replace('#nombre','<nombre>%s</nombre>' % tramite.x_names)
     datos = datos.replace('#apellido','<apellido>%s</apellido>' % tramite.x_lastnames)
     datos = datos.replace('#numdocumento','<numdocumento>%s</numdocumento>' % tramite.x_document_number)

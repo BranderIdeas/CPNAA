@@ -6,7 +6,7 @@ odoo.define('website.validations', function(require) {
     // Configuración de las alertas
     const Toast = Swal.mixin({
         toast: true,
-        position: 'top',
+        position: 'center',
         showConfirmButton: true,
         confirmButtonColor: '#c8112d',
         timer: 3000,
@@ -330,20 +330,20 @@ odoo.define('website.validations', function(require) {
             const tipo_doc = selectTipoDoc.val();
             const documento = inputDoc.val().trim().toUpperCase().replace(/\s+/g, ' ');
             if (documento.length > 0 && documento.length < 4) {
-                _this.alert_error_toast('Ingrese por lo menos 4 caracteres', 'top');
+                _this.alert_error_toast('Ingrese por lo menos 4 caracteres', 'center');
                 valido = false;
             } else if (tipo_doc == 1) {
                 // Solo numeros
                 let regex = /^[0-9]*$/;
                 inputDoc.attr('maxlength', '11');
                 if (!regex.test(documento)) {
-                    _this.alert_error_toast('Ingrese solo números, no incluya espacios, letras, puntos ó caracteres especiales', 'top');
+                    _this.alert_error_toast('Ingrese solo números, no incluya espacios, letras, puntos ó caracteres especiales', 'center');
                     valido = false;
                 } else {
                     valido = true;
                 }
                 if (documento.length > 11) {
-                    _this.alert_error_toast('Verifica tu número de documento', 'top');
+                    _this.alert_error_toast('Verifica tu número de documento', 'center');
                     valido = false;
                 }
             } else if (tipo_doc != 1) {
@@ -351,7 +351,7 @@ odoo.define('website.validations', function(require) {
                 let regex = /^[0-9a-zA-Z]*$/;
                 inputDoc.attr('maxlength', '45');
                 if (!regex.test(documento)) {
-                    _this.alert_error_toast('Ingrese solo números ó letras, no incluya espacios, puntos ó caracteres especiales', 'top');
+                    _this.alert_error_toast('Ingrese solo números ó letras, no incluya espacios, puntos ó caracteres especiales', 'center');
                     valido = false;
                 } else {
                     valido = true;
@@ -555,7 +555,7 @@ odoo.define('website.validations', function(require) {
         validarCheckboxsRequired: function(nameElems, nombreCampo, _this){
             let valido = $('input[name="'+nameElems+'"]:checked').length > 0 ? true : false;
             if(!valido){
-               _this.alert_error_toast(`Selecciona por lo menos un ${nombreCampo}`, 'top');
+               _this.alert_error_toast(`Selecciona por lo menos un ${nombreCampo}`, 'center');
             }
             return valido;
         },

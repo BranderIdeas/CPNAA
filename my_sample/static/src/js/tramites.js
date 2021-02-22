@@ -235,9 +235,9 @@ odoo.define('website.tramites', function(require) {
                     $('[for="' + idname + '"]').find('i').removeClass('fa-check').addClass('fa-search');
                     $('[for="' + idname + '"]').removeClass('texto-verde').addClass('texto-gris invalido-form');
                     if(ext != "pdf"){
-                      validaciones.alert_error_toast( "Extensión ." +ext +" no permitida.", 'top');
+                      validaciones.alert_error_toast( "Extensión ." +ext +" no permitida.", 'center');
                     }else if (fileSize > 819200){
-                      validaciones.alert_error_toast( "El documento excede el tamaño máximo de 800Kb.", 'top');
+                      validaciones.alert_error_toast( "El documento excede el tamaño máximo de 800Kb.", 'center');
                     }
 
                   }
@@ -703,7 +703,7 @@ odoo.define('website.tramites', function(require) {
         let objElm = $("#pdfViewerDiploma");
         if(file){
             if (file.size > 819200 || ext != 'pdf'){
-                validaciones.alert_error_toast( "El documento debe ser formato PDF y no exceder de 800Kb.", 'top');
+                validaciones.alert_error_toast( "El documento debe ser formato PDF y no exceder de 800Kb.", 'center');
                 return;
             }
             $('#viewerModalDiploma').on('show.bs.modal', function (e) {

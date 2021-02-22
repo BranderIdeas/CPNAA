@@ -231,7 +231,8 @@ odoo.define('website.vigencia', function(require) {
         $('#btn_generar_certificado').click(()=>{
             const input_email   = $('#email_vigencia');
             const input_celular = $('#celular_vigencia');
-            if(input_celular.val().trim().length < 1){
+            const exterior = location.pathname.indexOf('/tramites/certificado_de_vigencia') === -1;
+            if(exterior && input_celular.val().trim().length < 1){
                 vigencia.class_invalido(input_celular);
                 validaciones.mostrar_alerta_vacio('celular de contacto');
                 return; 
@@ -239,14 +240,21 @@ odoo.define('website.vigencia', function(require) {
                 vigencia.class_invalido(input_email);
                 validaciones.mostrar_alerta_vacio('correo electrónico');
                 return;
-            } 
-            const valido = vigencia.validar_cel_number(input_celular, vigencia) && vigencia.validar_email(input_email, vigencia);
-            if(valido){
-                location.pathname.indexOf('/tramites/certificado_de_vigencia') !== -1
-                        ? vigencia.generar_certificado(input_email.val(), vigencia)
-                        : vigencia.generar_certificado_exterior({email: input_email.val(), celular: input_celular.val()}, vigencia);
-                mostrarSpinner();
             }
+            if (exterior){
+                const valido = vigencia.validar_cel_number(input_celular, vigencia) && vigencia.validar_email(input_email, vigencia);
+                if(valido){
+                    vigencia.generar_certificado_exterior({email: input_email.val(), celular: input_celular.val()}, vigencia);
+                    mostrarSpinner();
+                }
+            }else{
+                const valido = vigencia.validar_email(input_email, vigencia);
+                if(valido){
+                    vigencia.generar_certificado(input_email.val(), vigencia);
+                    mostrarSpinner();
+                }
+            }
+    
         })
         
         // Validar formatos de datos validacion de autenticidad

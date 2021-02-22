@@ -8,9 +8,14 @@ odoo.define('website.vigencia', function(require) {
             
         const Vigencia = Class.extend({
             validar_email: function(input, _this){
-                let entrada = validaciones.quitarAcentos(input.val().trim().toLowerCase().replace(/\s+/g, ' '));
+                const entrada = validaciones.quitarAcentos(input.val().trim().toLowerCase().replace(/\s+/g, ' '));
                 input.val(entrada);
-                return validaciones.validar_email(input.val(), entrada);
+                return validaciones.validar_email(input.val());
+            },
+            validar_cel_number: function(input, _this){
+                const entrada = input.val().trim().replace(/\s+/g, '');
+                input.val(entrada);
+                return validaciones.validar_celular(input.val());
             },
             class_invalido: function(input){
                 input.addClass('is-invalid');
@@ -96,10 +101,10 @@ odoo.define('website.vigencia', function(require) {
                     $('#mssg_result').addClass('alert alert-danger').text('No se ha podido completar su solicitud');
                 });
             },
-            generar_certificado_exterior: function(email, _this){
+            generar_certificado_exterior: function(data, _this){
                 rpc.query({
                     route: '/generar_certificado_exterior',
-                    params: {'email': email, 'id_tramite': $('#id_tramite').val()}
+                    params: {'email': data.email, 'celular': data.celular, 'id_tramite': $('#id_tramite').val()}
                 }).then(function(response){
                     ocultarSpinner();
                     if(response.ok){
@@ -219,22 +224,28 @@ odoo.define('website.vigencia', function(require) {
         // Valida si la dirección de email tiene el formato correcto
         $('#email_vigencia').change(() => vigencia.validar_email($('#email_vigencia'), vigencia));
         
+        // Valida si la dirección de email tiene el formato correcto
+        $('#celular_vigencia').change(() => vigencia.validar_cel_number($('#celular_vigencia'), vigencia));
+        
         // Realiza la petición del certificado de vigencia al email y genera la descarga del pdf en el navegador
         $('#btn_generar_certificado').click(()=>{
-            let el = $('#email_vigencia');
-            if(el.val().length < 1){
-                vigencia.class_invalido(el);
+            const input_email   = $('#email_vigencia');
+            const input_celular = $('#celular_vigencia');
+            if(input_celular.val().trim().length < 1){
+                vigencia.class_invalido(input_celular);
+                validaciones.mostrar_alerta_vacio('celular de contacto');
+                return; 
+            }else if(input_email.val().trim().length < 1){
+                vigencia.class_invalido(input_email);
                 validaciones.mostrar_alerta_vacio('correo electrónico');
                 return;
-            }
-            let valido = vigencia.validar_email(el, vigencia); 
+            } 
+            const valido = vigencia.validar_cel_number(input_celular, vigencia) && vigencia.validar_email(input_email, vigencia);
             if(valido){
                 location.pathname.indexOf('/tramites/certificado_de_vigencia') !== -1
-                        ? vigencia.generar_certificado(el.val(), vigencia)
-                        : vigencia.generar_certificado_exterior(el.val(), vigencia);
+                        ? vigencia.generar_certificado(input_email.val(), vigencia)
+                        : vigencia.generar_certificado_exterior({email: input_email.val(), celular: input_celular.val()}, vigencia);
                 mostrarSpinner();
-            }else{
-                vigencia.class_invalido(el);
             }
         })
         

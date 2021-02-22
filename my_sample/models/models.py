@@ -227,18 +227,14 @@ class my_sample(models.Model):
     def enviar_certificado_email(self, certificado):
         _logger.info(certificado)
         template_obj = http.request.env['mail.template'].sudo().search_read([('name','=','x_cpnaa_template_certificate_exterior_attachment')])[0]
-        certTemplate = http.request.env['x_cpnaa_template'].sudo().search([('x_name','=','CERTIFICADO DE VIGENCIA CON VIGENCIA AL EXTERIOR')])
-        pdf, _  = http.request.env.ref('my_sample.cert_vigencia_exterior').sudo().render_qweb_pdf([certificado.id])
-        pdf64   = base64.b64encode(pdf)
-        pdfStr  = pdf64.decode('ascii')
         cert_at = http.request.env['ir.attachment'].sudo().create({
             'name': 'cert-vig-prof-dest-ext-%s.pdf' % certificado.x_document_number,
             'type': 'binary',
-            'datas': pdf64,
+            'datas': certificado.x_signed_document,
             'mimetype': 'application/x-pdf'
         })
-        body = template_obj['body_html']
         if template_obj:
+            body = template_obj['body_html']
             mail_values = {
                 'subject': template_obj['subject'],
                 'attachment_ids': [cert_at.id],

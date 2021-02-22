@@ -898,7 +898,7 @@ class MySample(http.Controller):
             _logger.info(sys.exc_info())
             return {'ok': False, 'mensaje': 'No se podido completar su solicitud', 'cert': False}
 
-    # Enviar el certificado de vigencia que subieron ya firmado al email que lo solicito
+    # Enviar el certificado de vigencia al email y lo retorna al navegador para su descarga
     @http.route('/generar_certificado_exterior', methods=["POST"], type="json", auth='public')
     def generar_certificado_exterior(self, **kw):
         nombre_tramite = 'CERTIFICADO DE VIGENCIA CON DESTINO AL EXTERIOR'
@@ -914,16 +914,17 @@ class MySample(http.Controller):
             'x_consecutive': consecutivo.x_value + 1,
             'x_state': 'x_process',
             'x_name': 'CERT-VIG-EXT-%s-%s' % (tramite.x_studio_nombres, tramite.x_studio_apellidos),
-            'x_email': kw.get('email')
+            'x_email': kw.get('email'),
+            'x_cel_contact': kw.get('celular')
         })
         if certificado:
-            # numero_radicado = Sevenet.sevenet_certificado_exterior(certificado.id)
-            # certificado.sudo().write({'x_radicate_number': numero_radicado })
+#             numero_radicado = Sevenet.sevenet_certificado_exterior(certificado.id)
+#             certificado.sudo().write({'x_radicate_number': numero_radicado })
             mail_template = http.request.env['mail.template'].sudo().search([('name','=','x_cpnaa_template_certificate_exterior')])[0]
             mail_template.send_mail(certificado.id,force_send=True)
             consecutivo.sudo().write({'x_value': consecutivo.x_value + 1})
         try:
-            mensaje = 'Su certificado de vigencia con destino al exterior será tramitado de 1 a 5 días hábiles y enviado a su correo electrónico "%s" para que sea presentado en el Ministerio de relaciones exteriores.' % kw.get('email') #Su solicitud fue radicada con el número R-%s numero_radicado
+            mensaje = 'Su certificado de vigencia con destino al exterior será tramitado de 1 a 5 días hábiles y enviado a su correo electrónico "%s" para que sea presentado en el Ministerio de relaciones exteriores". Su solicitud fue radicada con el número R-%s' % (kw.get('email'), consecutivo.x_value + 1)
             return {'ok': True, 'mensaje': mensaje}
         except:
             _logger.info(sys.exc_info())

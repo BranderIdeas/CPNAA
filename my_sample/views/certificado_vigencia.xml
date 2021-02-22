@@ -114,14 +114,32 @@
                             </div>
                         </div>
                         <hr/>
-                        <div class="form-group row col-sm-12 wInput mx-auto mb-4">
+                        <div t-if="digital" class="form-group row col-sm-12 wInput mx-auto mb-4">
                             <div class="col-sm-12 text-center">
                                 <label class="col-form-label" for="x_email">
                                     Ingrese la dirección de correo electrónico para la recepción del certificado
                                 </label>
                             </div>
                             <div class="row col-sm-12">
-                                <input type="text" class="o-email form-control i_required" id="email_vigencia" name="x_email" maxlength="80" />
+                                <input type="text" class="form-control i_required" id="email_vigencia" name="x_email" maxlength="80" />
+                            </div>
+                        </div>
+                        <div t-if="exterior" class="form-group row col-sm-12 wInput mx-auto mb-4">
+                            <div class="col-sm-12 col-md-6">
+                                <label for="x_cel_number">
+                                    Ingrese un número celular de contacto
+                                </label>
+                            </div>
+                            <div class="col-sm-12 col-md-6 mb-3">
+                                <input type="text" class="form-control i_required" id="celular_vigencia" name="x_cel_number" maxlength="11" />
+                            </div>
+                            <div class="col-sm-12 col-md-6">
+                                <label for="x_email">
+                                    Ingrese la dirección de correo electrónico para la recepción del certificado
+                                </label>
+                            </div>
+                            <div class="col-sm-12 col-md-6">
+                                <input type="text" class="form-control i_required" id="email_vigencia" name="x_email" maxlength="80" />
                             </div>
                         </div>
                     </div>

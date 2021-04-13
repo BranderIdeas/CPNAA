@@ -89,8 +89,10 @@ class MySample(http.Controller):
                                                                     ('x_studio_documento_1','=',kw['x_document']),
                                                                     ('x_cycle_ID.x_order','<',5)])
             user = tramite.x_user_ID
-            update = {'x_studio_carrera_1':kw.get('x_institute_career'),'x_studio_universidad_5': kw.get('x_institution_ID'),
-                      'x_full_name': kw.get('x_name')+' '+kw.get('x_last_name'), 'x_validation_refuse': False,
+            update = {'x_validation_refuse': False,
+                      'x_studio_carrera_1': int(kw.get('x_institute_career')),
+                      'x_studio_universidad_5': int(kw.get('x_institution_ID')),
+                      'x_full_name': kw.get('x_name')+' '+kw.get('x_last_name'),
                       'x_name': tramite.x_service_ID.x_name+'-'+kw.get('x_name')+'-'+kw.get('x_last_name')}
             rechazos = http.request.env['x_cpnaa_refuse_procedure'].sudo().search([('x_procedure_ID','=',tramite.id)])
             if len(rechazos) > 0:

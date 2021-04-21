@@ -367,7 +367,7 @@ modal-body.pdfViewer {
     text-decoration: none !important;
     color: #cccccc !important;
 }
-results-vigencia:hover {
+.results-vigencia:hover {
     text-decoration: none;
     opacity: 0.7;
 }
@@ -385,6 +385,10 @@ results-vigencia:hover {
     width: 80% !important;
     margin-left: 10% !important;
 }
+.counter{
+    margin-top: 0.25rem;
+    font-size: 80%;
+}
 @media (max-width: 992px) {
     .info-tramites {
         width: 100% !important;
@@ -397,3 +401,12 @@ results-vigencia:hover {
         width: 90% !important;
     }
 }
+
+.rotate-spin {
+    -webkit-animation:spin 2s linear infinite;
+    -moz-animation:spin 2s linear infinite;
+    animation:spin 2s linear infinite;
+}
+@-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
+@-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+@keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }

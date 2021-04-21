@@ -299,13 +299,17 @@ class MySample(http.Controller):
         for key in borrar:
             del kw[key]
         kw['x_complaint_issues_ID'] = kw['x_complaint_issues_ID'].split(',')
-        kw['x_phase_0'] = True
+        kw['x_origin'] = http.request.env["x_cpnaa_origin_complaint"].sudo().search([("x_name","=",'QUEJA EXTERNA')]).id
         try:
-            consecutivo = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=','DENUNCIAS')])
-            kw['x_name'] = 'DENUNCIA-'+str(consecutivo.x_value + 1)
+            hoy = date.today()
             denuncia = http.request.env['x_cpnaa_complaint'].sudo().create(kw)
             if denuncia:
                 count = 0
+#                 numero_radicado = Sevenet.sevenet_denuncia(denuncia.id)
+                consecutivo = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=','Consecutivo Radicado Temporal Denuncias')])
+                numero_radicado = consecutivo.x_value + 1
+                consecutivo.sudo().write({'x_value': numero_radicado})
+                denuncia.write({ 'x_radicate_number': numero_radicado, 'x_radicate_date': hoy })
                 for ev in evidence_files:
                     count += 1
                     file = base64.b64encode(ev.read())
@@ -314,9 +318,10 @@ class MySample(http.Controller):
                     if ext == 'pdf':
                         http.request.env['x_evidence_files_pdf'].sudo().create(evidence)
                     else:
+                        evidence['x_extention'] = ext
                         http.request.env['x_evidence_files_img'].sudo().create(evidence)
-                http.request.env['x_cpnaa_consecutive'].browse(consecutivo.id).sudo().write({'x_value':consecutivo.x_value + 1})
-            resp = { 'ok': True, 'message': 'Su queja ha sido registrada con el consecutivo '+ denuncia.x_name +' exitosamente.' }
+            message = 'Su queja ha sido registrada con el radicado %s-%s exitosamente.' % (denuncia.x_radicate_number, hoy.year)
+            resp = { 'ok': True, 'message': message }
         except:
             tb = sys.exc_info()[2]
             resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }

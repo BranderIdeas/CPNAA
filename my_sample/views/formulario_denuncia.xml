@@ -414,6 +414,9 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                         <div class="row form-group form-field">
                                             <textarea rows="7" maxlength="1000" style="width:100%;" name="x_facts_narration"
                                                         class="form-control o_website_form_input i_required" />
+                                            <div class="col-sm-12">
+                                                <span id="counter_facts_narration" class="float-right counter">0/1000</span>
+                                            </div>
                                         </div>                                            
                                     </div>
                             </div>

@@ -142,7 +142,98 @@ odoo.define('website.denuncia', function(require) {
                 $("input[name='x_implicated_enrollment_number']").val(prof.x_enrollment_number)
                 $("input[name='x_implicated_names']").val(prof.x_studio_nombres)
                 $("input[name='x_implicated_lastnames']").val(prof.x_studio_apellidos)
-            }
+            },
+            descargar_adjunto_fase: function(elem, _this){
+                _this.mostrar_loading_btn_icon(elem, _this);
+                const nombre_archivo = elem.dataset.id.split('-').slice(0,-1).join('-');
+                const id_denuncia    = Number(elem.dataset.id.split('-').pop());
+                return rpc.query({
+                    route: '/get_attachment',
+                    params: { id_denuncia, nombre_archivo }
+                }).then(function(response){
+                    if(response.ok){
+                        $('#pdfFrameVigencia').attr('src', `data:application/pdf;base64,${response.file.pdf}`);
+                        const linkSource = $('#pdfFrameVigencia').attr('src');
+                        const downloadLink = document.createElement("a");
+                        const fileName = response.file_name;
+                        downloadLink.href = linkSource;
+                        downloadLink.download = fileName;
+                        downloadLink.click();
+                    }else{
+                        validaciones.alert_error_toast( response.error, 'top');
+                    }
+                    _this.ocultar_loading_btn_icon(elem, _this);
+                }).catch(function(err){
+                    console.log(err);
+                    validaciones.alert_error_toast( "No hemos podido completar su solicitud.", 'top');
+                    _this.ocultar_loading_btn_icon(elem, _this);
+                })
+            },
+            mostrar_loading_btn_icon: function(elem, _this){
+                if(elem.tagName === 'I'){
+                    _this.rotar(elem);
+                    elem.parentNode.setAttribute('disabled', true);
+                }else if(elem.tagName === 'BUTTON'){
+                    _this.rotar(elem.children[0]);
+                    elem.setAttribute('disabled', true);
+                }
+            },
+            ocultar_loading_btn_icon: function(elem, _this){
+                if(elem.tagName === 'I'){
+                    _this.quitar_rotar(elem);
+                    elem.parentNode.removeAttribute('disabled');
+                }else if(elem.tagName === 'BUTTON'){
+                    _this.quitar_rotar(elem.children[0]);
+                    elem.removeAttribute('disabled');
+                }
+            },
+            rotar: function(icono){
+                icono.classList.remove('fa-download');
+                icono.classList.add('fa-spinner');
+                icono.classList.add('rotate-spin');
+            },
+            quitar_rotar: function(icono){
+                icono.classList.add('fa-download');
+                icono.classList.remove('fa-spinner');
+                icono.classList.remove('rotate-spin');
+            },
+            guardar_apelacion: function(archivo_pdf, id_denuncia){
+                Swal.fire({
+                    toast: true,
+                    title: `¿Confirmar envio del archivo PDF?`,
+                    showConfirmButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Confirmar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#c8112d',
+                    showLoaderOnConfirm: true,
+                      preConfirm: (response) => {
+                        return rpc.query({
+                                route: '/save_apelacion',
+                                params: {'archivo_pdf': archivo_pdf, 'id_denuncia': id_denuncia}
+                            }).then(function(response){
+                                if (!response.ok) {
+                                  throw new Error(response.error.message)
+                                }
+                                return response;
+                            }).catch((error) => {
+                                let message = error.message.message == undefined ? error : error.message.message;
+                                Swal.showValidationMessage(
+                                  `Error: ${message}`
+                                )
+                            })
+                      },
+                }).then((result) => {
+                    if (result.value) {
+                        validaciones.alert_success_toast(`${result.value.message}`,'center')
+                        if(result.value.ok){
+                            setTimeout(()=>{
+                                location.reload();
+                            },1000)
+                        }
+                    }
+                })
+            },
         })
         
         const denuncia = new Denuncia();
@@ -168,6 +259,10 @@ odoo.define('website.denuncia', function(require) {
                     denuncia.insertarFila(file);
                 }
             }
+        });
+    
+        $(".btn-attachment").click((e) => {
+            denuncia.descargar_adjunto_fase(e.target, denuncia);
         });
         
         $("#tableFiles").click((e) => {
@@ -251,6 +346,40 @@ odoo.define('website.denuncia', function(require) {
                 },400);
             }
         });
+    
+        // Muestra el número de caracteres del textarea de narración de los hechos
+        $("[name='x_facts_narration']").on('input propertychange', e => {
+            $('#counter_facts_narration').text(`${e.target.value.length}/1000`);
+        });
+    
+        // Mostrar modal preview del cargue de diploma en PDF
+        $("#btn_apelacion").change(function(ev){
+            let file = ev.target.files[0];
+            let ext = $('#btn_apelacion').val().split('.').pop();
+            let objElm = $("#pdfViewerApelacion");
+            if(file){
+                if (file.size > 1024000 || ext != 'pdf'){
+                    validaciones.alert_error_toast( "El archivo debe ser formato PDF y no exceder de 1Mb.", 'top');
+                    return;
+                }
+                $('#viewerModalApelacion').on('show.bs.modal', function (e) {
+                    let reader = new FileReader();
+                    reader.onload = function(e) {
+                        objElm.attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                });
+                $("#viewerModalApelacion").modal('show');          
+            }
+        });
+
+        // Guardar el Archivo de Apelación PDF
+        $("#guardarApelacion").click(function(e){
+            e.preventDefault();
+            let id_denuncia = $(this).data('denuncia_id');
+            let archivo_b64 = $("#pdfViewerApelacion").attr('src');
+            denuncia.guardar_apelacion(archivo_b64, id_denuncia); 
+        })
         
         function mostrarSpinner(){
             $('#div_spinner_denuncia').attr('aria-hidden', false).removeClass('invisible');

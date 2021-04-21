@@ -18,7 +18,13 @@
                                 <tr>
                                     <th scope="row">Fecha de creación:</th>
                                     <td class="" id="fecha_expedicion">
-                                        <t t-esc="denuncia.create_date.strftime('%d-%m-%Y %H:%M:%S')"/>
+                                        <t t-esc="(denuncia.create_date - datetime.timedelta(hours=5)).strftime('%d/%m/%Y %H:%M:%S')"/>
+                                    </td>
+                                </tr>
+                                <tr t-if="denuncia.x_number_process">
+                                    <th scope="row">Número de proceso:</th>
+                                    <td class="" id="numero_proceso">
+                                        <t t-esc="denuncia.x_number_process"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -49,8 +55,16 @@
                         </table>
                     </div>
                 </div>
+                <div class="container justify-content-md-center">
+                    <div class="formSection pt-4">
+                        <h2 class="sectionName">AVISO LEGAL</h2>
+                        <div class="text-justify mb-4">
+                            La información aquí publicada es una herramienta de servicio al usuario que no compromete la responsabilidad de la Superintendencia de Sociedades. Por tanto, no sustituye el deber legal de las partes que intervienen en los procesos de consultar personalmente el expediente de si interés.
+                        </div>
+                    </div>
+                </div>
                 <div class="container row mx-auto">
-                    <div class="col-sm-3 text-center mb-5 pb-5 o-border">
+<!--                     <div class="col-sm-3 text-center mb-5 pb-5 o-border">
                         <h2 class="sectionName">Fases</h2>
                         <t t-foreach="request.env['x_cpnaa_cycle'].sudo().search([('x_service_ID.x_name','=','DENUNCIA'),('x_public','=',True)],order='x_order')" 
                            t-as="fase_denuncia">
@@ -59,40 +73,89 @@
                                 <t t-esc="fase_denuncia.x_name"/>
                             </a>
                         </t>
-                    </div>
-                    <div class="col-sm-9 mb-5 pb-5 o-border">
+                    </div> -->
+                    <div class="col-sm-12 mb-5 pb-5 o-border">
                         <div id="results_table" class="container justify-content-md-center">
-                            <h2 class="sectionName">Información de la Fase</h2>
+                            <h2 class="sectionName">Actuaciones del Proceso</h2>
                             <table class="table table-striped mt-4">
                                 <tbody>
                                     <tr>
-                                        <th scope="row">Número de certificado:</th>
-                                        <td id="numero_cert" class=""></td>
+                                        <th scope="row">Fecha</th>
+                                        <th scope="row">Tipo</th>
+                                        <th scope="row">Tipo de Actuación</th>
+                                        <th scope="row">Norma</th>
+                                        <th scope="row">Anotación</th>
+                                        <th scope="row">Acción</th>
+                                        <th scope="row">Adjunto</th>
                                     </tr>
-                                    <tr>
-                                        <th scope="row">Fecha de expedición:</th>
-                                        <td class="" id="fecha_expedicion"></td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Tipo de documento:</th>
-                                        <td id="tipo_documento_prof"></td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Documento:</th>
-                                        <td id="documento_prof"></td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Nombres y Apellidos:</th>
-                                        <td class="" id="nombres_prof"></td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Vigencia del certificado:</th>
-                                        <td id="fecha_vencimiento"></td>
-                                    </tr>
+                                    <t t-foreach="request.env['x_cpnaa_time_for_phases'].search([('x_complaint_ID','=',denuncia.id)])" 
+                                           t-as="time">
+                                        <tr>
+                                            <t t-set="fase" t-value="request.env['x_juridical_service_cycles'].search([('x_name','=',time.x_phase_name)])" />
+                                            <t t-if="not fase"
+                                               t-set="fase" t-value="request.env['x_juridical_subphases'].search([('x_name','=',time.x_phase_name)])" />
+                                            <t t-if="fase">
+                                            <td><t t-esc="(time.x_datetime - datetime.timedelta(hours=5)).strftime('%d/%m/%Y %H:%M:%S')"/></td>
+                                            <td><t t-esc="fase['x_type']"/></td>
+                                            <td><t t-esc="fase['x_name']"/></td>
+                                            <td><t t-esc="fase['x_norm']"/></td>
+                                            <td>
+                                                <t t-if="time['x_annotation']">
+                                                    <t t-esc="fase['x_annotation'].replace('#REPLACE', time['x_annotation'])"/>
+                                                </t>
+                                            </td>
+                                            <td t-if="fase['x_action']">
+                                                <div class="container d-flex justify-content-md-center">
+                                                    <label for="btn_apelacion" 
+                                                        class="btn btn-primary rounded-circle" style="text-transform: capitalize"
+                                                            data-toggle="tooltip" data-placement="top" title="Cargar recurso de apelación"
+                                                           >
+                                                        <i class="fa fa-upload"></i>
+                                                    </label>
+                                                    <input id="btn_apelacion" 
+                                                           class="btn_action" type="file" style='display:none;' accept=".pdf"/>
+                                                </div>
+                                                <div id="viewerModalApelacion" class="modal fade bd-example-modal-lg" tabindex="-1" 
+                                                    role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                                                    <div class="modal-dialog modal-lg">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header pdfViewer">
+                                                              <h3 class="modal-title formTitle" id="exampleModalLongTitle">Previsualización del archivo</h3>
+                                                            </div>
+                                                            <div class="modal-body pdfViewer">
+                                                              <iframe id="pdfViewerApelacion" src="#" height="800" style="width: 100%;"></iframe>
+                                                            </div>
+                                                            <div class="modal-footer d-flex justify-content-between align-items-center">
+                                                              <button id="cancelarApelacion" type="button" class="btn btn-primary btn-stadium" 
+                                                                      data-dismiss="modal">Cancelar</button>
+                                                              <button id="guardarApelacion" type="button" class="btn btn-primary btn-stadium"
+                                                                      t-attf-data-denuncia_id="{{denuncia.id}}">Guardar Recurso de Apelacion</button>
+                                                            </div>
+                                                            </div>
+                                                    </div>
+                                                </div> 
+                                             </td>
+                                            <td class="text-center" t-if="not fase['x_action']">-</td>
+                                            <td t-if="fase['x_attachment']">
+                                                <button type="button" class="btn btn-primary rounded-circle btn-attachment"
+                                                    t-attf-data-id="{{ '-'.join(fase['x_name'].split(' ')) }}-{{ denuncia['id'] }}"
+                                                    data-toggle="tooltip" data-placement="top" title="Descargar Auto en PDF"
+                                                ><i class="fa fa-download"
+                                                    t-attf-data-id="{{ '-'.join(fase['x_name'].split(' ')) }}-{{ denuncia['id'] }}"
+                                                ></i>
+                                                </button>
+                                            </td>
+                                            <td class="text-center" t-if="not fase['x_attachment']">-</td>
+                                            </t>
+                                        </tr>
+                                    </t>
                                 </tbody>
                             </table>
                         </div>
                     </div>
+                    <section class="invisible" aria-hidden="true">
+                        <iframe id="pdfFrameVigencia" class="recibo-pdf" frameborder="0" width="100%" height="320" src=""></iframe>
+                    </section>
                 </div>
             </t>
         </template>

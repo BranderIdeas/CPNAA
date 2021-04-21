@@ -243,7 +243,33 @@ class MySample(http.Controller):
     # Ruta que renderiza página de seguimiento de denuncias
     @http.route('/denuncias/seguimiento/<model("x_cpnaa_complaint"):denuncia>', auth='public', website=True)
     def seguimiento_denuncia(self, denuncia):
-        return http.request.render('my_sample.detalle_denuncia', { 'denuncia': denuncia })  
+#         fases = []
+#         for x in range(denuncia.x_cycle_ID.x_order + 1):
+#             fases.append(http.request.env['x_juridical_service_cycles'].search_read([('x_order','=',x)])[0])
+#         for fase in fases:
+#             if fase['x_annotation']:
+#                 fase['x_annotation'] = fase['x_annotation'].replace('#RADICADO', str(denuncia.x_radicate_number))
+#                 fase['x_annotation'] = fase['x_annotation'].replace('#PROCESO', str(denuncia.x_number_process))
+#         _logger.info(fases)
+        return http.request.render('my_sample.detalle_denuncia', { 'denuncia': denuncia }) #, 'fases': fases
+    
+    # Servicio para descargar autos de denuncias
+    @http.route('/get_attachment', methods=["POST"], type="json", auth='public', website=True)
+    def get_attachment(self, **kw):
+        _logger.info(kw)
+        try:
+            denuncia = http.request.env['x_cpnaa_complaint'].sudo().browse(kw['id_denuncia'])
+            nom_auto = '%s-%s' % (kw['nombre_archivo'], denuncia.x_name)
+            auto     = http.request.env['x_cpnaa_complaints_autos'].sudo().search([('x_name','=',nom_auto),('x_complaint_ID.id','=',denuncia.id)])
+            pdf, _   = http.request.env.ref('my_sample.autos_denuncias').sudo().render_qweb_pdf([auto.id])
+            pdf64    = base64.b64encode(pdf)
+            pdfStr   = pdf64.decode('ascii')
+            return {'ok': True, 'mensaje': 'Se ha completado su solicitud exitosamente', 
+                    'file_name': 'AUTO-DE-%s' % auto.x_name,
+                    'file': {'pdf': pdfStr, 'headers': {'Content-Type', 'application/pdf'}}}
+        except:
+            _logger.info(sys.exc_info())
+            return {'ok': False, 'error': 'No se podido completar su solicitud', 'file': False}
     
     # Ruta que renderiza página de formulario de denuncias
     @http.route('/get_profesional', methods=["POST"], type="json", auth='public', website=True)

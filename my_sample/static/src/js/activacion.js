@@ -44,7 +44,6 @@ odoo.define('website.activacion', function(require) {
                 });
             },
             buscar_tramite: function(token, elem, _this){
-                console.log(data);
                 rpc.query({
                     route: '/get_profesional',
                     params: {'tipo_doc': data.tipo_doc, 'documento': data.documento, 'token': token}
@@ -81,7 +80,7 @@ odoo.define('website.activacion', function(require) {
                     route: '/get_universidades',
                     params: {'cadena': cadena, 'tipo_universidad': tipo_universidad}
                 }).then(function(response){
-                    console.log(response);
+//                     console.log(response);
                     return response;
                 }).catch(function(err){
                     console.log(err);
@@ -107,7 +106,6 @@ odoo.define('website.activacion', function(require) {
                 data.x_enrollment_number = $('#x_enrollment_number').val();
                 data.x_studio_ciudad_de_expedicin = $('#x_expedition_city').val();
                 data.x_request_email = $('#x_request_email').hasClass('is-invalid') ? '' : $('#x_request_email').val();
-                console.log(data);
                 for (const d in data) {
                     if (data[d] === ''){
                         $('#'+d).addClass('is-invalid');
@@ -123,7 +121,6 @@ odoo.define('website.activacion', function(require) {
                     route: '/validar_respuestas',
                     params: { 'data': data }
                 }).then(function(response){
-                    console.log(response);
                     $('#enviar_respuestas').removeAttr('disabled');
                     $("#modal_questions").modal('show'); 
                     if (response.ok){
@@ -162,7 +159,6 @@ odoo.define('website.activacion', function(require) {
                     }
                 }).catch(function(err){
                     $('#enviar_respuestas').removeAttr('disabled');
-                    console.log(err);
                 });
             },
             confirmar_email: function(){
@@ -171,10 +167,8 @@ odoo.define('website.activacion', function(require) {
                     route: '/confirmar_email',
                     params: { 'data': data_confirmacion }
                 }).then(function(response){
-                    console.log(response);
                     $("#modal_questions").modal('show');
                     if (response.ok){
-                        console.log('SU SOLICITUD FUE EXITOSA');
                         $('#titulo').text('SU SOLICITUD FUE EXITOSA');
                         $("#result").html(`<p>Trámite completado con exito, hemos enviado un email a 
                                 ${response.data.email.toLowerCase()} con los datos de acceso a su 

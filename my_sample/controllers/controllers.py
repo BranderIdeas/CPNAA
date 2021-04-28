@@ -758,12 +758,14 @@ class MySample(http.Controller):
         _logger.info(tramite_valido)
         if success:
             usuario = http.request.env['res.users'].sudo().search([('login','=',tramite_valido.x_studio_correo_electrnico)])
+            if len(usuario) > 1:
+                return { 'ok': False, 'email_existe': True, 'message': 'Por favor comuniquese con el CPNAA' }
             # Valida si ya existe un usuario con esa dirección de email
             search_user = http.request.env["res.users"].sudo().search(['|',("login","=",data.get('x_request_email').lower()),
                                                                            ("login","=",data.get('x_request_email').upper())])
             if data.get('x_request_email') == tramite_valido.x_studio_correo_electrnico.lower():
                 pass
-            elif search_user and search_user.login == usuario.login:
+            elif search_user and len(search_user) == 1 and search_user.login == usuario.login:
                 return { 'ok': False, 'email_existe': True, 'message': 'Ya existe otro usuario registrado con el correo electrónico suministrado' }
             elif not search_user and data.get('x_request_email') != tramite_valido.x_studio_correo_electrnico.lower():
                 return { 'ok': False, 'email_existe': True, 'message': 'El correo ingresado no coincide con el que tenemos registrado, ¿Desea actualizarlo?',

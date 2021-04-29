@@ -759,7 +759,8 @@ class MySample(http.Controller):
         if success:
             usuario = http.request.env['res.users'].sudo().search([('login','=',tramite_valido.x_studio_correo_electrnico)])
             if len(usuario) > 1:
-                return { 'ok': False, 'email_existe': True, 'message': 'Por favor comuniquese con el CPNAA' }
+                message_dup = 'No es posible activar la matrícula virtual en este momento. Ya existe una matrícula virtual con estos datos. Por favor comuníquese con el CPNAA'
+                return { 'ok': False, 'email_existe': True, 'message': message_dup }
             # Valida si ya existe un usuario con esa dirección de email
             search_user = http.request.env["res.users"].sudo().search(['|',("login","=",data.get('x_request_email').lower()),
                                                                            ("login","=",data.get('x_request_email').upper())])

@@ -168,7 +168,7 @@ class MySample(http.Controller):
                     'fecha_pago'  : data['data']['x_transaction_date'],
                     'banco'       : data['data']['x_bank_name'],
                     'monto_pago'  : data['data']['x_amount'],
-                    'tipo_pago'   : data['data']['x_type_payment'],
+                    'tipo_pago'   : (data['data']['x_type_payment']).upper(),
                     'id_tramite'  : data['data']['x_extra1']
                 }
                 resultado_pago = self.tramite_fase_verificacion(data_tramite)
@@ -179,7 +179,7 @@ class MySample(http.Controller):
                         'x_epayco_ref'   : ref_payco,
                         'x_procedure_ID' : data['data']['x_extra1'],
                         'x_motive'       : data['data']['x_response_reason_text'],
-                        'x_type_payment' : data['data']['x_type_payment'],
+                        'x_type_payment' : (data['data']['x_type_payment']).upper(),
                         'x_name'         : 'PAGO-PENDIENTE-%s' % data['data']['x_ref_payco']
                     })
                 resultado_pago = { 'ok': False, 'message': 'La transacción esta pendiente','error': False, 'numero_radicado': False }

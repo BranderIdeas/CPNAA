@@ -84,7 +84,7 @@ class MySample(http.Controller):
         for key, value in kw.items():
             if type(value) != str:
                 kw[key] = base64.b64encode(kw[key].read())
-            if key == 'x_gender_ID'
+            if key == 'x_gender_ID':
                 kw[key] = int(kw.get('x_gender_ID'))
         try:
             tramite = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1.id','=',kw['x_document_type_ID']),

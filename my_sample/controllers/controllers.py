@@ -91,6 +91,7 @@ class MySample(http.Controller):
             user = tramite.x_user_ID
             update = {'x_validation_refuse': False,
                       'x_studio_carrera_1': int(kw.get('x_institute_career')),
+                      'x_gender_ID': int(kw.get('x_gender_ID')),
                       'x_studio_universidad_5': int(kw.get('x_institution_ID')),
                       'x_full_name': kw.get('x_name')+' '+kw.get('x_last_name'),
                       'x_name': tramite.x_service_ID.x_name+'-'+kw.get('x_name')+'-'+kw.get('x_last_name')}

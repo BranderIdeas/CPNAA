@@ -15,7 +15,7 @@
                         <h5 class="titulo inferior">Cargue de Diplomas de Grado en PDF</h5>
                         <div class="alert alert-block alert-dark"><strong>Importante!</strong><br/>
                             <p>Utilice el siguiente formulario para cargar en archivo PDF los diplomas. Tenga en cuenta que debe incluir 
-                                todos los diplomas en un solo archivo PDF,  el peso máximo del archivo es de 5 megas.
+                                todos los diplomas en un solo archivo PDF,  el peso máximo del archivo es de 20 megas.
                             </p>
                         </div>
                         <div>

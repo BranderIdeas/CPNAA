@@ -461,8 +461,8 @@ odoo.define('website.convenios', function(require) {
         const file = input[0].files[0];
         const ext = input.val().split('.').pop();
         if(file){
-            if (file.size/1024/1024 > 5 || ext != 'pdf'){
-                validaciones.alert_error_toast( "El documento debe ser formato PDF y no exceder los 5mb.", 'top');
+            if (file.size/1024/1024 > 20 || ext != 'pdf'){
+                validaciones.alert_error_toast( "El documento debe ser formato PDF y no exceder los 20mb.", 'top');
                 input.val('');
                 return;
             }         

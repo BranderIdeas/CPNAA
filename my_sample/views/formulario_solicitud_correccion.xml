@@ -109,7 +109,100 @@
                                 </label>
                             </div>
                             <div class="row">
-                                <div class="form-group row col-md-12 form-field">
+                                <div class="form-group row col-md-6 form-field o_website_form_required_custom">
+                                    <div class="col-md-4">
+                                        <label class="col-form-label" for="x_actual_state"> Departamento de Residencia Actual </label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <select t-if="solicitud" class="form-control i_required" name="x_actual_state" id="x_actual_state">
+                                            <t t-foreach="request.env['x_cpnaa_state'].search([('x_country_ID.x_name','=','COLOMBIA')],order='x_name')" 
+                                               t-as="state">
+                                                <option t-if="state.id != solicitud.x_actual_state.id"
+                                                        t-att-value="state.id">
+                                                    <t t-esc="state.x_name"/>
+                                                </option>
+                                                <option t-else="" t-att-value="state.id" selected="true">
+                                                    <t t-esc="state.x_name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                        <select t-else="" class="form-control i_required" name="x_actual_state" id="x_actual_state">
+                                            <option value="">Seleccione...</option>
+                                            <t t-foreach="request.env['x_cpnaa_state'].search([('x_country_ID.x_name','=','COLOMBIA')],order='x_name')" 
+                                               t-as="state">
+                                                <option t-att-value="state.id">
+                                                    <t t-esc="state.x_name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row col-md-6 form-group form-field o_website_form_required_custom">
+                                    <div class="col-md-4">
+                                        <label class="col-form-label" for="x_actual_city"> Ciudad de Residencia Actual </label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <select t-if="solicitud" class="form-control i_required" name="x_actual_city" id="x_actual_city">
+                                            <t t-foreach="request.env['x_cpnaa_city'].search([],order='x_name')" t-as="city">
+                                                <option t-if="city.id != solicitud.x_actual_cityr.id"
+                                                        t-att-value="city.id" style="display: none;" 
+                                                        t-att-data-state_id="city.x_state_ID.id">
+                                                    <t t-esc="city.x_name"/>
+                                                </option>
+                                                <option t-else="" t-att-value="city.id" selected="true">
+                                                    <t t-esc="city.x_name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                        <select t-else="" class="form-control i_required" name="x_actual_city" id="x_actual_city">
+                                            <option value="">Seleccione...</option>
+                                            <t t-foreach="request.env['x_cpnaa_city'].search([],order='x_name')" t-as="city">
+                                                <option t-att-value="city.id" style="display: none;" t-att-data-state_id="city.x_state_ID.id">
+                                                    <t t-esc="city.x_name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group row col-md-6 form-field o_website_form_required_custom">
+                                    <div class="col-md-4">
+                                        <label class="col-form-label" for="x_actual_phone"> Número de Celular Actual </label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <input t-if="solicitud" type="text" t-attf-value="{{solicitud.x_actual_phone}}"
+                                               class="form-control i_required v-celular" name="x_actual_phone" maxlength="11"/>
+                                        <input t-else="" type="text"
+                                               class="form-control i_required v-celular" name="x_actual_phone" maxlength="11"/>
+                                    </div>
+                                </div>
+                                <div class="row col-md-6 form-group form-field o_website_form_required_custom">
+                                    <div class="col-md-4">
+                                        <label class="col-form-label" for="x_actual_email"> Correo Electrónico Actual </label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <input t-if="solicitud" type="text" t-attf-value="{{solicitud.x_actual_email}}"
+                                               class="form-control i_required v-email" name="x_actual_email"/>
+                                        <input t-else="" type="text"
+                                               class="form-control i_required v-email" name="x_actual_email"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div id="row_adress" class="row col-md-12 form-group form-field o_website_form_required_custom">
+                                    <div class="col-md-4">
+                                        <label class="col-form-label" for="x_actual_address"> Dirección Actual </label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <input t-if="solicitud" type="text" class="form-control i_required v-address" name="x_actual_address" 
+                                            t-attf-value="{{solicitud.x_actual_address}}" />
+                                        <input t-else="" type="text" class="form-control i_required v-address" name="x_actual_address" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group row col-md-12 form-field o_website_form_required_custom">
                                     <div class="col-md-4">
                                         <label class="col-form-label" for="x_issue"> Información a Corregir / Actualizar </label>
                                     </div>

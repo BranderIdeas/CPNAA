@@ -121,37 +121,24 @@ odoo.define('website.correccion', function(require) {
                     div_results.find('#data_result').html(texto);
                 }
             },
-            validar_form: function(){
-                let valido = true;
+            validar_form: async function(){
                 let formSample = document.forms[0];
                 let elems = formSample.elements;
-                for (let i = 0; i < elems.length; i++) {
-                    if(elems[i].name != ''){
-                        if(elems[i].type === 'file'){
-                            if(elems[i].classList.contains('i_required') && !elems[i].files[0]){
-                                valido = false;
-                                $('[for="' + elems[i].id + '"]').addClass('is-invalid');
-                            }else{
-                                formData.append(elems[i].name, elems[i].files[0]);
-                                $('[for="' + elems[i].id + '"]').removeClass('is-invalid');
-                            }
-                        } else {
-                            if(elems[i].classList.contains('i_required') && elems[i].value == ''){
-                                valido = false;
-                                elems[i].classList.add('is-invalid');
-                            }else{
-                                formData.append(elems[i].name, elems[i].value);
-                                elems[i].classList.remove('is-invalid');
-                            }
-                        } 
-                    }
-
-                }
+                let valido = await validaciones.validar_formulario(validaciones);
                 if (!valido){
                     $('#mssg_result_correccion').addClass('alert alert-danger')
-                        .text(`Por favor, verifica los campos requeridos *.`);
+                        .text(`Por favor, verifica la información ingresada.`);
                 } else {
                     $('#mssg_result_correccion').removeClass('alert alert-danger').text('');
+                    for(let el of elems){
+                        if(el.name != ''){
+                            if(el.type === 'file'){
+                                formData.append(el.name, el.files[0]);
+                            }else{
+                                formData.append(el.name, el.value);   
+                            }   
+                        }
+                    }
                 }
                 return valido;
             },
@@ -224,20 +211,49 @@ odoo.define('website.correccion', function(require) {
               case 'PERSONAL':
                 $('#label_soporte').text('Escritura Pública');
                 $('#x_support_document').attr('name','x_public_write');
+                mostrarDocumentoSoporte('x_public_write');
                 break;
               case 'ACADEMICO':
                 $('#label_soporte').text('Diploma');
                 $('#x_support_document').attr('name','x_diploma');
+                mostrarDocumentoSoporte('x_diploma');
+                break;
+              case 'DATOS PERSONALES':
+                ocultarDocumentoSoporte();
                 break;
               default:
                 $('#label_soporte').text('Documento Soporte');
                 $('#x_support_document').attr('name','x_support_document');
+                mostrarDocumentoSoporte('x_support_document');
             }
         }).change();
     
-        $('#form_correccion').submit(function(e) {
+        // Muestra/Oculta las ciudades depende del departamento seleccionado
+        $("select[name='x_actual_state']").change((e) => {
+            let $select = $("select[name='x_actual_city']");
+            $select.find("option:not(:first)").hide();
+            $select.find("option[data-state_id="+($("select[name='x_actual_state']").val() || 0)+"]").show();
+            $select.val("");
+        })
+    
+        function ocultarDocumentoSoporte(){
+            $('#label_soporte').hide();
+            $('label[for="x_support_document"]').hide();
+            $('label[for="x_support_document"]').next().hide();
+            $('#x_support_document').removeAttr('name').hide();
+        }
+    
+        function mostrarDocumentoSoporte(name){
+            $('#label_soporte').show();
+            $('label[for="x_support_document"]').show();
+            $('label[for="x_support_document"]').next().show();
+            $('#x_support_document').attr('name', name).show();
+        }
+    
+        $('#form_correccion').submit(async function(e) {
             e.preventDefault();
-            if (!correccion.validar_form()){
+            const formValido = await correccion.validar_form();
+            if (!formValido){
                 return;
             }else{
                 $('#btn_enviar_correccion').attr('disabled','disabled')

@@ -1420,8 +1420,9 @@ class MySample(http.Controller):
             cadena[0] = 'data:application/vnd.ms-excel;base64'
             str_file = ','.join(cadena)
             data_csv = base64.b64decode(str_file)
-            data_str = data_csv.decode('cp1252')
-        except:
+            data_str = data_csv.decode('cp1252',errors='ignore')
+        except Exception as e:
+            _logger.info(e)
             return {'ok': False, 'message': 'Ha ocurrido un error al leer el archivo, verifique su contenido'}
         _logger.info(data_str)
         rows = data_str.split('\n')

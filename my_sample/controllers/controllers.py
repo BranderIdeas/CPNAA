@@ -438,6 +438,8 @@ class MySample(http.Controller):
     @http.route('/recibo_pago', methods=["POST"], type="json", auth='public', website=True)
     def recibo_pago(self, **kw):
         data = kw.get('data')
+        url_base  = http.request.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        modo_test = '.dev.odoo.com' in url_base
         _logger.info(data)
         ahora = datetime.now() - timedelta(hours=5)
         tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',int(data['id_tramite']))])
@@ -448,7 +450,7 @@ class MySample(http.Controller):
         elif not numero_recibo or (data['corte'] and data['corte'] != tramite.x_origin_name):
             consecutivo = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Consecutivo Recibo de Pago')])
             numero_recibo = int(consecutivo.x_value) + 1
-            numero_radicado = Sevenet.sevenet_consulta(tramite.id, 'Recibo')
+            numero_radicado = self.radicado_test() if modo_test else Sevenet.sevenet_consulta(tramite.id, 'Recibo')
             update = {'x_voucher_number': numero_recibo, 'x_radicacion_date': ahora, 'x_rad_number': numero_radicado }
             if data['corte']:
                 update = {'x_voucher_number': numero_recibo,'x_origin_name': data['corte'],
@@ -478,10 +480,13 @@ class MySample(http.Controller):
                 return {'ok': True, 'tramite': tramites[0], 'codigo': codigo, 'corte': corte_vigente}
             elif tramites[0]['x_grade_ID']:
                 grado = http.request.env['x_cpnaa_grade'].sudo().browse(tramites[0]['x_grade_ID'][0])
-                fecha_lim = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
-                ok = True
-                if not self.validar_fecha_limite(fecha_lim):
-                    ok = False
+                fecha_lim = None
+                if grado:
+                    if grado.x_agreement_ID.x_before_after_agreement:
+                        fecha_lim = grado.x_date + timedelta(days=grado.x_agreement_ID.x_days_to_pay_after)
+                    else:
+                        fecha_lim = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
+                ok = True if self.validar_fecha_limite(fecha_lim) else False
                 return {'ok': ok, 'tramite': tramites[0], 'codigo': codigo, 'grado': { 'id': grado.id, 'x_fecha_limite': fecha_lim }}
             else:
                 return {'ok': False, 'error': 'Ha ocurrido un error con el origen del trámite'}
@@ -490,6 +495,8 @@ class MySample(http.Controller):
 
     # Si el pago es aprobado pasa el trámite a fase de verificación, registra los cambios en el mailthread
     def tramite_fase_verificacion(self, data):
+        url_base  = http.request.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        modo_test = '.dev.odoo.com' in url_base
         datetime_str = datetime.strptime(data['fecha_pago'], '%Y-%m-%d %H:%M:%S')
         datetime_str = datetime_str + timedelta(hours=5)
         _logger.info('Hora del pago UTC: '+str(datetime_str))
@@ -502,7 +509,7 @@ class MySample(http.Controller):
                 if tramite.x_cycle_ID.x_order > 0:
                     raise Exception('Este pago ya fue registrado')
                 if tramite.x_cycle_ID.x_order == 0:
-                    numero_radicado = Sevenet.sevenet_consulta(tramite.id, data['tipo_pago'])
+                    numero_radicado = self.radicado_test() if modo_test else Sevenet.sevenet_consulta(tramite.id, data['tipo_pago'])
                     if (tramite.x_origin_type.x_name == 'CORTE'):
                         corte_vigente = self.buscar_corte(tramite.x_origin_name)
                         origin_name = corte_vigente['x_name']
@@ -1030,12 +1037,12 @@ class MySample(http.Controller):
                 graduandos = http.request.env['x_procedure_temp'].sudo().search_read([('x_nombres','=',data['nombres']),
                                                                                       ('x_apellidos','=',data['apellidos']),
                                                                                       ('x_grado_ID','!=',False),
-                                                                                      ('x_fecha_de_grado','>=',hoy),
+#                                                                                       ('x_fecha_de_grado','>=',hoy),
                                                                                       ('x_origin_type','=','CONVENIO')])
             else:
                 graduandos = http.request.env['x_procedure_temp'].sudo().search_read([('x_tipo_documento_select','=',int(data['doc_type'])),
                                                                                       ('x_grado_ID','!=',False),
-                                                                                      ('x_fecha_de_grado','>=',hoy),
+#                                                                                       ('x_fecha_de_grado','>=',hoy),
                                                                                       ('x_documento','=',data['doc']),
                                                                                       ('x_origin_type','=','CONVENIO')])
             if (len(graduandos) > 0):
@@ -1043,7 +1050,10 @@ class MySample(http.Controller):
                     grado = http.request.env['x_cpnaa_grade'].sudo().browse(graduando['x_grado_ID'][0])
                     id_grado = grado.id
                     if grado:
-                        fecha_maxima = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
+                        if grado.x_agreement_ID.x_before_after_agreement:
+                            fecha_maxima = grado.x_date + timedelta(days=grado.x_agreement_ID.x_days_to_pay_after)
+                        else:
+                            fecha_maxima = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
                         if self.validar_fecha_limite(fecha_maxima):
                             _logger.info('Grado vigente hasta: '+str(fecha_maxima))
                         else:
@@ -1055,7 +1065,8 @@ class MySample(http.Controller):
                             'graduando': graduando,
                             'id_user_tramite': tramite.x_user_ID.id,
                             'id_grado': id_grado,
-                            'fecha_maxima': fecha_maxima
+                            'fecha_maxima': fecha_maxima,
+                            'nivel_profesional': grado.x_carrera_ID.x_level_ID.x_name
                         }
                         definitivos.append(definitivo)
             if (graduandos):
@@ -1063,7 +1074,7 @@ class MySample(http.Controller):
             else:
                 return { 'ok': False, 'graduandos': False }
         else:
-            return { 'ok': False, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página', 'error_captcha': True }
+            return { 'ok': False, 'mensaje': 'Valida nuevamente el captcha', 'error_captcha': True }
         
     # Renderiza el formulario para trámites, valida si ya ha realizado este trámite y lo redirige al inicio del tramite
     @http.route('/tramite/<string:origen>/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)
@@ -1094,15 +1105,17 @@ class MySample(http.Controller):
     # Renderiza el formulario para trámites por convenios, valida si ya hay trámite en curso y lo redirige al estado del tramite
     @http.route('/tramite/convenios/<model("x_procedure_temp"):cliente>', auth='public', website=True)
     def formulario_convenio(self, cliente):
-        form = 'inscripciontt'
-        if (cliente.x_carrera_select.x_level_ID.x_name == 'PROFESIONAL'):
-            form = 'matricula'
+        form = 'matricula' if cliente.x_carrera_select.x_level_ID.x_name == 'PROFESIONAL' else 'inscripciontt'
         tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',cliente.x_tipo_documento_select.id),
                                                                            ('x_studio_documento_1','=',cliente.x_documento),
                                                                            ('x_cycle_ID.x_order','<','5')])
         grado = http.request.env['x_cpnaa_grade'].sudo().browse(cliente.x_grado_ID.id)
-        if not self.validar_fecha_limite(grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)):
-            return http.request.redirect('/cliente/tramite/'+form)
+        if not grado.x_agreement_ID.x_before_after_agreement:
+            if not self.validar_fecha_limite(grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)):
+                return http.request.redirect('/cliente/tramite/'+form)
+        else:
+            if not self.validar_fecha_limite(grado.x_date + timedelta(days=grado.x_agreement_ID.x_days_to_pay_after)):
+                return http.request.redirect('/cliente/tramite/'+form)
         if tramite:
             return http.request.redirect('/cliente/'+str(tramite.x_user_ID.id)+'/tramites')
         else:
@@ -1138,7 +1151,11 @@ class MySample(http.Controller):
                 ahora = datetime.now() - timedelta(hours=5)
                 _logger.info(ahora)
                 if grado:
-                    fecha_maxima = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
+                    fecha_maxima = None
+                    if grado.x_agreement_ID.x_before_after_agreement:
+                        fecha_maxima = grado.x_date + timedelta(days=grado.x_agreement_ID.x_days_to_load_later)
+                    else:
+                        fecha_maxima = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
                     fecha_maxima = datetime.combine(fecha_maxima+timedelta(days=1), datetime.min.time())
                     if fecha_maxima < ahora:
                         pago_vencido = True
@@ -1287,9 +1304,22 @@ class MySample(http.Controller):
     # Ruta donde agrega mas estudiantes cuando el grado ya esta creado
     @http.route('/convenios/<model("x_cpnaa_user"):universidad>/gradoCsv/<model("x_cpnaa_grade"):grado>', auth='user', website=True) 
     def form_archivo_csv_grado(self, universidad, grado):
+        hoy = date.today()
+        redirect = False
         if universidad.x_email != http.request.session.login or universidad.x_user_type_ID.x_name != 'IES':
+            redirect = True
+            
+        # Si ya ha caducado la fecha de carga de archivo csv para el grado 
+        if grado.x_agreement_ID.x_before_after_agreement:
+            if grado.x_date + timedelta(days=grado.x_agreement_ID.x_days_to_load_later) <= hoy:
+                redirect = True
+        else:
+            if grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_before_degree) <= hoy:
+                redirect = True
+                
+        if redirect:
             return http.request.redirect('/')
-        profesiones = http.request.env['x_cpnaa_career'].search([('x_profession_type_ID.x_name','not ilike','NO ACTIVA')], order="x_name")
+        profesiones = http.request.env['x_cpnaa_career'].search([('x_profession_type_ID.x_name','not ilike','NO ACThoyIVA')], order="x_name")
         convenios = http.request.env['x_cpnaa_agreement'].search([('x_user_ID','=',universidad.id)])
         convenio = http.request.env['x_cpnaa_agreement'].search([('id','=',grado.x_agreement_ID.id)])
         return http.request.render('my_sample.convenios_archivo_csv', {'profesiones': profesiones, 'convenios': convenios,
@@ -1568,3 +1598,9 @@ class MySample(http.Controller):
         valores = '0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
         p = ''
         return p.join([choice(valores) for i in range(longitud)])
+    
+    def radicado_test(self):
+        rad = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=','RADICADO TRAMITES')])
+        val = rad.x_value + 1
+        rad.sudo().write({'x_value': val})
+        return val

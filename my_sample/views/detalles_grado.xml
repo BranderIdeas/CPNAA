@@ -21,13 +21,24 @@
                                 <tbody>
                                     <tr>
                                         <th scope="col">
-                                            <a t-if="grado.x_date - datetime.timedelta(days=convenio.x_days_before_degree) &gt;= datetime.date.today()"
-                                               class="link-cuadro" t-attf-href="/convenios/{{ (universidad.id) }}/gradoCsv/{{ (grado.id)  }}">
-                                                <i class="fa fa-upload"></i> CARGUE CSV DE POSIBLES GRADUANDOS
-                                            </a>
-                                            <a t-else="" class="no-select text-gray" disabled="1">
-                                                <i class="fa fa-upload"></i> CARGUE CSV DE POSIBLES GRADUANDOS
-                                            </a>
+                                            <t t-if="not grado.x_agreement_ID.x_before_after_agreement">
+                                                <a t-if="grado.x_date - datetime.timedelta(days=convenio.x_days_before_degree) &gt;= datetime.date.today()"
+                                                   class="link-cuadro" t-attf-href="/convenios/{{ (universidad.id) }}/gradoCsv/{{ (grado.id)  }}">
+                                                    <i class="fa fa-upload"></i> CARGUE CSV DE POSIBLES GRADUANDOS
+                                                </a>
+                                                <a t-else="" class="no-select text-gray" disabled="1">
+                                                    <i class="fa fa-upload"></i> CARGUE CSV DE POSIBLES GRADUANDOS
+                                                </a>
+                                            </t>
+                                            <t t-if="grado.x_agreement_ID.x_before_after_agreement">
+                                                <a t-if="grado.x_date + datetime.timedelta(days=convenio.x_days_to_load_later) &gt;= datetime.date.today()"
+                                                   class="link-cuadro" t-attf-href="/convenios/{{ (universidad.id) }}/gradoCsv/{{ (grado.id)  }}">
+                                                    <i class="fa fa-upload"></i> CARGUE CSV DE POSIBLES GRADUANDOS
+                                                </a>
+                                                <a t-else="" class="no-select text-gray" disabled="1">
+                                                    <i class="fa fa-upload"></i> CARGUE CSV DE POSIBLES GRADUANDOS
+                                                </a>
+                                            </t>
                                             <t t-set="estudiantes_grado" t-value="request.env['x_procedure_temp'].search([('x_grado_ID','=',grado.id)])"/>
                                             <t t-set="estudiantes_con_pago" 
                                                t-value="request.env['x_cpnaa_procedure'].search([('x_grade_ID.id','=',grado.id),
@@ -38,7 +49,11 @@
                                                     <i class="fa fa-external-link"></i> (<t t-esc="len(estudiantes_grado)" /> estudiante)</a>
                                                 <a t-else="" href="#" class="text-black" data-toggle="modal" data-target="#modal-estudiantes-cargados">
                                                     <i class="fa fa-external-link"></i> (<t t-esc="len(estudiantes_grado)" /> estudiantes)</a>
-                                                Máximo hasta el <t t-esc="(grado.x_date - datetime.timedelta(days=convenio.x_days_before_degree)).strftime('%d-%m-%Y')" />
+                                                        Máximo hasta el 
+                                                    <t t-if="not grado.x_agreement_ID.x_before_after_agreement"
+                                                       t-esc="(grado.x_date - datetime.timedelta(days=convenio.x_days_before_degree)).strftime('%d-%m-%Y')" />
+                                                    <t t-if="grado.x_agreement_ID.x_before_after_agreement"
+                                                       t-esc="(grado.x_date + datetime.timedelta(days=convenio.x_days_to_load_later)).strftime('%d-%m-%Y')" />
                                             </p>
                                         </th>
                                         <td scope="col">
@@ -60,7 +75,11 @@
                                                     <i class="fa fa-external-link"></i> (<t t-esc="len(estudiantes_con_pago)" /> estudiantes)</a>
                                                 <a t-else="" href="#" class="text-black" data-toggle="modal" data-target="#modal-estudiantes-con-pago">
                                                     <i class="fa fa-external-link"></i> (<t t-esc="len(estudiantes_con_pago)" /> estudiantes)</a>
-                                                Máximo hasta el <t t-esc="(grado.x_date - datetime.timedelta(days=convenio.x_days_to_pay)).strftime('%d-%m-%Y')" />
+                                                        Máximo hasta el 
+                                                    <t t-if="not grado.x_agreement_ID.x_before_after_agreement" 
+                                                       t-esc="(grado.x_date - datetime.timedelta(days=convenio.x_days_to_pay)).strftime('%d-%m-%Y')" />
+                                                    <t t-if="grado.x_agreement_ID.x_before_after_agreement"
+                                                       t-esc="(grado.x_date + datetime.timedelta(days=convenio.x_days_to_pay_after)).strftime('%d-%m-%Y')" />
                                             </p>
                                         </th>
                                         <td scope="col">
@@ -69,7 +88,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                                <tbody>
+                                <tbody t-if="not grado.x_hide_load_pdf_definitive">
                                     <tr>
                                         <th scope="col">
                                             <a t-if="grado.x_date - datetime.timedelta(days=convenio.x_days_to_upload_pdf) &gt;= datetime.date.today()" 
@@ -89,7 +108,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                                <tbody>
+                                <tbody t-if="not grado.x_hide_load_diplomas">
                                     <tr>
                                         <th scope="col">
                                             <a t-if="grado.x_date + datetime.timedelta(days=convenio.x_days_to_upload_diploma) &gt;= datetime.date.today()" 

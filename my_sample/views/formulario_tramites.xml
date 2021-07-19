@@ -366,7 +366,9 @@
                                     </select>
                                 </div>
                                 </div>
-                                <div t-if="(form == 'matricula' or form == 'inscripciontt') and origen != 2" 
+                                <t t-if="cliente" t-set="mostrar_diploma" t-value="cliente.x_grado_ID.x_agreement_ID.x_before_after_agreement"/>
+                                <t t-else="" t-set="mostrar_diploma" t-value="(form == 'matricula' or form == 'inscripciontt') and origen != 2"/>
+                                <div t-if="mostrar_diploma"
                                      class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
                                     <div class="col-md-6">
                                         <label class="col-form-label o_fake_editable"> Cargue la imágen legible de su diploma </label>

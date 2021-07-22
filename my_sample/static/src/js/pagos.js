@@ -198,9 +198,6 @@ odoo.define('website.pagos', function(require) {
     })
 
     if(location.href.indexOf(`/pagos/[`) != -1){
-        if(window.top.location.href !== location.href){
-            window.top.location.href = location.href;
-        }
         var pagos = new Pagos();
         pagos.traer_data(pagos);
         $('#epayco').click(pagos.iniciar_pago);

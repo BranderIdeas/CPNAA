@@ -67,7 +67,7 @@
                                             data-epayco-name='PAGO CPNAA'
                                             data-epayco-currency='cop'    
                                             data-epayco-country='CO'
-                                            data-epayco-external='false'
+                                            data-epayco-external='true'
                                             >
                                        </script>
                                     </form>

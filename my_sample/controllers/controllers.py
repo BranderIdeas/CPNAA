@@ -153,7 +153,7 @@ class MySample(http.Controller):
         return http.request.redirect('/pagos/confirmacion')
     
     # Ruta que renderiza página de confirmación de pasarela de pagos
-    @http.route('/pagos/confirmacion', auth='public', website=True)
+    @http.route('/pagos/confirmacion', auth='public', website=True, csrf=False)
     def epayco_confirmacion(self, **kw):
         ref_payco = kw.get('ref_payco')
         if not ref_payco:

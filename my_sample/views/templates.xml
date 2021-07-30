@@ -5,22 +5,24 @@
                 <link rel="stylesheet" href="/my_sample/static/src/css/styles.css"/>
                 <link rel="stylesheet" href="/my_sample/static/src/css/yearpicker.css"/>
                 <link rel="stylesheet" href="/my_sample/static/src/css/website_preloader.css"/>
+                <link rel="stylesheet" href="/my_sample/static/src/css/datatables.min.css"/>
                 <script src='/my_sample/static/src/js/swal.js'></script>
                 <script src="/my_sample/static/src/js/tramites.js"></script>
                 <script src="/my_sample/static/src/js/convenios.js"></script>
                 <script src="/my_sample/static/src/js/validaciones.js"></script>
                 <script src="/my_sample/static/src/js/pagos.js"></script>
-                <script src="/my_sample/static/src/js/pactos.js"></script>
                 <script src="/my_sample/static/src/js/vigencia.js"></script>
                 <script src="/my_sample/static/src/js/consulta.js"></script>
                 <script src="/my_sample/static/src/js/denuncia.js"></script>
                 <script src="/my_sample/static/src/js/activacion.js"></script>
                 <script src="/my_sample/static/src/js/correccion.js"></script>                
                 <script src="/my_sample/static/src/js/pqrs.js"></script>
+                <script src="/my_sample/static/src/js/pactos.js"></script>
                 <script src='/my_sample/static/src/js/scripts/yearpicker.js'></script>
                 <script src="/my_sample/static/src/js/scripts/dist/jspdf.min.js"></script>
                 <script src="/my_sample/static/src/js/scripts/JsBarcode.all.min.js"></script>
                 <script src="/my_sample/static/src/js/scripts/pdfFunctions.js"></script>
+                <script src="/my_sample/static/src/js/scripts/datatables.min.js"></script>
             </xpath>
         </template>
         <template id="sample_snippet_id" inherit_id="website.snippets" name="Snippet">

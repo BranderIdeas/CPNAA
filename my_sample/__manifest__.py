@@ -40,6 +40,7 @@
         'views/inicio_cert_vigencia.xml',
         'views/inicio_mat_virtual.xml',
         'views/inicio_correccion.xml',
+        'views/inicio_pactos.xml',
         'views/preguntas_mat_virtual.xml',
         'views/certificado_vigencia.xml',
         'views/consulta_registro.xml',

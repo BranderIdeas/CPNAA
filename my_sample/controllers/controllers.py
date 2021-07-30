@@ -1277,7 +1277,83 @@ class MySample(http.Controller):
             'res_id': id_tramite
         }
         return http.request.env['mail.message'].sudo().create(mailthread)
+    
+    """   RUTAS CLIENTE EMPRESA   """
+    
+   # Ruta que renderiza el inicio del trámite actualización/coreeción de registro
+    @http.route('/convenios-inter-administrativos', auth='user', website=True)
+    def inicio_pactos(self):
+        empresa = http.request.env['x_cpnaa_user'].search([('x_email','=',http.request.session.login)])
+        if empresa.x_user_type_ID.x_name != 'EMPRESA':
+            return http.request.redirect('/')
+        hoy = date.today()
+        fecha_consulta = '%s-01-%s' % (hoy.month-2, hoy.year)
+        mes_desde = hoy.month-2 if hoy.month > 10 else '0%s' % str(hoy.month-2)
+        desde = '01-%s-%s' % (mes_desde, hoy.year)
+        tramites = http.request.env['x_cpnaa_procedure'].search([('create_date','>',fecha_consulta)])
+        _logger.info(hoy)                                                         
+        return http.request.render('my_sample.inicio_pactos', { 'tramites': tramites, 'desde': desde, 'hoy': hoy })
+
+    # Ruta que realiza la consulta de convenios inter administrativos
+    @http.route('/consulta_pactos', auth='user', methods=['POST'], type="json", website=True)
+    def consulta_pactos(self, **kw):
+        _logger.info(kw)
+        campos = ['id','x_studio_tipo_de_documento_1', 'x_studio_documento_1','x_service_ID','x_studio_universidad_5',
+                  'x_origin_type', 'x_studio_ciudad_de_expedicin','x_resolution_ID', 'x_legal_status', 'x_sanction',
+                  'x_studio_ciudad_de_expedicin','x_studio_carrera_1','x_studio_gnero','x_studio_fecha_de_resolucin',
+                  'x_studio_nombres','x_studio_apellidos','x_enrollment_number','x_fecha_resolucion_corte', 'x_expedition_date']
         
+        if ((kw['data']['tipo'] == 'x_names') and (kw['data']['tipo_2'] == 'x_apellidos')):
+            tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([(self.campos_interregulacion[kw['data']['tipo']],'ilike',kw['data']['value']), (self.campos_interregulacion[kw['data']['tipo_2']],'ilike',kw['data']['value_2']), ('x_cycle_ID.x_order','=',5)], campos)
+        
+        elif ((kw['data']['tipo'] == 'x_names') or (kw['data']['tipo'] == 'x_apellidos')):
+            tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([(self.campos_interregulacion[kw['data']['tipo']],'ilike',kw['data']['value']),('x_cycle_ID.x_order','=',5)], campos)
+        
+        elif (kw['data']['tipo'] == 'x_fecha_resolucion_corte'):
+            tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([(self.campos_interregulacion[kw['data']['tipo']],'=',kw['data']['value']), ('x_cycle_ID.x_order','=',5)], campos)
+            tramites_2 = http.request.env['x_cpnaa_procedure'].sudo().search_read([(self.campos_interregulacion[kw['data']['tipo_2']],'=',kw['data']['value']), ('x_cycle_ID.x_order','=',5)], campos)
+            if tramites:
+                pass
+            else:
+                tramites = tramites_2
+                
+        elif (kw['data']['tipo'] == 'x_resolution_ID'):
+            tramites_1 = http.request.env['x_cpnaa_procedure'].sudo().search_read([(self.campos_interregulacion[kw['data']['tipo']],'=',kw['data']['value']), ('x_cycle_ID.x_order','=',5)], campos)
+            tramites_2 = http.request.env['x_cpnaa_procedure'].sudo().search_read([(self.campos_interregulacion[kw['data']['tipo']],'=',kw['data']['value_2']), ('x_cycle_ID.x_order','=',5)], campos)
+            tramites = tramites_1 + tramites_2
+            
+        else:
+            tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([(self.campos_interregulacion[kw['data']['tipo']],'=',kw['data']['value']),('x_cycle_ID.x_order','=',5)], campos)
+        
+        #_logger.info(tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([(self.campos_interregulacion[kw['data']['tipo']])]))
+        #_logger.info((self.campos_interregulacion[kw['data']['tipo']], kw['data']['value']),)
+        #_logger.info((self.campos_interregulacion[kw['data']['tipo_2']], kw['data']['value']))
+        _logger.info(tramites)
+        #_logger.info(tramites[0])
+        return { 'tramites': tramites }
+
+
+                
+    
+    
+#     # Realiza la consulta del registro online 
+#    @http.route('/convenios-inter-administrativos/consulta/<model("x_cpnaa_procedure"):tramite>', auth='user', website=True)
+#    def realizar_consulta(self, **kw):
+#        empresa = http.request.env['x_cpnaa_user'].search([('x_email','=',http.request.session.login)])
+#        if empresa.x_user_type_ID.x_name != 'EMPRESA':
+#           return http.request.redirect('/')
+#       data = kw.get('data')
+#        _logger.info(data)
+#        tramites = []
+#         if ahora = datetime.now() - timedelta(hours=5)
+#           hora_consulta = ahora.strftime('%Y-%m-%d %H:%M:%S')
+#           campos = ['id','x_studio_tipo_de_documento_1', 'x_studio_documento_1','x_service_ID','x_studio_pas_de_expedicin_1',
+#                       'x_origin_type', 'x_studio_ciudad_de_expedicin','x_resolution_ID', 'x_legal_status', 'x_sanction',
+#                       'x_studio_ciudad_de_expedicin','x_studio_carrera_1','x_studio_gnero','x_studio_fecha_de_resolucin',
+#                       'x_studio_nombres','x_studio_apellidos','x_enrollment_number','x_fecha_resolucion_corte']
+            
+#             _logger.info(tramites)
+    
         
     """   RUTAS DE CONVENIOS  """
 
@@ -1604,3 +1680,13 @@ class MySample(http.Controller):
         val = rad.x_value + 1
         rad.sudo().write({'x_value': val})
         return val
+    
+    campos_interregulacion = {
+        "x_document":"x_studio_documento_1",
+        "x_names":"x_studio_nombres",
+        "x_apellidos":"x_studio_apellidos",
+        "x_enrollment":"x_enrollment_number",
+        "x_fecha_resolucion_corte":"x_fecha_resolucion_corte", #["x_fecha_resolucion_corte", ], #"x_studio_fecha_de_resolucin",
+        'x_studio_fecha_de_resolucin': 'x_studio_fecha_de_resolucin',
+        "x_resolution_ID": "x_resolution_ID",
+    }

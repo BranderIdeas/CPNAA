@@ -10,6 +10,7 @@
                 <script src="/my_sample/static/src/js/convenios.js"></script>
                 <script src="/my_sample/static/src/js/validaciones.js"></script>
                 <script src="/my_sample/static/src/js/pagos.js"></script>
+                <script src="/my_sample/static/src/js/pactos.js"></script>
                 <script src="/my_sample/static/src/js/vigencia.js"></script>
                 <script src="/my_sample/static/src/js/consulta.js"></script>
                 <script src="/my_sample/static/src/js/denuncia.js"></script>

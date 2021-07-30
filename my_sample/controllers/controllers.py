@@ -64,6 +64,8 @@ class MySample(http.Controller):
         for key, value in kw.items():
             if type(value) != str:
                 kw[key] = base64.b64encode(kw[key].read())
+            if (key in self.campos_ID_form_tramites):
+                kw[key] = int(kw.get(key))
         try:
             user = http.request.env['x_cpnaa_user'].sudo().create(kw)
             resp = { 'ok': True, 'message': 'Usuario creado con exito',
@@ -84,8 +86,8 @@ class MySample(http.Controller):
         for key, value in kw.items():
             if type(value) != str:
                 kw[key] = base64.b64encode(kw[key].read())
-            if key == 'x_gender_ID':
-                kw[key] = int(kw.get('x_gender_ID'))
+            if (key in self.campos_ID_form_tramites):
+                kw[key] = int(kw.get(key))
         try:
             tramite = http.request.env['x_cpnaa_procedure'].search([('x_studio_tipo_de_documento_1.id','=',kw['x_document_type_ID']),
                                                                     ('x_studio_documento_1','=',kw['x_document']),
@@ -1690,3 +1692,23 @@ class MySample(http.Controller):
         'x_studio_fecha_de_resolucin': 'x_studio_fecha_de_resolucin',
         "x_resolution_ID": "x_resolution_ID",
     }
+
+    campos_ID_form_tramites = [ 
+        'x_origin_type', 
+        'x_user_type_ID', 
+        'x_document_type_ID',
+        'x_expedition_country',
+        'x_expedition_state',
+        'x_expedition_city',
+        'x_gender_ID',
+        'x_country_ID',
+        'x_state_ID',
+        'x_city_ID',
+        'x_level_ID',
+        'x_institution_type_ID',
+        'x_institution_ID',
+        'x_institute_career',
+        'x_foreign_country',
+        'x_foreign_state',
+        'x_foreign_city'
+    ] 

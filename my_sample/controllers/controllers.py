@@ -1282,7 +1282,7 @@ class MySample(http.Controller):
     
     """   RUTAS CLIENTE EMPRESA   """
     
-   # Ruta que renderiza el inicio del trámite actualización/coreeción de registro
+    # Ruta que renderiza el inicio del trámite actualización/coreeción de registro
     @http.route('/convenios-inter-administrativos', auth='user', website=True)
     def inicio_pactos(self):
         empresa = http.request.env['x_cpnaa_user'].search([('x_email','=',http.request.session.login)])
@@ -1299,6 +1299,7 @@ class MySample(http.Controller):
     # Ruta que realiza la consulta de convenios inter administrativos
     @http.route('/consulta_pactos', auth='user', methods=['POST'], type="json", website=True)
     def consulta_pactos(self, **kw):
+        tramites = []
         _logger.info(kw)
         campos = ['id','x_studio_tipo_de_documento_1', 'x_studio_documento_1','x_service_ID','x_studio_universidad_5',
                   'x_origin_type', 'x_studio_ciudad_de_expedicin','x_resolution_ID', 'x_legal_status', 'x_sanction',
@@ -1320,18 +1321,14 @@ class MySample(http.Controller):
                 tramites = tramites_2
                 
         elif (kw['data']['tipo'] == 'x_resolution_ID'):
-            tramites_1 = http.request.env['x_cpnaa_procedure'].sudo().search_read([(self.campos_interregulacion[kw['data']['tipo']],'=',kw['data']['value']), ('x_cycle_ID.x_order','=',5)], campos)
-            tramites_2 = http.request.env['x_cpnaa_procedure'].sudo().search_read([(self.campos_interregulacion[kw['data']['tipo']],'=',kw['data']['value_2']), ('x_cycle_ID.x_order','=',5)], campos)
-            tramites = tramites_1 + tramites_2
+            tramites_1 = http.request.env['x_cpnaa_procedure'].sudo().search_read([(self.campos_interregulacion[kw['data']['tipo']],'ilike',kw['data']['value']), ('x_cycle_ID.x_order','=',5)], campos)
+            for i in range(len(tramites_1)):
+                if (kw['data']['value'] in tramites_1[i]['x_resolution_ID'][1].split()):
+                    tramites.append(tramites_1[i])
             
         else:
             tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([(self.campos_interregulacion[kw['data']['tipo']],'=',kw['data']['value']),('x_cycle_ID.x_order','=',5)], campos)
         
-        #_logger.info(tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([(self.campos_interregulacion[kw['data']['tipo']])]))
-        #_logger.info((self.campos_interregulacion[kw['data']['tipo']], kw['data']['value']),)
-        #_logger.info((self.campos_interregulacion[kw['data']['tipo_2']], kw['data']['value']))
-        _logger.info(tramites)
-        #_logger.info(tramites[0])
         return { 'tramites': tramites }
 
 

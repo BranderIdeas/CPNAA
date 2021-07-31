@@ -149,8 +149,7 @@ odoo.define('website.pactos', function(require) {
                 data['value'] = $('input[name="buscar_fecha_resolucion"]').val();
             }
             else if (data['tipo'] == "x_resolution_ID"){
-                data['value'] = "RESOLUCION " + $('input[name="buscar_resolucion"]').val();
-                data['value_2'] = "RESOLUCION PROFESIONAL " + $('input[name="buscar_resolucion"]').val();
+                data['value'] = $('input[name="buscar_resolucion"]').val();
             }
             
             pactos.realizar_consulta(pactos);

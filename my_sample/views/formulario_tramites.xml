@@ -568,7 +568,7 @@
                                     <select t-else="" class="form-control i_required" name="x_institution_type_ID" id="x_institution_type_ID" >
                                         <option value="">Seleccione...</option>
                                         <t t-foreach="request.env['x_cpnaa_institution_type'].search([])" t-as="tipo_universidad">
-                                        <option t-att-value="tipo_universidad.id">
+                                        <option t-if= "tipo_universidad.x_name != 'DESACTIVADA'" t-att-value="tipo_universidad.id">
                                             <t t-esc="tipo_universidad.x_name"/>
                                         </option>
                                         </t>

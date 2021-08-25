@@ -540,7 +540,7 @@
                                             <t t-esc="cliente.x_universidad_select.x_institution_type_ID.x_name" />
                                         </option>
                                     </select>
-                                    <select t-elif="form == 'licencia'" class="form-control i_required inputDisabled" 
+                                    <select t-elif="form == 'licencia' or form == 'renovacion'" class="form-control i_required inputDisabled" 
                                             name="x_institution_type_ID" id="x_institution_type_ID">
                                         <t t-foreach="request.env['x_cpnaa_institution_type'].search([('x_name','=','EXTRANJERA')])" t-as="tipo_universidad">
                                         <option t-att-value="tipo_universidad.id">
@@ -548,10 +548,10 @@
                                         </option>
                                         </t>
                                     </select>
-                                    <select t-elif="user and form != 'licencia' and origen == 1" class="form-control i_required" 
+                                    <select t-elif="user and form != 'licencia' and form != 'renovacion' and origen == 1" class="form-control i_required" 
                                             name="x_institution_type_ID" id="x_institution_type_ID">
                                         <t t-foreach="request.env['x_cpnaa_institution_type'].search([])" t-as="tipo_universidad">
-                                            <option t-if="tipo_universidad.id != user.x_institution_type_ID.id and tipo_universidad.x_name != 'DESACTIVADA'" t-att-value="tipo_universidad.id">
+                                            <option t-if="tipo_universidad.id != user.x_institution_type_ID.id" t-att-value="tipo_universidad.id">
                                                 <t t-esc="tipo_universidad.x_name"/>
                                             </option>
                                             <option t-else="" t-att-value="tipo_universidad.id" selected="true">
@@ -559,9 +559,9 @@
                                             </option>
                                         </t>
                                     </select>
-                                    <select t-elif="user and form != 'licencia' and origen == 2" class="form-control i_required inputDisabled" 
+                                    <select t-elif="user and form != 'licencia' and form != 'renovacion' and origen == 2" class="form-control i_required inputDisabled" 
                                             name="x_institution_type_ID" id="x_institution_type_ID">
-                                            <option t-if= "tipo_universidad.x_name != 'DESACTIVADA'"  t-attf-value="{{ (user.x_institution_type_ID.id) }}" >
+                                            <option t-attf-value="{{ (user.x_institution_type_ID.id) }}" >
                                                 <t t-esc="user.x_institution_type_ID.x_name" />
                                             </option>
                                     </select>                                

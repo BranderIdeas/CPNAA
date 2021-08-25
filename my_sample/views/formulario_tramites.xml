@@ -554,7 +554,7 @@
                                             <option t-if="tipo_universidad.x_name != 'DESACTIVADA' and tipo_universidad.id != user.x_institution_type_ID.id" t-att-value="tipo_universidad.id">
                                                 <t t-esc="tipo_universidad.x_name"/>
                                             </option>
-                                            <option t-else="" t-att-value="tipo_universidad.id" selected="true">
+                                            <option t-elif="tipo_universidad.x_name != 'DESACTIVADA'" t-att-value="tipo_universidad.id" selected="true">
                                                 <t t-esc="tipo_universidad.x_name"/>
                                             </option>
                                         </t>
@@ -568,9 +568,9 @@
                                     <select t-else="" class="form-control i_required" name="x_institution_type_ID" id="x_institution_type_ID" >
                                         <option value="">Seleccione...</option>
                                         <t t-foreach="request.env['x_cpnaa_institution_type'].search([])" t-as="tipo_universidad">
-                                        <option t-if= "tipo_universidad.x_name != 'DESACTIVADA'" t-att-value="tipo_universidad.id">
-                                            <t t-esc="tipo_universidad.x_name"/>
-                                        </option>
+                                            <option t-if= "tipo_universidad.x_name != 'DESACTIVADA'" t-att-value="tipo_universidad.id">
+                                                <t t-esc="tipo_universidad.x_name"/>
+                                            </option>
                                         </t>
                                     </select>
                                 </div>

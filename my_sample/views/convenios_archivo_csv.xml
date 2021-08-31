@@ -102,7 +102,7 @@
                                     <div class="form-group row">
                                         <label for="profesion" class="col-sm-3 col-form-label">Profesión</label>
                                         <t t-set="arquitecto_id" t-value="request.env['x_cpnaa_career'].search([('x_name','=','ARQUITECTO')]).id"/>
-                                        <t t-set="arquitecta_id" t-value="request.env['x_cpnaa_career'].search([('x_name','=','ARQUITECTA')]).id"/>
+                                        <t t-set="arquitecta_id" t-value="request.env['x_cpnaa_career'].search([('id','=',110)]).id"/> <!-- ARQUITECTA -->
                                         <div class="col-sm-9">
                                             <select t-if="grado" id="profesion" name="user_id" class="form-control" readonly="1">
                                                 <option t-if="grado.x_carrera_ID.id == arquitecto_id" t-att-value="arquitecto_id" selected="">

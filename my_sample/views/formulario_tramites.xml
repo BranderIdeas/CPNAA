@@ -22,8 +22,10 @@
                             <div class="container">
                             <div class="row hiddenFields">
                             <div class="row form-group form-field o_website_form_required_custom">
+                                <input t-if="form == 'renovacion'" type="hidden" id="x_related_service" name="x_related_service" 
+                                       t-attf-value="{{ (request.env['x_cpnaa_service'].search_read([('x_name','=','RENOVACIÓN - LICENCIA TEMPORAL ESPECIAL')], ['id'])[0]['id']) }}"/>
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                <input type="hidden" id="x_origin_type" name="x_origin_type" t-attf-value="{{ (origen) }}" />
+                                <input type="hidden" id="x_origin_type" name="x_origin_type" t-attf-value="{{ (origen) }}"/>
                                 <div class="col-md-4">
                                     <label class="col-form-label o_fake_editable" for="x_user_type_ID">
                                         Tipo de usuario
@@ -49,9 +51,9 @@
                                     <label class="col-form-label o_fake_editable" for="x_name"> Nombres </label>
                                 </div>
                                 <div class="col-md-6">
-                                    <input t-if="cliente" t-attf-value="{{ (cliente.x_nombres) }}" type="text" class=" o-letters form-control i_required" 
-                                           name="x_name" />
-                                    <input t-elif="user" t-attf-value="{{ (user.x_name) }}" type="text" class="o-letters form-control i_required" 
+                                    <input t-if="cliente" t-attf-value="{{ (cliente.x_nombres) }}" type="text" class=" o-letters form-control i_required inputDisabled" 
+                                           name="x_name" /> 
+                                    <input t-elif="user" t-attf-value="{{ (user.x_name) }}" type="text" class="o-letters form-control i_required inputDisabled" 
                                            name="x_name" maxlength="80" />
                                     <input t-else="" type="text" class="o-letters form-control i_required" name="x_name" maxlength="80" />
                                 </div>
@@ -61,9 +63,9 @@
                                     <label class="col-form-label o_fake_editable" for="x_last_name"> Apellidos </label>
                                 </div>
                                 <div class="col-md-6">
-                                    <input t-if="cliente" t-attf-value="{{ (cliente.x_apellidos) }}" type="text" class=" o-letters form-control i_required" 
+                                    <input t-if="cliente" t-attf-value="{{ (cliente.x_apellidos) }}" type="text" class=" o-letters form-control i_required inputDisabled" 
                                            name="x_last_name" />
-                                    <input t-elif="user" t-attf-value="{{ (user.x_last_name) }}" type="text" class=" o-letters form-control i_required" 
+                                    <input t-elif="user" t-attf-value="{{ (user.x_last_name) }}" type="text" class=" o-letters form-control i_required inputDisabled" 
                                            name="x_last_name" />
                                     <input t-else="" type="text" class="o-letters form-control i_required" name="x_last_name" maxlength="80" />
                                 </div>
@@ -74,31 +76,34 @@
                                 <div class="col-md-6">
                                     <label class="col-form-label o_fake_editable" for="x_document_type_ID"> Tipo de documento </label>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-6">                                    
                                     <select class="form-control o_website_form_input inputDisabled" name="x_document_type_ID" required="true">
-                                    <option t-if="cliente" t-attf-value="{{ (cliente.x_tipo_documento_select.id) }}" selected="">
-                                        <t t-esc="cliente.x_tipo_documento_select.x_name" />
-                                    </option>
-                                    <option t-elif="user" t-attf-value="{{ (user.x_document_type_ID.id) }}" selected="">
-                                        <t t-esc="user.x_document_type_ID.x_name" />
-                                    </option>
-                                    <option t-else="" t-attf-value="{{ (tipo_doc) }}" selected="">
-                                        <t t-esc="request.env['x_cpnaa_document_type'].search([('id','=',tipo_doc)]).x_name" />
-                                    </option>
+                                        <option t-if="cliente" t-attf-value="{{ (cliente.x_tipo_documento_select.id) }}" selected="">
+                                            <t t-esc="cliente.x_tipo_documento_select.x_name" />
+                                        </option>
+                                        <option t-elif="user" t-attf-value="{{ (user.x_document_type_ID.id) }}" selected="">
+                                            <t t-esc="user.x_document_type_ID.x_name" />
+                                        </option>
+                                        <option t-else="" t-attf-value="{{ (tipo_doc) }}" selected="">
+                                            <t t-esc="request.env['x_cpnaa_document_type'].search([('id','=',tipo_doc)]).x_name" />
+                                        </option>
                                     </select>
                                 </div>
                                 </div>
-                                <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
+                                <!-- o_fake_not_editable -->
+                                <div class="row col-md-6 form-group form-field  o_website_form_required_custom">
                                 <div class="col-md-6">
-                                    <label class="col-form-label o_fake_editable" for="x_document"> Número de documento </label>
+                                    <label class="col-form-label" for="x_document"> Número de documento </label>
                                 </div>
                                 <div class="col-md-6">
-                                    <input t-if="cliente" t-attf-value="{{ (cliente.x_documento) }}" type="text" class="form-control o_website_form_input"
-                                           name="x_document" required="true" readonly="true"/>
-                                    <input t-elif="user" t-attf-value="{{ (user.x_document) }}" type="text" class="form-control o_website_form_input" 
-                                           name="x_document" required="true" readonly="true"/>
-                                    <input t-else="" t-attf-value="{{ (documento) }}" type="text" class="form-control o_website_form_input" 
-                                           name="x_document" required="true" readonly="true"/>
+                                    <div>
+                                        <input t-if="cliente" t-attf-value="{{ (cliente.x_documento) }}" type="text" class="form-control o_website_form_input inputDisabled"
+                                               name="x_document" required="true" readonly="true"/>
+                                        <input t-elif="user" t-attf-value="{{ (user.x_document) }}" type="text" class="form-control o_website_form_input inputDisabled" 
+                                               name="x_document" required="true"/>
+                                        <input t-else="" t-attf-value="{{ (documento) }}" type="text" class="form-control o_website_form_input" 
+                                               name="x_document" required="true" readonly="true"/>
+                                    </div>
                                 </div>
                                 </div>
                             </div>
@@ -109,7 +114,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <t t-if="cliente">
-                                        <select t-if="(cliente.x_tipo_documento_select.id == 1 or cliente.x_tipo_documento_select.id == 2)"
+                                        <select t-if="(cliente.x_tipo_documento_select.id == 1 or cliente.x_tipo_documento_select.id == 2) and form != 'renovacion'"
                                                 class="child_place-x_expedition_state form-control i_required" 
                                                 name="x_expedition_country" id="x_expedition_country" >
                                             <t t-foreach="request.env['x_cpnaa_country'].search_read([],order='x_name')" t-as="expedition_country">
@@ -121,7 +126,7 @@
                                                 </option>
                                             </t>
                                         </select>
-                                        <select t-elif="(cliente.x_tipo_documento_select.id == 5 or cliente.x_document_type_ID.id == 5)"
+                                        <select t-elif="(cliente.x_tipo_documento_select.id == 5 or cliente.x_document_type_ID.id == 5) and form != 'renovacion'"
                                                 class="child_place-x_expedition_state form-control i_required" 
                                                 name="x_expedition_country" id="x_expedition_country">
                                             <option value="">Seleccione...</option>
@@ -133,8 +138,14 @@
                                         </select>
                                     </t>
                                     <t t-if="user">
-                                        <select t-if="(user.x_document_type_ID.id == 1 or user.x_document_type_ID.id == 2)"
-                                                class="child_place-x_expedition_state form-control i_required" 
+                                        <select t-if="form == 'renovacion'" class="child_place-x_expedition_state form-control i_required inputDisabled" 
+                                                name="x_expedition_country" id="x_expedition_country" required="true">
+                                            <option t-attf-value="{{ (pais_exp[0]) }}" selected="selected">
+                                                <t t-esc="pais_exp[1]" />
+                                            </option>
+                                        </select>
+                                        <select t-if="(user.x_document_type_ID.id == 1 or user.x_document_type_ID.id == 2) and form != 'renovacion'"
+                                                class="child_place-x_expedition_state form-control i_required"
                                                 name="x_expedition_country" id="x_expedition_country" >
                                             <t t-foreach="request.env['x_cpnaa_country'].search_read([],order='x_name')" t-as="expedition_country">
                                                 <option t-if="expedition_country['x_name'] != 'COLOMBIA'" t-att-value="expedition_country['id']">
@@ -145,7 +156,7 @@
                                                 </option>
                                             </t>
                                         </select>
-                                        <select t-elif="(user.x_document_type_ID.id == 5 or user.x_document_type_ID.id == 5)"
+                                        <select t-elif="(user.x_document_type_ID.id == 5 or user.x_document_type_ID.id == 5) and form != 'renovacion'"
                                                 class="child_place-x_expedition_state form-control i_required" 
                                                 name="x_expedition_country" id="x_expedition_country">
                                             <option value="">Seleccione...</option>
@@ -156,7 +167,7 @@
                                             </t>
                                         </select>
                                     </t>
-                                    <select t-if="(tipo_doc == '1' or tipo_doc == '2')" 
+                                    <select t-if="(tipo_doc == '1' or tipo_doc == '2') and form != 'renovacion'" 
                                             class="child_place-x_expedition_state form-control i_required" 
                                             name="x_expedition_country" id="x_expedition_country">
                                         <t t-foreach="request.env['x_cpnaa_country'].search_read([],order='x_name')" t-as="expedition_country">
@@ -168,7 +179,7 @@
                                         </option>
                                         </t>
                                     </select>
-                                    <select t-elif="(tipo_doc == '5')"
+                                    <select t-elif="(tipo_doc == '5') and form != 'renovacion'"
                                             class="child_place-x_expedition_state form-control i_required" 
                                             name="x_expedition_country" id="x_expedition_country">
                                         <option value="">Seleccione...</option>
@@ -186,7 +197,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div t-if="cliente">
-                                        <select t-if="(cliente.x_tipo_documento_select.id == 1 or cliente.x_tipo_documento_select.id == 2)" 
+                                        <select t-if="(cliente.x_tipo_documento_select.id == 1 or cliente.x_tipo_documento_select.id == 2) and form != 'renovacion'" 
                                                 class="child_place-x_expedition_city form-control i_required"
                                                 name="x_expedition_state" id="x_expedition_state">
                                             <option value="">Seleccione...</option>
@@ -196,17 +207,23 @@
                                             </option>
                                             </t>
                                         </select>
-                                        <select t-if="(cliente.x_tipo_documento_select.id != 5)" name="x_expedition_state"
+                                        <select t-if="(cliente.x_tipo_documento_select.id != 5) and form != 'renovacion'" name="x_expedition_state"
                                                 id="dpto_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
                                             <option value="555" selected="true"> NO APLICA </option>
                                         </select>
-                                        <select t-if="(cliente.x_tipo_documento_select.id == 5)" name="x_expedition_state"
+                                        <select t-if="(cliente.x_tipo_documento_select.id == 5) and form != 'renovacion'" name="x_expedition_state"
                                                 class="form-control inputDisabled i_required">
                                             <option value="555" selected="true"> NO APLICA </option>
                                         </select>
                                     </div>
                                     <div t-if="user">
-                                        <t t-if="(user.x_document_type_ID.id == 1 or user.x_document_type_ID.id == 2)">
+                                        <select t-if="form == 'renovacion'" class="form-control inputDisabled i_required"
+                                                name="x_expedition_state" id="dpto_otro_pais" required="true">
+                                            <option t-attf-value="{{ (dep_exp[0]) }}" selected="selected">
+                                                <t t-esc="dep_exp[1]" />
+                                            </option>
+                                        </select>
+                                        <t t-if="(user.x_document_type_ID.id == 1 or user.x_document_type_ID.id == 2) and form != 'renovacion'">
                                             <select class="child_place-x_expedition_city form-control i_required"
                                                     name="x_expedition_state" id="x_expedition_state">
                                                 <option value="">Seleccione...</option>
@@ -220,12 +237,12 @@
                                                 <option value="555" selected="true"> NO APLICA </option>
                                             </select>
                                         </t>
-                                        <select t-if="(user.x_document_type_ID.id == 5)" 
+                                        <select t-if="(user.x_document_type_ID.id == 5 and form != 'renovacion')" 
                                                 class="form-control inputDisabled i_required">
                                             <option value="555" selected="true"> NO APLICA </option>
                                         </select>
                                     </div>
-                                    <div t-if="(tipo_doc == '1' or tipo_doc == '2')">
+                                    <div t-if="(tipo_doc == '1' or tipo_doc == '2') and form != 'renovacion'">
                                         <select class="child_place-x_expedition_city form-control i_required"
                                                 name="x_expedition_state" id="x_expedition_state">
                                             <option value="">Seleccione...</option>
@@ -239,7 +256,7 @@
                                             <option value="555" selected="true"> NO APLICA </option>
                                         </select>
                                     </div>
-                                    <select t-if="(tipo_doc == '5')" class="form-control inputDisabled i_required">
+                                    <select t-if="(tipo_doc == '5') and form != 'renovacion'" class="form-control inputDisabled i_required">
                                         <option value="555" selected="true"> NO APLICA </option>
                                     </select>
                                 </div>
@@ -255,46 +272,52 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div t-if="cliente">
-                                        <div t-if="(cliente.x_tipo_documento_select.id == 1 or cliente.x_tipo_documento_select.id == 2)">
-                                        <select class="form-control i_required"
-                                                name="x_expedition_city" id="x_expedition_city">
-                                            <option value="">Seleccione...</option>
-                                            <t t-foreach="request.env['x_cpnaa_city'].search([],order='x_name')" t-as="expedition_city">
-                                                <option t-att-value="expedition_city.id" style="display: none;" t-att-data-state_id="expedition_city.x_state_ID.id">
-                                                <t t-esc="expedition_city.x_name"/>
-                                                </option>
-                                            </t>
-                                        </select>
-                                        <select id="ciudad_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
-                                            <option value="5309" selected="true"> NO APLICA </option>
-                                        </select>
+                                        <div t-if="(cliente.x_tipo_documento_select.id == 1 or cliente.x_tipo_documento_select.id == 2) and form != 'renovacion'">
+                                            <select class="form-control i_required"
+                                                    name="x_expedition_city" id="x_expedition_city">
+                                                <option value="">Seleccione...</option>
+                                                <t t-foreach="request.env['x_cpnaa_city'].search([],order='x_name')" t-as="expedition_city">
+                                                    <option t-att-value="expedition_city.id" style="display: none;" t-att-data-state_id="expedition_city.x_state_ID.id">
+                                                    <t t-esc="expedition_city.x_name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                            <select id="ciudad_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
+                                                <option value="5309" selected="true"> NO APLICA </option>
+                                            </select>
                                         </div>
-                                        <select t-if="(cliente.x_tipo_documento_select.id == 5)" 
+                                        <select t-if="(cliente.x_tipo_documento_select.id == 5) and form != 'renovacion'" 
                                                 name="x_expedition_city" class="form-control inputDisabled i_required">
                                             <option value="5309" selected="true"> NO APLICA </option>
                                         </select>
                                     </div>
                                     <div t-if="user">
-                                        <div t-if="(user.x_document_type_ID.id  == 1 or user.x_document_type_ID.id  == 2)">
-                                        <select class="form-control i_required"
-                                                name="x_expedition_city" id="x_expedition_city">
-                                            <option value="">Seleccione...</option>
-                                            <t t-foreach="request.env['x_cpnaa_city'].search([],order='x_name')" t-as="expedition_city">
-                                                <option t-att-value="expedition_city.id" style="display: none;" t-att-data-state_id="expedition_city.x_state_ID.id">
-                                                <t t-esc="expedition_city.x_name"/>
-                                                </option>
-                                            </t>
+                                        <select t-if="form == 'renovacion'" class="child_place-x_expedition_state form-control i_required inputDisabled" 
+                                                name="x_expedition_city" id="ciudad_otro_pais" required="true">
+                                            <option t-attf-value="{{ (ciu_exp[0]) }}" selected="selected">
+                                                <t t-esc="ciu_exp[1]" />
+                                            </option>
                                         </select>
-                                        <select id="ciudad_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
-                                            <option value="5309" selected="true"> NO APLICA </option>
-                                        </select>
+                                        <div t-if="(user.x_document_type_ID.id  == 1 or user.x_document_type_ID.id  == 2) and form != 'renovacion'">
+                                            <select class="form-control i_required"
+                                                    name="x_expedition_city" id="x_expedition_city">
+                                                <option value="">Seleccione...</option>
+                                                <t t-foreach="request.env['x_cpnaa_city'].search([],order='x_name')" t-as="expedition_city">
+                                                    <option t-att-value="expedition_city.id" style="display: none;" t-att-data-state_id="expedition_city.x_state_ID.id">
+                                                    <t t-esc="expedition_city.x_name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                            <select id="ciudad_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
+                                                <option value="5309" selected="true"> NO APLICA </option>
+                                            </select>
                                         </div>
-                                        <select t-if="(user.x_document_type_ID.id == 5)" 
+                                        <select t-if="(user.x_document_type_ID.id == 5 and form != 'renovacion')" 
                                                 name="x_expedition_city" class="form-control inputDisabled i_required">
                                             <option value="5309" selected="true"> NO APLICA </option>
                                         </select>
                                     </div>
-                                    <div t-if="(tipo_doc == '1' or tipo_doc == '2')">
+                                    <div t-if="(tipo_doc == '1' or tipo_doc == '2') and form != 'renovacion'">
                                         <select class="form-control i_required"
                                                 name="x_expedition_city" id="x_expedition_city">
                                             <option value="">Seleccione...</option>
@@ -308,7 +331,7 @@
                                             <option value="5309" selected="true">NO APLICA</option>
                                         </select>
                                     </div>
-                                    <select t-if="(tipo_doc == '5')" name="x_expedition_city" 
+                                    <select t-if="(tipo_doc == '5') and form != 'renovacion'" name="x_expedition_city" 
                                             class="form-control inputDisabled i_required" id="ciudad_otro_pais">
                                         <option value="5309" selected="true">NO APLICA</option>
                                     </select>
@@ -346,7 +369,7 @@
                                             </option>
                                         </t>
                                     </select>
-                                    <select t-elif="user" class="form-control i_required" name="x_gender_ID" id="x_gender_ID">
+                                    <select t-elif="user" class="form-control i_required inputDisabled" name="x_gender_ID" id="x_gender_ID">
                                         <t t-foreach="request.env['x_cpnaa_gender'].search([])" t-as="gender">
                                             <option t-if="gender.x_name != user.x_gender_ID.x_name" t-att-value="gender.id">
                                                 <t t-esc="gender.x_name"/>
@@ -437,7 +460,11 @@
                                 <div class="col-md-6">
                                     <label class="col-form-label o_fake_editable" for="x_address"> Dirección de residencia </label>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-6"> 
+                                    <!--
+                                    <input t-if="form == 'renovacion'" t-attf-value="{{tramites[0].x_studio_direccin}}" type="text" class="v-address form-control i_required" 
+                                           name="x_address"  maxlength="100"/>
+                                    -->
                                     <input t-if="user" type="text" class="v-address form-control i_required" 
                                            t-att-value="user.x_address" name="x_address" maxlength="100"/>
                                     <input t-else="" type="text" class="v-address form-control i_required" name="x_address" maxlength="100"/>
@@ -446,10 +473,14 @@
                             </div>
                             <div class="row">
                                 <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
+                                    <div class="col-md-6">
+                                        <label class="col-form-label o_fake_editable" for="x_email"> Correo electrónico </label>
+                                    </div>
                                 <div class="col-md-6">
-                                    <label class="col-form-label o_fake_editable" for="x_email"> Correo electrónico </label>
-                                </div>
-                                <div class="col-md-6">
+                                    <!--
+                                    <input t-if="form == 'renovacion'" t-attf-value="{{tramites[0].x_studio_correo_electrnico}}" type="text" minlength="5" maxlength="50"
+                                           class="v-email form-control i_required" name="x_email" /> 
+                                    -->
                                     <input t-if="cliente" t-attf-value="{{ (cliente.x_email.lower()) }}" type="text" minlength="5" maxlength="50" 
                                            class="v-email form-control i_required" name="x_email"/>
                                     <input t-elif="user" t-attf-value="{{ (user.x_email.lower()) }}" type="text" minlength="5" maxlength="50" 
@@ -463,6 +494,10 @@
                                     <label class="col-form-label o_fake_editable" for="x_celphone"> Número de celular </label>
                                 </div>
                                 <div class="col-md-6">
+                                    <!--
+                                    <input t-if="form == 'renovacion'" t-attf-value="{{tramites[0].x_studio_celular}}" type="text" minlength="10" maxlength="11"
+                                           class="v-celular form-control i_required" name="x_celphone" /> 
+                                    -->
                                     <input t-if="user" t-attf-value="{{ (user.x_celphone) }}" type="text" 
                                            class="v-celular form-control i_required" name="x_celphone"  minlength="10" maxlength="11"/>
                                     <input t-else="" type="text" class="v-celular form-control i_required" 
@@ -475,7 +510,11 @@
                                 <div class="col-md-6">
                                     <label class="col-form-label o_fake_editable" for="x_local_phone"> Teléfono </label>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-6"> 
+                                    <!--
+                                    <input t-if="form == 'renovacion'" t-attf-value="{{tramites[0].x_studio_telfono}}" type="text" minlength="7" maxlength="30"
+                                           class="v-telefono form-control" name="x_local_phone" /> 
+                                    -->
                                     <input t-if="user" t-attf-value="{{ (user.x_local_phone) }}" type="text"
                                            class="v-telefono form-control" minlength="7" maxlength="30" name="x_local_phone"/>
                                     <input t-else="" type="text" class="v-telefono form-control" 
@@ -497,7 +536,7 @@
                                             <t t-esc="cliente.x_carrera_select.x_level_ID.x_name"/>
                                         </option>
                                     </select>
-                                    <select t-elif="form == 'matricula' or form == 'licencia'" class="form-control i_required inputDisabled" 
+                                    <select t-elif="form == 'matricula' or form == 'licencia' or form == 'renovacion'" class="form-control i_required inputDisabled" 
                                             name="x_level_ID" id="x_level_ID">
                                         <option t-attf-value="{{ (request.env['x_cpnaa_level'].search([('x_name','=','PROFESIONAL')]).id) }}">
                                             PROFESIONAL
@@ -548,9 +587,9 @@
                                         </option>
                                         </t>
                                     </select>
-                                    <select t-elif="user and form != 'licencia' and origen == 1" class="form-control i_required" 
+                                    <select t-elif="user and form != 'licencia' and form != 'renovacion' and origen == 1" class="form-control i_required" 
                                             name="x_institution_type_ID" id="x_institution_type_ID">
-                                        <t t-foreach="request.env['x_cpnaa_institution_type'].search([('x_name','!=','DESACTIVADA')])" t-as="tipo_universidad">
+                                        <t t-foreach="request.env['x_cpnaa_institution_type'].search([])" t-as="tipo_universidad">
                                             <option t-if="tipo_universidad.id != user.x_institution_type_ID.id" t-att-value="tipo_universidad.id">
                                                 <t t-esc="tipo_universidad.x_name"/>
                                             </option>
@@ -559,7 +598,7 @@
                                             </option>
                                         </t>
                                     </select>
-                                    <select t-elif="user and form != 'licencia' and origen == 2" class="form-control i_required inputDisabled" 
+                                    <select t-elif="user and form != 'licencia' and form != 'renovacion' and origen == 2" class="form-control i_required inputDisabled" 
                                             name="x_institution_type_ID" id="x_institution_type_ID">
                                             <option t-attf-value="{{ (user.x_institution_type_ID.id) }}" >
                                                 <t t-esc="user.x_institution_type_ID.x_name" />
@@ -567,14 +606,14 @@
                                     </select>                                
                                     <select t-else="" class="form-control i_required" name="x_institution_type_ID" id="x_institution_type_ID" >
                                         <option value="">Seleccione...</option>
-                                        <t t-foreach="request.env['x_cpnaa_institution_type'].search([('x_name','!=','DESACTIVADA')])" t-as="tipo_universidad">
+                                        <t t-foreach="request.env['x_cpnaa_institution_type'].search([])" t-as="tipo_universidad">
                                         <option t-att-value="tipo_universidad.id">
                                             <t t-esc="tipo_universidad.x_name"/>
                                         </option>
                                         </t>
                                     </select>
                                 </div>
-                            </div>
+                                </div>
                             </div>
                             <div class="row">
                                 <div class="row col-md-6 form-group form-field o_website_form_required_custom">
@@ -591,7 +630,7 @@
                                             </option>
                                         </select>
                                         <div t-else="" id="autocomplete_universidades">
-                                            <input t-if="user and origen == 1" type="text" id="universidades" placeholder="Buscar..." class="form-control"
+                                            <input t-if="user and origen == 1" type="text" id="universidades" placeholder="Buscar..." class="form-control inputDisabled"
                                                    t-attf-value="{{ (user.x_institution_ID.x_name) }}"/>
                                             <input t-else="" type="text" id="universidades" placeholder="Buscar..." class="form-control"/>
                                             <ul class="list-group" id="result_univ"></ul>
@@ -613,7 +652,7 @@
                                         <div id="fecha_grado" class="o_website_form_date input-group">
                                             <input t-if="cliente" class="form-control inputDisabled i_required" name="x_grade_date" disabled="true"
                                                t-attf-value="{{ (cliente.x_fecha_de_grado.strftime('%d-%m-%Y')) }}" readonly="true"/>
-                                            <input t-elif="user and origen == 1" class="form-control i_required hand blanco" name="x_grade_date"
+                                            <input t-elif="user and origen == 1" class="form-control i_required hand blanco inputDisabled" name="x_grade_date"
                                                t-attf-value="{{ (user.x_grade_date.strftime('%d-%m-%Y')) }}" readonly="true"/>
                                             <input t-elif="user and origen == 2" class="form-control i_required inputDisabled" name="x_grade_date" disabled="true"
                                                t-attf-value="{{ (user.x_grade_date.strftime('%d-%m-%Y')) }}" readonly="true"/>                                            
@@ -647,7 +686,7 @@
                                             <t t-esc="user.x_institute_career.x_name" />
                                         </option>
                                     </select>
-                                    <select t-if="(form == 'licencia' or form == 'matricula')" class="form-control i_required inputDisabled" 
+                                    <select t-if="(form == 'licencia' or form == 'matricula' or form == 'renovacion')" class="form-control i_required inputDisabled" 
                                             name="x_institute_career" id="x_institute_career">
                                         <t t-foreach="request.env['x_cpnaa_career'].search([('x_level_ID.x_name','=','PROFESIONAL')])" t-as="career">
                                             <option t-att-value="career.id">
@@ -670,7 +709,7 @@
                                     </div>
                                 </div>
                                 </div>
-                                <div t-if="origen == 1 and form != 'licencia'" class="row col-md-6 form-group form-field o_fake_not_editable">
+                                <div t-if="origen == 1 and form != 'licencia' and form != 'renovacion'" class="row col-md-6 form-group form-field o_fake_not_editable">
                                     <div class="col-md-6">
                                         <label class="col-form-label o_fake_editable" for="doc_min_educa">
                                             Convalidación de título Ministerio de Educación Nacional
@@ -692,7 +731,7 @@
                                 </div>
                             </div>
                             </div>
-                            <div t-if="form == 'licencia'">
+                            <div t-if="form == 'licencia' or form == 'renovacion'">
                                 <div id="foreignInfo" class="formSection">
                                     <h2 class="sectionName">Información para extranjero</h2>
                                     <div class="row">
@@ -720,13 +759,19 @@
                                                 </label>
                                             </div>
                                             <div class="col-md-6">
-                                                <select class="form-control i_required" name="x_foreign_country" id="x_foreign_country">
+                                                <select t-if="form != 'renovacion'" class="form-control i_required" name="x_foreign_country" id="x_foreign_country">
                                                     <option value="">Seleccione...</option>
                                                     <t t-foreach="request.env['x_cpnaa_country'].search([('x_name','!=','COLOMBIA')],order='x_name')" t-as="foreign_country">
                                                     <option t-att-value="foreign_country.id">
                                                         <t t-esc="foreign_country.x_name"/>
                                                     </option>
                                                     </t>
+                                                </select>
+                                                <select t-if="form == 'renovacion'" class="form-control i_required inputDisabled" 
+                                                        name="x_foreign_country" id="x_foreign_country" required="true">
+                                                    <option t-attf-value="{{ (pais_resi[0]) }}" selected="selected">
+                                                        <t t-esc="pais_resi[1]" />
+                                                    </option>
                                                 </select>
                                             </div>
                                         </div>
@@ -755,98 +800,126 @@
                                     </div>
                                     <div class="row">
                                         <div class="row col-md-6 form-group form-field o_fake_not_editable">
-                                        <div class="col-md-6">
-                                            <label class="col-form-label o_fake_editable" for="x_foreign_address"> Dirección de residencia en el extranjero </label>
+                                            <div class="col-md-6">
+                                                <label class="col-form-label o_fake_editable" for="x_foreign_address"> Dirección de residencia en el extranjero </label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <input t-if="user" type="text" class="v-address form-control i_required inputDisabled" 
+                                                       t-attf-value="{{ (user.x_foreign_address) }}" name="x_foreign_address"/>
+                                                <input t-else="" type="text" class="v-address form-control i_required" name="x_foreign_address"/>
+                                            </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <input t-if="user" type="text" class="v-address form-control i_required" 
-                                                   t-attf-value="{{ (user.x_foreign_address) }}" name="x_foreign_address"/>
-                                            <input t-else="" type="text" class="v-address form-control i_required" name="x_foreign_address"/>
+                                        <div t-if="form == 'renovacion'" class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
+                                            <div class="col-md-6">
+                                                <label class="col-form-label o_fake_editable"> Acreditación ejercicio profesional </label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="x_certification_vigencia" class="file-label"><i class="fa fa-search"></i>
+                                                    <span> Seleccionar archivo</span>
+                                                </label>
+                                                <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
+                                                <span class="help-block preview-pdf" id="preview-x_certification_vigencia">Previsualizar</span>
+                                                <input type="file" class="form-control i_required btn-file file-tramites" name="x_certification_vigencia" 
+                                                       id="x_certification_vigencia" accept="application/pdf"/>
+                                            </div>
                                         </div>
-                                        </div>
-                                        <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
-                                        <div class="col-md-6">
-                                            <label class="col-form-label o_fake_editable"> Imagen de diploma apostillado </label>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="x_certification_image" class="file-label"><i class="fa fa-search"></i>
-                                                <span> Seleccionar archivo</span>
-                                            </label>
-                                            <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
-                                            <span class="help-block preview-pdf" id="preview-x_certification_image">Previsualizar</span>
-                                            <input type="file" class="form-control i_required btn-file file-tramites" name="x_certification_image" 
-                                                   id="x_certification_image" accept="application/pdf"/>
-                                        </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
-                                        <div class="col-md-6">
-                                            <label class="col-form-label o_fake_editable"> Acreditación de profesión en el extranjero </label>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="x_foreign_professional_accreditation" class="file-label"><i class="fa fa-search"></i>
-                                                <span> Seleccionar archivo</span>
-                                            </label>
-                                            <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
-                                            <span class="help-block preview-pdf" id="preview-x_foreign_professional_accreditation">Previsualizar</span>
-                                            <input type="file" class="form-control i_required btn-file file-tramites" name="x_foreign_professional_accreditation" 
-                                                   id="x_foreign_professional_accreditation" accept="application/pdf"/>
-                                        </div>
-                                        </div>
-                                        <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
-                                        <div class="col-md-6">
-                                            <label class="col-form-label o_fake_editable"> Experiencia profesional acreditada </label>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="x_professional_experience" class="file-label"><i class="fa fa-search"></i>
-                                                <span> Seleccionar archivo</span>
-                                            </label>
-                                            <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
-                                            <span class="help-block preview-pdf" id="preview-x_professional_experience">Previsualizar</span>
-                                            <input type="file" class="form-control i_required btn-file file-tramites" name="x_professional_experience" 
-                                                   id="x_professional_experience" accept="application/pdf"/>
-                                        </div>
+                                        <div t-if="form != 'renovacion'" class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
+                                            <div class="col-md-6">
+                                                <label class="col-form-label o_fake_editable"> Imagen de diploma apostillado </label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="x_certification_image" class="file-label"><i class="fa fa-search"></i>
+                                                    <span> Seleccionar archivo</span>
+                                                </label>
+                                                <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
+                                                <span class="help-block preview-pdf" id="preview-x_certification_image">Previsualizar</span>
+                                                <input type="file" class="form-control i_required btn-file file-tramites" name="x_certification_image" 
+                                                       id="x_certification_image" accept="application/pdf"/>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="row">
+                                        <div t-if="form != 'renovacion'" class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
+                                            <div class="col-md-6">
+                                                <label class="col-form-label o_fake_editable"> Acreditación de profesión en el extranjero </label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="x_foreign_professional_accreditation" class="file-label"><i class="fa fa-search"></i>
+                                                    <span> Seleccionar archivo</span>
+                                                </label>
+                                                <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
+                                                <span class="help-block preview-pdf" id="preview-x_foreign_professional_accreditation">Previsualizar</span>
+                                                <input type="file" class="form-control i_required btn-file file-tramites" name="x_foreign_professional_accreditation" 
+                                                       id="x_foreign_professional_accreditation" accept="application/pdf"/>
+                                            </div>
+                                        </div>
                                         <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
-                                        <div class="col-md-6">
-                                            <label class="col-form-label o_fake_editable"> Solicitud empresa contratante </label>
+                                            <div class="col-md-6">
+                                                <label class="col-form-label o_fake_editable"> Certificación cumple experiencia requerida </label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="x_professional_experience" class="file-label"><i class="fa fa-search"></i>
+                                                    <span> Seleccionar archivo</span>
+                                                </label>
+                                                <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
+                                                <span class="help-block preview-pdf" id="preview-x_professional_experience">Previsualizar</span>
+                                                <input type="file" class="form-control i_required btn-file file-tramites" name="x_professional_experience" 
+                                                       id="x_professional_experience" accept="application/pdf"/>
+                                            </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label for="x_entity_request" class="file-label"><i class="fa fa-search"></i>
-                                                <span> Seleccionar archivo</span>
-                                            </label>
-                                            <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
-                                            <span class="help-block preview-pdf" id="preview-x_entity_request">Previsualizar</span>
-                                            <input type="file" class="form-control i_required btn-file file-tramites" name="x_entity_request" 
-                                                   id="x_entity_request" accept="application/pdf"/>
+                                        <div t-if="form == 'renovacion'" class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
+                                            <div class="col-md-6">
+                                                <label class="col-form-label o_fake_editable"> Solicitud empresa contratante </label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="x_entity_request" class="file-label"><i class="fa fa-search"></i>
+                                                    <span> Seleccionar archivo</span>
+                                                </label>
+                                                <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
+                                                <span class="help-block preview-pdf" id="preview-x_entity_request">Previsualizar</span>
+                                                <input type="file" class="form-control i_required btn-file file-tramites" name="x_entity_request" 
+                                                       id="x_entity_request" accept="application/pdf"/>
+                                            </div>
                                         </div>
+                                    </div>
+                                    <div class="row">
+                                        <div t-if="form != 'renovacion'" class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
+                                            <div class="col-md-6">
+                                                <label class="col-form-label o_fake_editable"> Solicitud empresa contratante </label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="x_entity_request" class="file-label"><i class="fa fa-search"></i>
+                                                    <span> Seleccionar archivo</span>
+                                                </label>
+                                                <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
+                                                <span class="help-block preview-pdf" id="preview-x_entity_request">Previsualizar</span>
+                                                <input type="file" class="form-control i_required btn-file file-tramites" name="x_entity_request" 
+                                                       id="x_entity_request" accept="application/pdf"/>
+                                            </div>
                                         </div>
                                         <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">
-                                        <div class="col-md-6">
-                                            <label class="col-form-label o_fake_editable"> Certificado de existencia empresa contratante </label>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="x_company_existence_certificate" class="file-label"><i class="fa fa-search"></i>
-                                                <span> Seleccionar archivo</span>
-                                            </label>
-                                            <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
-                                            <span class="help-block preview-pdf" id="preview-x_company_existence_certificate">Previsualizar</span>
-                                            <input type="file" class="form-control i_required btn-file file-tramites" name="x_company_existence_certificate" 
-                                                   id="x_company_existence_certificate" accept="application/pdf"/>
-                                        </div>
+                                            <div class="col-md-6">
+                                                <label class="col-form-label o_fake_editable"> Certificación de existencia y representación legal empresa </label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="x_company_existence_certificate" class="file-label"><i class="fa fa-search"></i>
+                                                    <span> Seleccionar archivo</span>
+                                                </label>
+                                                <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
+                                                <span class="help-block preview-pdf" id="preview-x_company_existence_certificate">Previsualizar</span>
+                                                <input type="file" class="form-control i_required btn-file file-tramites" name="x_company_existence_certificate" 
+                                                       id="x_company_existence_certificate" accept="application/pdf"/>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                                 <div class="formInfo">
-                                    <div t-if="not user" class="row">
+                                    <div t-if="not user or form == 'renovacion'" class="row">
                                         <div class="row form-group form-field o_fake_not_editable o_website_form_required_custom">
                                             <div class="col-md-12">
                                                 <label class="col-form-label o_fake_editable" for="x_elec_autorization"> 
-                                                <input type="checkbox" value="Yes" class="o_website_form_input" name="x_elec_autorization" id="x_elec_autorization"/>Autorización uso de medios electrónicos: acepto y autorizo de manera expresa para que el CPNAA, envié notificaciones y demás comunicaciones relacionadas con mi trámite y/o solicitudes a través de técnicas y medios electrónicos, informáticos, telemáticos, mensajes de texto SMS (Incluye correo electrónico y pagina web).
+                                                <input type="checkbox" value="Yes" class="o_website_form_input" required="true" name="x_elec_autorization" id="x_elec_autorization"/>Autorización uso de medios electrónicos: acepto y autorizo de manera expresa para que el CPNAA, envié notificaciones y demás comunicaciones relacionadas con mi trámite y/o solicitudes a través de técnicas y medios electrónicos, informáticos, telemáticos, mensajes de texto SMS (Incluye correo electrónico y pagina web).
                                                 </label>
                                             </div>
                                             <div class="col-md-12">
@@ -867,7 +940,7 @@
                                         </div>
                                     </div>
                                     <div class="col-md-2">
-                                        <button t-if="user" id="btn-actualizar" class="btn btn-primary btn-lg btn-stadium">Actualizar</button>
+                                        <button t-if="user and form != 'renovacion'" id="btn-actualizar" class="btn btn-primary btn-lg btn-stadium">Actualizar</button>
                                         <button t-else="" id="btn-registrar" class="btn btn-primary btn-lg btn-stadium">Registrar</button>
                                     </div>
                                 </div>

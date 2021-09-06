@@ -26,7 +26,7 @@ odoo.define('website.tramites', function(require) {
     }
         
     const Tramites = Class.extend({
-        validar_tramites: function(token) {
+        validar_tramites: function(token, _this){
             let origen = data.origen;
             (!origen) ? origen = '' : origen = `/${data.origen}`;
             return rpc.query({
@@ -42,7 +42,7 @@ odoo.define('website.tramites', function(require) {
                 } else if(response.id){
                     // console.log(response);
                     if (response.tramite_en_curso){
-                        $(location).attr('href','/cliente/'+ response.id +'/tramites');
+                         $(location).attr('href','/cliente/'+ response.id +'/tramites');
                     } else if (!response.tramite_en_curso && location.href.indexOf('/consulta') != -1){
                         if(response.id && (response.matricula || response.certificado)){
                             $('#text_message').html(`El documento ${validaciones.capitalizeFromUpper(response.data_user.tipo_documento)}: 
@@ -67,11 +67,17 @@ odoo.define('website.tramites', function(require) {
                 } else if (!response.id && location.href.indexOf('/consulta') != -1){
                         $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
                         $('#text_message').text(`No se ha encontrado trámite en curso con los datos ingresados`);
+                } else if (response.ok == 'False' && location.href.indexOf('/renovacion')){
+                        $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
+                        $('#text_message').text(response.messaje);
+                
                 } else {
                     $(location).attr('href','/tramite' + origen+'/['+data.doc_type+':'+data.doc+']');
+                    //_this.mostrar_resultado()
                 }
             })
         },
+        
         validar_convenios: function(token) {
             let div_msj = $('#msj_nombre');
             if(data.nombres == ''){
@@ -83,6 +89,7 @@ odoo.define('website.tramites', function(require) {
                 route: '/validar_estudiante',
                 params: {'data': data, 'token': token}
             }).then(function(response){
+                console.log(response);
                 if (response.error_captcha){
                     resetCaptcha();
                     div_msj.removeClass('invisible').attr('aria-hidden',false);
@@ -93,25 +100,24 @@ odoo.define('website.tramites', function(require) {
                     div_msj.removeClass('invisible').attr('aria-hidden',false);
                     div_msj.find('div').text(
                         `Usted no se encuentra registrado por Convenio, si ya intentó la búsqueda por documento 
-                            y nombre por favor comuníquese con la universidad ó con el CPNAA al siguiente correo 
-                            electrónico: convenios@cpnaa.gov.co o al número telefónico (1)3502700 ext 111-115 en Bogotá`);
+                         y nombre por favor comuníquese con la universidad ó con el CPNAA al siguiente correo 
+                         electrónico: convenios@cpnaa.gov.co o al número telefónico (1)3502700 ext 111-115 en Bogotá`);
                 } else if (response.graduandos.length == 1){
                     if (response.graduandos[0].id_user_tramite){
                         $(location).attr('href','/cliente/'+ response.graduandos[0].id_user_tramite +'/tramites');
                     } else if(!response.graduandos[0].id_grado){
                         const fecha = response.graduandos[0].fecha_maxima.split('-').reverse().join('-');
-                        console.log(fecha);
                         const nombre_tramite = response.graduandos[0].nivel_profesional === 'PROFESIONAL' 
-                                    ? 'matrícula profesional'
-                                    : 'certificado de incripción profesional';
+                                   ? 'matrícula profesional'
+                                   : 'certificado de incripción profesional';
                         const link = response.graduandos[0].nivel_profesional === 'PROFESIONAL' 
-                                    ? 'https://cpnaa.gov.co/matricula-profesional-de-arquitecto-d69/'
-                                    : 'https://cpnaa.gov.co/certificado-de-inscripcion-profesional-profesional-auxiliar-de-la-arquitectura/'; 
+                                   ? 'https://cpnaa.gov.co/matricula-profesional-de-arquitecto-d69/'
+                                   : 'https://cpnaa.gov.co/certificado-de-inscripcion-profesional-profesional-auxiliar-de-la-arquitectura/'; 
                         div_msj.removeClass('invisible').attr('aria-hidden',false);
                         div_msj.find('div').html(
-                            `Señor (a) le informamos que la fecha límite para el trámite de ${nombre_tramite} 
-                                por convenio expiró, favor ingresar al siguiente <a href="${link}">link</a>, donde usted podrá realizar el
-                                trámite de manera normal una vez haya obtenido su titulo académico.`);
+                            `Señor (a) le informamos que la fecha límite (${fecha}) para el trámite de ${nombre_tramite} 
+                             por convenio expiró, favor ingresar al siguiente <a href="${link}">link</a>, donde usted podrá realizar el
+                             trámite de manera normal una vez haya obtenido su titulo académico.`);
                     } else if (response.graduandos[0].id_grado){
                         $(location).attr('href','/tramite/convenios/'+ response.graduandos[0].graduando.id);
                     }
@@ -126,11 +132,11 @@ odoo.define('website.tramites', function(require) {
                                         GRADUANDO: ${grad.graduando.x_nombres} ${grad.graduando.x_apellidos}
                                     </div>
                                     <div class="card-body">
-                                        ${grad.graduando.x_tipo_documento_select[1]}: ${grad.graduando.x_documento} </br> 
-                                        TRÁMITE : ${grad.graduando.x_service_ID[1]} </br>
-                                        INSTITUCIÓN: ${grad.graduando.x_universidad} </br>
+                                      ${grad.graduando.x_tipo_documento_select[1]}: ${grad.graduando.x_documento} </br> 
+                                      TRÁMITE : ${grad.graduando.x_service_ID[1]} </br>
+                                      INSTITUCIÓN: ${grad.graduando.x_universidad} </br>
                                     </div>
-                                    </a></br>`;
+                                  </a></br>`;
                     })
                     div_msj.find('div').html(texto);
                 }
@@ -146,22 +152,22 @@ odoo.define('website.tramites', function(require) {
                 cancelButtonText: 'Cancelar',
                 confirmButtonColor: '#c8112d',
                 showLoaderOnConfirm: true,
-                    preConfirm: (response) => {
+                  preConfirm: (response) => {
                     return rpc.query({
                             route: '/save_diploma',
                             params: {'diploma': diploma, 'id_tramite': id_tramite}
                         }).then(function(response){
                             if (!response.ok) {
-                                throw new Error(response.error.message)
+                              throw new Error(response.error.message)
                             }
                             return response;
                         }).catch((error) => {
                             let message = error.message.message == undefined ? error : error.message.message;
                             Swal.showValidationMessage(
-                                `Error: ${message}`
+                              `Error: ${message}`
                             )
                         })
-                    },
+                  },
             }).then((result) => {
                 if (result.value) {
                     validaciones.alert_success_toast(`${result.value.message}`,'center')
@@ -210,11 +216,11 @@ odoo.define('website.tramites', function(require) {
             if ($(elem).hasClass('btn-file') && $(elem).hasClass('file-tramites')) {
                 if($(elem)[0].files[0]){
 
-                    let filename = $(elem).val().split('\\').pop();
-                    let ext = $(elem).val().split('.').pop();
-                    let fileSize = $(elem)[0].files[0].size;
+                  let filename = $(elem).val().split('\\').pop();
+                  let ext = $(elem).val().split('.').pop();
+                  let fileSize = $(elem)[0].files[0].size;
 
-                    if(ext == "pdf" & fileSize <= 819200){
+                  if(ext == "pdf" & fileSize <= 819200){
 
                     $('[for="' + idname + '"]').find('i').removeClass('fa-search').addClass('fa-file-pdf-o');
                     setTimeout(function(){
@@ -236,21 +242,21 @@ odoo.define('website.tramites', function(require) {
                         $("#viewerModal").modal('show');
                     });
 
-                    }else{
+                  }else{
 
                     $(elem).val('');
                     filename = ' Selecciona tu Archivo';
                     $('[for="' + idname + '"]').find('i').removeClass('fa-check').addClass('fa-search');
                     $('[for="' + idname + '"]').removeClass('texto-verde').addClass('texto-gris invalido-form');
                     if(ext != "pdf"){
-                        validaciones.alert_error_toast( "Extensión ." +ext +" no permitida.", 'center');
+                      validaciones.alert_error_toast( "Extensión ." +ext +" no permitida.", 'center');
                     }else if (fileSize > 819200){
-                        validaciones.alert_error_toast( "El documento excede el tamaño máximo de 800Kb.", 'center');
+                      validaciones.alert_error_toast( "El documento excede el tamaño máximo de 800Kb.", 'center');
                     }
 
-                    }
+                  }
 
-                    $('[for="' + idname + '"]').find('span').html('  ' + filename);
+                  $('[for="' + idname + '"]').find('span').html('  ' + filename);
 
                 } else {
                     $(elem).val('');
@@ -268,9 +274,9 @@ odoo.define('website.tramites', function(require) {
             let $select = $("select[name='"+childName+"']");
             $select.find("option:not(:first)").hide();
             if (childName.split("_").includes("state")){
-                let nb = $select.find("option[data-country_id="+($(_this).val() || 0)+"]").show();
+              let nb = $select.find("option[data-country_id="+($(_this).val() || 0)+"]").show();
             } else if (childName.split("_").includes("city")){
-                let nb = $select.find("option[data-state_id="+($(_this).val() || 0)+"]").show();
+              let nb = $select.find("option[data-state_id="+($(_this).val() || 0)+"]").show();
             }
             $select.val("");
         },
@@ -322,7 +328,7 @@ odoo.define('website.tramites', function(require) {
                 if(location.href.indexOf('/edicion/') == -1){
                     request.open("POST", "/create_user");
                 }else{
-                    request.open("POST", "/update_tramite");            
+                    request.open("POST", "/update_tramite");
                 }
                 request.send(formData);
                 request.onreadystatechange = function (aEvt) {
@@ -343,11 +349,11 @@ odoo.define('website.tramites', function(require) {
                                 $('#mssg_result').addClass('alert alert-danger').text('Error: '+resp.message.slice(0,80));
                                 $('#btn-registrar').removeAttr('disabled');
                             }
-                        } else {
-                            ocultarSpinner();
-                            console.log('ERROR: '+request.status + request.statusText);
-                            $('#mssg_result').addClass('alert alert-danger').text('No hemos podido completar la solicitud en este momento');
-                        }
+                         } else {
+                                ocultarSpinner();
+                                console.log('ERROR: '+request.status + request.statusText);
+                                $('#mssg_result').addClass('alert alert-danger').text('No hemos podido completar la solicitud en este momento');
+                         }
                     }
                 }
             } catch (err){
@@ -598,11 +604,11 @@ odoo.define('website.tramites', function(require) {
     $('#universidades').on('keyup change input', async function(e){
         let tipoUniversidad = $('#x_institution_type_ID').val();
         if(e.target.value.length > 1){
-            let consulta = await tramites.data_autocomplete_univ(e.target.value, tipoUniversidad);
-            $('#result_univ').html('');
-            $.each(consulta.universidades, function(key, value) { 
-                $('#result_univ').append('<li class="list-group-item link-univ"><span id="'+ value.id +'" class="text-gray univ">' + value.x_name + '</span></li>');
-            });
+           let consulta = await tramites.data_autocomplete_univ(e.target.value, tipoUniversidad);
+           $('#result_univ').html('');
+           $.each(consulta.universidades, function(key, value) { 
+               $('#result_univ').append('<li class="list-group-item link-univ"><span id="'+ value.id +'" class="text-gray univ">' + value.x_name + '</span></li>');
+           });
         }
     })
     
@@ -651,12 +657,12 @@ odoo.define('website.tramites', function(require) {
         let nivelProf = $('#x_level_ID').val();
         let genero = $('#x_gender_ID').val() != '' ? $('#x_gender_ID').val() : '1';
         if(e.target.value.length > 1){
-            let consulta = await tramites.data_autocomplete_carreras(e.target.value, nivelProf, genero);
-            $('#result_carreras').html('');
-            $.each(consulta.carreras, function(key, value) { 
-                let carrera = genero == '1' ? value.x_name : value.x_female_name;
-                $('#result_carreras').append('<li class="list-group-item link-carreras"><span id="'+ value.id +'" class="text-gray carreras">' + carrera + '</span></li>');
-            });
+           let consulta = await tramites.data_autocomplete_carreras(e.target.value, nivelProf, genero);
+           $('#result_carreras').html('');
+           $.each(consulta.carreras, function(key, value) { 
+               let carrera = genero == '1' ? value.x_name : value.x_female_name;
+               $('#result_carreras').append('<li class="list-group-item link-carreras"><span id="'+ value.id +'" class="text-gray carreras">' + carrera + '</span></li>');
+           });
         }
     })
     
@@ -747,13 +753,13 @@ odoo.define('website.tramites', function(require) {
     $("select[class*=child_place]").change(function(){
         let pais_seleccionado = $('select[name="x_expedition_country"] option:selected').text().trim();
         if(pais_seleccionado == 'COLOMBIA'){
-            tramites.combinar_select(this, 'child_place-');
+          tramites.combinar_select(this, 'child_place-');
         }
     }).change();
     
     //Controlador de paises/ciudades (Residencia)
     $("select[class*=child-place]").change(function(){
-        tramites.combinar_select(this, 'child-place-');
+          tramites.combinar_select(this, 'child-place-');
     }).change();
     
     function resetCaptcha(){
@@ -761,32 +767,32 @@ odoo.define('website.tramites', function(require) {
         $('#btn_verificar').removeAttr('disabled');
         $('#btn_verificar_convenios').removeAttr('disabled');
     }
-    
+  
     // Opciones para idioma e inicializar el datepicker
-    $.datepicker.regional['es'] = {
-        closeText: 'Cerrar',
-        prevText: 'Anterior',
-        nextText: 'Siguiente',
-        currentText: 'Hoy',
-        monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-        monthNamesShort: ['Ene','Feb','Mar','Abr', 'May','Jun','Jul','Ago','Sep', 'Oct','Nov','Dic'],
-        dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-        dayNamesShort: ['Dom','Lun','Mar','Mié','Juv','Vie','Sáb'],
-        dayNamesMin: ['Do','Lu','Ma','Mi','Ju','Vi','Sá'],
-        weekHeader: 'Sm',
-        dateFormat: 'dd/mm/yy',
-        firstDay: 1,
-        isRTL: false,
-        showMonthAfterYear: false,
-        yearSuffix: ''
-    };
-    $.datepicker.setDefaults($.datepicker.regional['es']);
+	$.datepicker.regional['es'] = {
+		closeText: 'Cerrar',
+		prevText: 'Anterior',
+		nextText: 'Siguiente',
+		currentText: 'Hoy',
+		monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+		monthNamesShort: ['Ene','Feb','Mar','Abr', 'May','Jun','Jul','Ago','Sep', 'Oct','Nov','Dic'],
+		dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+		dayNamesShort: ['Dom','Lun','Mar','Mié','Juv','Vie','Sáb'],
+		dayNamesMin: ['Do','Lu','Ma','Mi','Ju','Vi','Sá'],
+		weekHeader: 'Sm',
+		dateFormat: 'dd/mm/yy',
+		firstDay: 1,
+		isRTL: false,
+		showMonthAfterYear: false,
+		yearSuffix: ''
+	};
+	$.datepicker.setDefaults($.datepicker.regional['es']);
     $("[name=x_grade_date]").datepicker({
-        maxDate: '0',
-        dateFormat: "dd-mm-yy",
-        changeMonth: true,
-        changeYear: true,
-        yearRange: '-80:+0'
+      maxDate: '0',
+      dateFormat: "dd-mm-yy",
+      changeMonth: true,
+      changeYear: true,
+      yearRange: '-80:+0'
     });
             
 })

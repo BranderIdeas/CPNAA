@@ -583,7 +583,8 @@ class MySample(http.Controller):
     # Ruta que renderiza el inicio del trámite (usuarios ya graduados)
     @http.route('/cliente/tramite/<string:form>', auth='public', website=True)
     def inicio_tramite(self, form):
-        validos = ['matricula','inscripciontt','licencia']
+        validos = ['matricula','inscripciontt','licencia','renovacion']
+        _logger.info('yo soy el form de def inicio_tramite: ' + str(form))
         if form in validos:
             return http.request.render('my_sample.inicio_tramite', {'form': form, 'inicio_tramite': True})
         else:
@@ -642,6 +643,7 @@ class MySample(http.Controller):
         if len(registros) < 1:
             return {'ok': False, 'result': 'No hay registros con la información suministrada'}
         return {'ok': True, 'result': registros}
+
         
     # Ruta que renderiza el inicio del trámite actualización/coreeción de registro
     @http.route('/tramites/solicitud_correccion/<model("x_cpnaa_procedure"):tramite>', auth='public', website=True)
@@ -983,6 +985,33 @@ class MySample(http.Controller):
         data = kw.get('data')
         user, data_user = False, False
         if self.validar_captcha(kw.get('token')):
+            if kw['data']['origen'] == 'renovacion':
+                campos = ['x_studio_tipo_de_documento_1', 'x_studio_documento_1',  'x_expedition_date', 'x_expiration_date', 'x_renovacion_licencia', 'x_service_ID']    
+                vigencia = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_documento_1','=',kw['data']['doc']), ('x_studio_tipo_de_documento_1.id', "=", kw['data']['doc_type']), ('x_cycle_ID.x_order','=',5)], campos)
+                _logger.info('yo soy el vigencia en consulta renovacion: ' + str(vigencia))
+                ano = timedelta(days=365)
+                now = datetime.now()
+                try:
+                    fecha_expiracion = str(vigencia[0]['x_expiration_date']) + ' 00:00'
+                    _logger.info('yo soy la fecha de expiración emitida: ' + str(fecha_expiracion))
+                    fecha_expiracion = datetime.strptime(fecha_expiracion, '%Y-%m-%d %H:%M')
+                    dias = (fecha_expiracion - now) / timedelta(days=1)
+                except:
+                    try:
+                        fecha_expedicion = str(vigencia[0]['x_expedition_date']) + ' 00:00'
+                        fecha_expiracion = datetime.strptime(fecha_expedicion, '%Y-%m-%d %H:%M')
+                        dias = (fecha_expiracion + ano - now) / timedelta(days=1)
+                        _logger.info('yo soy la fecha de expiración sumando 1 año a la fecha de expedicion: ' + str(fecha_expiracion))  
+                    except:
+                        return { 'ok': 'False', 'messaje': 'Señor usuario usted no puede realizar solicitud de Renovación de Licencia Temporal Especial, favor solicitar Licencia Temporal Especial por primera vez, dirigirse al link: https://cpnaa.gov.co/tramite-licencia-temporal/'}
+                for i in vigencia:
+                    if i['x_service_ID'][1] == 'RENOVACIÓN - LICENCIA TEMPORAL ESPECIAL':
+                            return { 'ok': 'False', 'messaje': 'Señor usuario usted ya solicitó una renovación de Licencia Temporal Especial, favor solicitar nuevamente Licencia Temporal Especial por primera vez, dirigirse al link: https://cpnaa.gov.co/tramite-licencia-temporal/'}
+                if (dias >= 30):
+                    return { 'ok': 'True'}
+                else:
+                    return { 'ok': 'False', 'messaje': 'Su solicitud de Renovación de Licencia Temporal Especial no puede ser recibida, tiempo vencido para radicar la solicitud. Favor tramitar Licencia Temporal Especial por primera vez en el link: https://cpnaa.gov.co/tramite-licencia-temporal/'}                
+                
             result, por_nombre, matricula, certificado, tramite_en_curso = {}, False, False, False, False
             graduando = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select','=',int(data['doc_type'])),
                                                                             ('x_documento','=',data['doc']),('x_origin_type','=','CONVENIO')])
@@ -1024,6 +1053,7 @@ class MySample(http.Controller):
             else:
                 return { 'ok': False, 'id': False, 'convenio': False }
         else:
+            _logger.info('no se ha validado catcha')
             return { 'ok': False, 'id': False, 'convenio': False, 'error_captcha': True,
                     'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página' }
         
@@ -1081,18 +1111,28 @@ class MySample(http.Controller):
     # Renderiza el formulario para trámites, valida si ya ha realizado este trámite y lo redirige al inicio del tramite
     @http.route('/tramite/<string:origen>/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)
     def formulario_tramites(self, origen, tipo_doc, documento):
-        validos = ['matricula','inscripciontt','licencia']
+        validos = ['matricula','inscripciontt','licencia', 'renovacion']
         doc_validos = ['1','2','5']
         matricula, tramite_en_curso = None, None
         servicio = 'MATRÍCULA PROFESIONAL'
+        _logger.info('yo soy el origen: ' + str(origen))
+        _logger.info('yo soy el tipo_doc: ' + str(tipo_doc))
+        _logger.info('yo soy el documento: ' + str(documento))
+        #_logger.info(request.env['x_cpnaa_service'].sudo().browse(3).x_rate)
         if tipo_doc == '1' and not self.validar_solo_numeros(documento):
             return http.request.redirect('/cliente/tramite/'+origen)
         if origen == validos[1]:
             servicio = 'CERTIFICADO DE INSCRIPCIÓN PROFESIONAL'
         if origen == validos[2]:
             servicio = 'LICENCIA TEMPORAL ESPECIAL'
-        tramites = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
-                                                                 ('x_studio_documento_1','=',documento)])
+        if origen == validos[3]:
+            servicio = 'RENOVACIÓN - LICENCIA TEMPORAL ESPECIAL'
+        try:
+            tramites = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
+                                                                     ('x_studio_documento_1','=',documento)])
+            user = http.request.env['x_cpnaa_user'].sudo().browse(tramites[0].x_user_ID.id)
+        except:
+            pass
         if tramites:
             for tramite in tramites:
                 matricula = True if tramite.x_service_ID.x_name == 'MATRÍCULA PROFESIONAL' else False
@@ -1102,7 +1142,34 @@ class MySample(http.Controller):
         elif matricula and origen == 'matricula':
             return http.request.redirect('/cliente/tramite/'+origen)
         elif origen in validos and tipo_doc in doc_validos:
-            return http.request.render('my_sample.formulario_tramites', {'tipo_doc': tipo_doc, 'documento':documento, 'form': origen, 'origen': 1})
+            #si el origen de la consulta viene por renovación, se evaluan los 30 días calendario que se deben tener para poder renovar la licencia
+            if origen == 'renovacion':
+                campos = ['id','x_studio_tipo_de_documento_1', 'x_studio_documento_1','x_service_ID','x_studio_universidad_5', 'x_studio_correo_electrnico',
+                  'x_origin_type', 'x_studio_ciudad_de_expedicin','x_resolution_ID', 'x_legal_status', 'x_sanction', 'x_studio_ciudad_de_expedicin', 'x_studio_telfono',
+                  'x_studio_carrera_1','x_studio_gnero','x_studio_fecha_de_resolucin', 'x_studio_nombres','x_studio_apellidos','x_enrollment_number',
+                  'x_fecha_resolucion_corte', 'x_expedition_date', 'x_expiration_date', 'x_studio_pas_de_expedicin_1', 'x_studio_celular', 'x_studio_direccin',
+                  'x_studio_ciudad_de_residencia_en_el_extranjero', 'x_renovacion_licencia', 'x_service_ID', 'x_studio_departamento_de_expedicin', 'x_studio_pas_de_residencia_en_el_extranjero_1']
+                vigencia = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_documento_1','=',documento)], campos)
+                _logger.info('yo soy el vigencia: ' + str(vigencia))
+                
+                ano = timedelta(days=365)
+                now = datetime.now()
+                try:
+                    fecha_expiracion = str(vigencia[0]['x_expiration_date']) + ' 00:00'
+                    _logger.info('yo soy la fecha de expiración emitida: ' + str(fecha_expiracion))
+                    fecha_expiracion = datetime.strptime(fecha_expiracion, '%Y-%m-%d %H:%M')
+                    dias = (fecha_expiracion - now) / timedelta(days=1)
+                except:
+                    fecha_expedicion = str(vigencia[0]['x_expedition_date']) + ' 00:00'
+                    fecha_expiracion = datetime.strptime(fecha_expedicion, '%Y-%m-%d %H:%M')
+                    dias = (fecha_expiracion + ano - now) / timedelta(days=1)
+                    _logger.info('yo soy la fecha de expiración sumando 1 año a la fecha de expedicion: ' + str(fecha_expiracion))
+                if dias >= 30 and not vigencia[0]['x_renovacion_licencia']:
+                    return http.request.render('my_sample.formulario_tramites', {'user': user, 'tipo_doc': tipo_doc, 'documento':documento, 'form': origen, 'origen': 1, 'ciu_exp':vigencia[0]['x_studio_ciudad_de_expedicin'], 'dep_exp':vigencia[0]['x_studio_departamento_de_expedicin'], 'pais_exp':vigencia[0]['x_studio_pas_de_expedicin_1'],'pais_resi':vigencia[0]['x_studio_pas_de_residencia_en_el_extranjero_1']})
+                else:
+                    return http.request.render('my_sample.inicio_tramite', {'form': 'renovacion', 'inicio_tramite': False})
+            else:
+                return http.request.render('my_sample.formulario_tramites', {'tipo_doc': tipo_doc, 'documento':documento, 'form': origen, 'origen': 1})
         
     # Renderiza el formulario para trámites por convenios, valida si ya hay trámite en curso y lo redirige al estado del tramite
     @http.route('/tramite/convenios/<model("x_procedure_temp"):cliente>', auth='public', website=True)

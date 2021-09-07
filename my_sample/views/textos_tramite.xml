@@ -12,7 +12,7 @@
                                         t-set="servicio"
                                         t-value="request.env['x_cpnaa_service'].sudo().search([('x_name','=',nombre_tramite)])"
                                     />
-                                    <t t-if="servicio">
+                                    <t t-if="len(servicio) == 1">
                                         <h6 class="fw700"> Valor del trámite vigencia <t t-esc="datetime.date.today().year"/>:
                                             <span class="price fw700">
                                                 $<t t-esc="'{:,}'.format(servicio.x_rate).replace(',','.')"/>

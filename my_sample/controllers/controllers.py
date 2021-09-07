@@ -583,10 +583,9 @@ class MySample(http.Controller):
     # Ruta que renderiza el inicio del trámite (usuarios ya graduados)
     @http.route('/cliente/tramite/<string:form>', auth='public', website=True)
     def inicio_tramite(self, form):
-        validos = ['matricula','inscripciontt','licencia','renovacion']
-        _logger.info('yo soy el form de def inicio_tramite: ' + str(form))
-        if form in validos:
-            return http.request.render('my_sample.inicio_tramite', {'form': form, 'inicio_tramite': True})
+        nombre_tramite = self.nombres_tramites(form)
+        if nombre_tramite:
+            return http.request.render('my_sample.inicio_tramite', {'form': form, 'inicio_tramite': True, 'nombre_tramite': nombre_tramite})
         else:
             return http.request.redirect('/cliente/tramite/matricula')
     
@@ -1111,22 +1110,13 @@ class MySample(http.Controller):
     # Renderiza el formulario para trámites, valida si ya ha realizado este trámite y lo redirige al inicio del tramite
     @http.route('/tramite/<string:origen>/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)
     def formulario_tramites(self, origen, tipo_doc, documento):
-        validos = ['matricula','inscripciontt','licencia', 'renovacion']
         doc_validos = ['1','2','5']
+        servicio = self.nombres_tramites(origen)
         matricula, tramite_en_curso = None, None
-        servicio = 'MATRÍCULA PROFESIONAL'
-        _logger.info('yo soy el origen: ' + str(origen))
-        _logger.info('yo soy el tipo_doc: ' + str(tipo_doc))
-        _logger.info('yo soy el documento: ' + str(documento))
-        #_logger.info(request.env['x_cpnaa_service'].sudo().browse(3).x_rate)
         if tipo_doc == '1' and not self.validar_solo_numeros(documento):
             return http.request.redirect('/cliente/tramite/'+origen)
-        if origen == validos[1]:
-            servicio = 'CERTIFICADO DE INSCRIPCIÓN PROFESIONAL'
-        if origen == validos[2]:
-            servicio = 'LICENCIA TEMPORAL ESPECIAL'
-        if origen == validos[3]:
-            servicio = 'RENOVACIÓN - LICENCIA TEMPORAL ESPECIAL'
+        if not servicio:
+            return http.request.redirect('/cliente/tramite/matricula')
         try:
             tramites = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
                                                                      ('x_studio_documento_1','=',documento)])
@@ -1141,7 +1131,7 @@ class MySample(http.Controller):
             return http.request.redirect('/cliente/'+str(tramite.x_user_ID.id)+'/tramites/')                
         elif matricula and origen == 'matricula':
             return http.request.redirect('/cliente/tramite/'+origen)
-        elif origen in validos and tipo_doc in doc_validos:
+        elif servicio and tipo_doc in doc_validos:
             #si el origen de la consulta viene por renovación, se evaluan los 30 días calendario que se deben tener para poder renovar la licencia
             if origen == 'renovacion':
                 campos = ['id','x_studio_tipo_de_documento_1', 'x_studio_documento_1','x_service_ID','x_studio_universidad_5', 'x_studio_correo_electrnico',
@@ -1165,6 +1155,8 @@ class MySample(http.Controller):
                     dias = (fecha_expiracion + ano - now) / timedelta(days=1)
                     _logger.info('yo soy la fecha de expiración sumando 1 año a la fecha de expedicion: ' + str(fecha_expiracion))
                 if dias >= 30 and not vigencia[0]['x_renovacion_licencia']:
+                    #_logger.info('formulario tramites')
+                    #actualizado = http.request.env['x_cpnaa_procedure'].browse('x_renovacion_licencia').sudo().write(1)
                     return http.request.render('my_sample.formulario_tramites', {'user': user, 'tipo_doc': tipo_doc, 'documento':documento, 'form': origen, 'origen': 1, 'ciu_exp':vigencia[0]['x_studio_ciudad_de_expedicin'], 'dep_exp':vigencia[0]['x_studio_departamento_de_expedicin'], 'pais_exp':vigencia[0]['x_studio_pas_de_expedicin_1'],'pais_resi':vigencia[0]['x_studio_pas_de_residencia_en_el_extranjero_1']})
                 else:
                     return http.request.render('my_sample.inicio_tramite', {'form': 'renovacion', 'inicio_tramite': False})
@@ -1746,6 +1738,15 @@ class MySample(http.Controller):
         val = rad.x_value + 1
         rad.sudo().write({'x_value': val})
         return val
+
+    def nombres_tramites(self, form_value):
+        nombre_tramite = {
+            'matricula': 'MATRÍCULA PROFESIONAL',
+            'inscripciontt': 'CERTIFICADO DE INSCRIPCIÓN PROFESIONAL',
+            'licencia': 'LICENCIA TEMPORAL ESPECIAL',
+            'renovacion': 'RENOVACIÓN - LICENCIA TEMPORAL ESPECIAL'
+        }
+        return nombre_tramite.get(form_value, False)
     
     campos_interregulacion = {
         "x_document":"x_studio_documento_1",

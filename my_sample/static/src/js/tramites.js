@@ -61,6 +61,11 @@ odoo.define('website.tramites', function(require) {
                         $('#text_message').text(`El documento ${validaciones.capitalizeFromUpper(response.result.tipo_documento)}: ${response.result.documento}, ya se encuentra registrado con la profesión auxiliar ${validaciones.capitalizeFromUpper(response.result.carrera)}, desea continuar para tramitar su matrícula profesional de arquitectura, por primer vez.`);
                         $('#btn-result').attr('href','/tramite/matricula/['+data.doc_type+':'+data.doc+']')
                             .text('Tramitar Matrícula Profesional').attr('target','_self');;
+                    } else if (response.certificado && data.origen == 'inscripciontt'){
+                        $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
+                        $('#text_message').text(`El documento ${validaciones.capitalizeFromUpper(response.result.tipo_documento)}: ${response.result.documento}, ya se encuentra registrado con la profesión auxiliar ${validaciones.capitalizeFromUpper(response.result.carrera)}, desea continuar para tramitar su Certificado de Inscripción Profesional auxiliar de arquitectura, por primer vez.`);
+                        $('#btn-result').attr('href','/tramite/inscripciontt/['+data.doc_type+':'+data.doc+']')
+                            .text('Tramitar Certificado de Inscripción Profesional').attr('target','_self');
                     } else {
                         $(location).attr('href','/tramite' + origen+'/['+data.doc_type+':'+data.doc+']');
                     }

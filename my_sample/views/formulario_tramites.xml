@@ -22,6 +22,10 @@
                             <div class="container">
                             <div class="row hiddenFields">
                             <div class="row form-group form-field o_website_form_required_custom">
+                                <input t-if="form == 'inscripciontt'" type="hidden" id="x_tramite" name="x_tramite" t-attf-value= "inscripciontt"/>
+                                <input t-if="form == 'licencia'" type="hidden" id="x_tramite" name="x_tramite" t-attf-value= "licencia"/>
+                                <input t-if="form == 'renovacion'" type="hidden" id="x_tramite" name="x_tramite" t-attf-value= "renovacion"/>
+                                <input t-if="form == 'matricula'" type="hidden" id="x_tramite" name="x_tramite" t-attf-value= "matricula"/>
                                 <input t-if="form == 'renovacion'" type="hidden" id="x_related_service" name="x_related_service" 
                                        t-attf-value="{{ (request.env['x_cpnaa_service'].search_read([('x_name','=','RENOVACIÓN - LICENCIA TEMPORAL ESPECIAL')], ['id'])[0]['id']) }}"/>
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>

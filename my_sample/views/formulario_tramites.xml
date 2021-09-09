@@ -221,12 +221,14 @@
                                         </select>
                                     </div>
                                     <div t-if="user">
+                                        
                                         <select t-if="form == 'renovacion'" class="form-control inputDisabled i_required"
                                                 name="x_expedition_state" id="dpto_otro_pais" required="true">
-                                            <option t-attf-value="{{ (dep_exp[0]) }}" selected="selected">
-                                                <t t-esc="dep_exp[1]" />
+                                            <option t-attf-value="{{ (ciu_exp[0]) }}" selected="selected">
+                                                <t t-esc="ciu_exp[1]" />
                                             </option>
                                         </select>
+                                        
                                         <t t-if="(user.x_document_type_ID.id == 1 or user.x_document_type_ID.id == 2) and form != 'renovacion'">
                                             <select class="child_place-x_expedition_city form-control i_required"
                                                     name="x_expedition_state" id="x_expedition_state">

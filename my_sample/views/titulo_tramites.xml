@@ -8,7 +8,7 @@
                     <font t-elif="form == 'renovacion'">RENOVACIÓN - LICENCIA TEMPORAL ESPECIAL</font>
                     <font t-elif="form == 'convenio'">CONVENIOS - ACCESO ESTUDIANTES</font>
                     <font t-elif="form == 'consulta'">CONSULTA ESTADO DE TRÁMITE</font>
-                    <font t-else="">MATRÍCULA PROFESIONAL DE ARQUITECTO</font>
+                    <font t-elif="form == 'matricula'">MATRÍCULA PROFESIONAL DE ARQUITECTO</font>
                 </h1>
             </div>
         </template>

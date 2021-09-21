@@ -61,6 +61,19 @@ class MySample(http.Controller):
     def create_user(self, **kw):
         resp = {}
         _logger.info(kw)
+        if kw['x_tramite'] in self.nombre_tramite:
+            _logger.info('validando 1')
+            try:
+                campos = ['x_studio_carrera_1', 'x_service_ID']    
+                validation = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_documento_1','=',kw['x_document']), ('x_studio_tipo_de_documento_1.id', "=", kw['x_document_type_ID']), ('x_cycle_ID.x_order','=',5)], campos)
+                for i in validation:
+                    if (i['x_studio_carrera_1'][0] == int(kw['x_institute_career'])) and (i['x_service_ID'][1] == self.nombre_tramite[kw['x_tramite']]):
+                        _logger.info('validando 1')
+                        resp = { 'ok': False, 'message': 'Ya cuenta con éste trámite para la carrera seleccionada, no es posible continuar'}
+                        return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
+            except:
+                pass
+        kw.pop('x_tramite')
         for key, value in kw.items():
             if type(value) != str:
                 kw[key] = base64.b64encode(kw[key].read())
@@ -1748,6 +1761,13 @@ class MySample(http.Controller):
         }
         return nombre_tramite.get(form_value, False)
     
+    nombre_tramite = {
+            #'matricula': 'MATRÍCULA PROFESIONAL',
+            'inscripciontt': 'CERTIFICADO DE INSCRIPCIÓN PROFESIONAL',
+            #'licencia': 'LICENCIA TEMPORAL ESPECIAL',
+            #'renovacion': 'RENOVACIÓN - LICENCIA TEMPORAL ESPECIAL'
+        }
+
     campos_interregulacion = {
         "x_document":"x_studio_documento_1",
         "x_names":"x_studio_nombres",

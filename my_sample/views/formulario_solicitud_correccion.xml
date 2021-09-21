@@ -144,7 +144,7 @@
                                     <div class="col-md-8">
                                         <select t-if="solicitud" class="form-control i_required" name="x_actual_city" id="x_actual_city">
                                             <t t-foreach="request.env['x_cpnaa_city'].search([],order='x_name')" t-as="city">
-                                                <option t-if="city.id != solicitud.x_actual_cityr.id"
+                                                <option t-if="city.id != solicitud.x_actual_city.id"
                                                         t-att-value="city.id" style="display: none;" 
                                                         t-att-data-state_id="city.x_state_ID.id">
                                                     <t t-esc="city.x_name"/>

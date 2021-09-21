@@ -89,8 +89,8 @@
                                                 <input t-if="grado" class="form-control inputDisabled" name="fecha_grado" disabled="true"
                                                    t-attf-value="{{ (grado.x_date.strftime('%d-%m-%Y')) }}" readonly="true"/>
                                                 <input t-else="" type="text" class="form-control hand blanco" name="fecha_grado" readonly="true"
-                                            t-attf-data-min="{{ (datetime.date.today()).strftime('%d-%m-%Y') }}" 
-                                            t-attf-data-max="{{ (datetime.date.today() + datetime.timedelta(days=convenio.x_days_after_degree)).strftime('%d-%m-%Y') }}"/>
+                                            t-attf-data-min="{{ (datetime.date.today() - datetime.timedelta(days=convenio.x_days_after_degree)).strftime('%d-%m-%Y') }}" 
+                                            t-attf-data-max="{{ (datetime.date.today()).strftime('%d-%m-%Y') }}"/>
                                                 <div class="input-group-append">
                                                     <div class="input-group-text">
                                                     <i class="fa fa-calendar"/>

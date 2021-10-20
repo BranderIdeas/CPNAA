@@ -1801,5 +1801,6 @@ class MySample(http.Controller):
         'x_institute_career',
         'x_foreign_country',
         'x_foreign_state',
-        'x_foreign_city'
+        'x_foreign_city',
+        'x_related_service'
     ] 

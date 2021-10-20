@@ -1153,24 +1153,30 @@ class MySample(http.Controller):
                   'x_fecha_resolucion_corte', 'x_expedition_date', 'x_expiration_date', 'x_studio_pas_de_expedicin_1', 'x_studio_celular', 'x_studio_direccin',
                   'x_studio_ciudad_de_residencia_en_el_extranjero', 'x_renovacion_licencia', 'x_service_ID', 'x_studio_departamento_de_expedicin', 'x_studio_pas_de_residencia_en_el_extranjero_1']
                 vigencia = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_documento_1','=',documento)], campos)
+                if len(vigencia) > 0:
+                    vigencia = vigencia[0]
+                else:
+                    return http.request.redirect('/cliente/tramite/'+origen)
+                
                 _logger.info('yo soy el vigencia: ' + str(vigencia))
                 
                 ano = timedelta(days=365)
                 now = datetime.now()
                 try:
-                    fecha_expiracion = str(vigencia[0]['x_expiration_date']) + ' 00:00'
+                    fecha_expiracion = str(vigencia['x_expiration_date']) + ' 00:00'
                     _logger.info('yo soy la fecha de expiración emitida: ' + str(fecha_expiracion))
                     fecha_expiracion = datetime.strptime(fecha_expiracion, '%Y-%m-%d %H:%M')
                     dias = (fecha_expiracion - now) / timedelta(days=1)
                 except:
-                    fecha_expedicion = str(vigencia[0]['x_expedition_date']) + ' 00:00'
+                    fecha_expedicion = str(vigencia['x_expedition_date']) + ' 00:00'
                     fecha_expiracion = datetime.strptime(fecha_expedicion, '%Y-%m-%d %H:%M')
                     dias = (fecha_expiracion + ano - now) / timedelta(days=1)
                     _logger.info('yo soy la fecha de expiración sumando 1 año a la fecha de expedicion: ' + str(fecha_expiracion))
-                if dias >= 30 and not vigencia[0]['x_renovacion_licencia']:
+                if dias >= 30 and not vigencia['x_renovacion_licencia']:
                     #_logger.info('formulario tramites')
                     #actualizado = http.request.env['x_cpnaa_procedure'].browse('x_renovacion_licencia').sudo().write(1)
-                    return http.request.render('my_sample.formulario_tramites', {'user': user, 'tipo_doc': tipo_doc, 'documento':documento, 'form': origen, 'origen': 1, 'ciu_exp':vigencia[0]['x_studio_ciudad_de_expedicin'], 'dep_exp':vigencia[0]['x_studio_departamento_de_expedicin'], 'pais_exp':vigencia[0]['x_studio_pas_de_expedicin_1'],'pais_resi':vigencia[0]['x_studio_pas_de_residencia_en_el_extranjero_1']})
+                    return http.request.render('my_sample.formulario_tramites', {'user': user, 'tipo_doc': tipo_doc, 
+                                                                                 'documento':documento, 'form': origen, 'origen': 1, 'renovar': vigencia})
                 else:
                     return http.request.render('my_sample.inicio_tramite', {'form': 'renovacion', 'inicio_tramite': False})
             else:

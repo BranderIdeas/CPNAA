@@ -144,8 +144,8 @@
                                     <t t-if="user">
                                         <select t-if="form == 'renovacion'" class="child_place-x_expedition_state form-control i_required inputDisabled" 
                                                 name="x_expedition_country" id="x_expedition_country" required="true">
-                                            <option t-attf-value="{{ (pais_exp[0]) }}" selected="selected">
-                                                <t t-esc="pais_exp[1]" />
+                                            <option t-attf-value="{{ (renovar['x_studio_pas_de_expedicin_1'][0]) }}" selected="selected">
+                                                <t t-esc="renovar['x_studio_pas_de_expedicin_1'][1]" />
                                             </option>
                                         </select>
                                         <select t-if="(user.x_document_type_ID.id == 1 or user.x_document_type_ID.id == 2) and form != 'renovacion'"
@@ -221,14 +221,13 @@
                                         </select>
                                     </div>
                                     <div t-if="user">
-                                        
                                         <select t-if="form == 'renovacion'" class="form-control inputDisabled i_required"
                                                 name="x_expedition_state" id="dpto_otro_pais" required="true">
-                                            <option t-attf-value="{{ (ciu_exp[0]) }}" selected="selected">
-                                                <t t-esc="ciu_exp[1]" />
+                                            <option t-if="user.x_document_type_ID.id == 5" value="555" selected="true"> NO APLICA </option>
+                                            <option t-else="" t-attf-value="{{ (renovar['x_studio_departamento_de_expedicin'][0]) }}" selected="selected">
+                                                <t t-esc="renovar['x_studio_departamento_de_expedicin'][1]" />
                                             </option>
                                         </select>
-                                        
                                         <t t-if="(user.x_document_type_ID.id == 1 or user.x_document_type_ID.id == 2) and form != 'renovacion'">
                                             <select class="child_place-x_expedition_city form-control i_required"
                                                     name="x_expedition_state" id="x_expedition_state">
@@ -300,8 +299,8 @@
                                     <div t-if="user">
                                         <select t-if="form == 'renovacion'" class="child_place-x_expedition_state form-control i_required inputDisabled" 
                                                 name="x_expedition_city" id="ciudad_otro_pais" required="true">
-                                            <option t-attf-value="{{ (ciu_exp[0]) }}" selected="selected">
-                                                <t t-esc="ciu_exp[1]" />
+                                            <option t-attf-value="{{ (renovar['x_studio_ciudad_de_expedicin'][0]) }}" selected="selected">
+                                                <t t-esc="renovar['x_studio_ciudad_de_expedicin'][1]" />
                                             </option>
                                         </select>
                                         <div t-if="(user.x_document_type_ID.id  == 1 or user.x_document_type_ID.id  == 2) and form != 'renovacion'">
@@ -775,8 +774,13 @@
                                                 </select>
                                                 <select t-if="form == 'renovacion'" class="form-control i_required inputDisabled" 
                                                         name="x_foreign_country" id="x_foreign_country" required="true">
-                                                    <option t-attf-value="{{ (pais_resi[0]) }}" selected="selected">
-                                                        <t t-esc="pais_resi[1]" />
+<!--                                                     <option t-attf-value="NO APLICA" selected="selected">  -->
+                                                        <!-- {{ (pais_resi[0]) }}  pais_resi[1]  
+                                                        <t t-esc="NO APLICA" /> -->
+<!--                                                     </option> -->
+                                                    <option t-attf-value="{{ (renovar['x_studio_pas_de_residencia_en_el_extranjero_1'][0]) }}"
+                                                            selected="selected">
+                                                        <t t-esc="renovar['x_studio_pas_de_residencia_en_el_extranjero_1'][1]" />
                                                     </option>
                                                 </select>
                                             </div>

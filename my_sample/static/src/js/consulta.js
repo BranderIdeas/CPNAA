@@ -76,19 +76,19 @@ odoo.define('website.consulta', function(require) {
                                 ${tramite.x_studio_documento_1}${de}${_this.capitalize(expedicion)},  
                                 Se encuentra ${registrado} como `;
                 response.tramites.forEach((tram, idx)=>{
-                    const antecedentes = !tram.x_legal_status 
+                    const txt_antecedentes = !tram.x_legal_status 
                         ? `no registra ANTECEDENTES ni SANCIONES VIGENTES en el ejercicio de su profesión por parte del Consejo 
                             Profesional Nacional de Arquitectura y sus Profesiones Auxiliares.`
                         : tram.x_sanction.slice(15);
-                    const status = tram.x_legal_status != 'SUSPENDIDO' ? 'VIGENTE' : 'SUSPENDIDA';
-                    const text_final = (response.tramites.length - 1) === idx ? '' : ' y ';
+                    const antecedentes = txt_antecedentes != '' ? `y ${txt_antecedentes}` : '';
+                    const status = !tram.x_legal_status ? 'VIGENTE' : tram.x_legal_status.toUpperCase();
+                    const text_final = (response.tramites.length - 1) === idx ? '' : ' y registra como ';
                     const carrera = tram.x_studio_gnero[0] === 1 ? tram.x_studio_carrera_1[1] : tram.x_female_career ;
                     texto += `${_this.capitalize(carrera)} con número de ${_this.capitalize(_this.quitarConvenio(tram.x_service_ID[1]))}: 
                                 ${tram.x_enrollment_number} de acuerdo a la resolución Nro. ${tram.x_resolution_number} de fecha 
-                                ${validaciones.dateTimeToString(tram.x_resolution_date)}, se encuentra <b>${status}</b> 
-                                y ${antecedentes}`;
+                                ${validaciones.dateTimeToString(tram.x_resolution_date)}, se encuentra <b>${status}</b> ${antecedentes}`;
                     texto += text_final;
-                })
+                });
                 div_results.find('#data_result').html(texto);
             }
             $('#hora_consulta').html(`Fecha y hora de consulta: 

@@ -436,6 +436,9 @@ class MySample(http.Controller):
                         ('id','=',tramite['x_resolution_ID'][0])])
                     tramite['x_resolution_number'] = resolution.x_consecutive
                     tramite['x_resolution_date']   = resolution.x_date if resolution.x_date else tramite['x_fecha_resolucion_corte']
+                    if tramite['x_expiration_date'] and ahora.date() > tramite['x_expiration_date']:
+                        tramite['x_legal_status'] = 'VENCIDA'
+                        tramite['x_sanction'] = ''
                 return {'ok': True, 'mensaje': 'Usuario registrado', 'tramites': tramites, 'hora_consulta': hora_consulta }
             else:
                 return {'ok': False, 'mensaje': 'El usuario no esta registrado', 'hora_consulta': hora_consulta }

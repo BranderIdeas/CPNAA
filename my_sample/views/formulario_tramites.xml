@@ -594,7 +594,7 @@
                                     </select>
                                     <select t-elif="user and form != 'licencia' and form != 'renovacion' and origen == 1" class="form-control i_required" 
                                             name="x_institution_type_ID" id="x_institution_type_ID">
-                                        <t t-foreach="request.env['x_cpnaa_institution_type'].search([])" t-as="tipo_universidad">
+                                        <t t-foreach="request.env['x_cpnaa_institution_type'].search([('x_name','!=','DESACTIVADA')])" t-as="tipo_universidad">
                                             <option t-if="tipo_universidad.id != user.x_institution_type_ID.id" t-att-value="tipo_universidad.id">
                                                 <t t-esc="tipo_universidad.x_name"/>
                                             </option>
@@ -611,7 +611,7 @@
                                     </select>                                
                                     <select t-else="" class="form-control i_required" name="x_institution_type_ID" id="x_institution_type_ID" >
                                         <option value="">Seleccione...</option>
-                                        <t t-foreach="request.env['x_cpnaa_institution_type'].search([])" t-as="tipo_universidad">
+                                        <t t-foreach="request.env['x_cpnaa_institution_type'].search([('x_name','!=','DESACTIVADA')])" t-as="tipo_universidad">
                                         <option t-att-value="tipo_universidad.id">
                                             <t t-esc="tipo_universidad.x_name"/>
                                         </option>

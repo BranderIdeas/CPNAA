@@ -387,7 +387,7 @@ function generatePDF(invoiceData) {
     let BcodeIMG;
     var string;
     let Bcode = JsBarcode(Bcontain, "\xCF" + code, {
-        format: "code128",
+        format: "code128c",
         displayValue: "false",
     });
 

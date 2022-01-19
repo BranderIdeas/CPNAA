@@ -241,7 +241,7 @@ function drawInvoice(pdf, invoiceData, offset) {
 
     pdf.setFontSize(8.0261);
     pdf.setFont("arial", "normal");
-    pdf.text(360, offset + 251.31, replaceAndComplete(invoiceData.num_doc)); //DATA
+    pdf.text(360, offset + 251.31, replaceAndComplete(invoiceData.num_doc, 10)); //DATA
 
     pdf.setFontSize(8.0261);
     pdf.setFont("arial", "bold");
@@ -335,7 +335,7 @@ function drawOthers(pdf, invoiceData, BcodeIMG) {
         58,
         369,
         `(415)${invoiceData.local_code}(8020)${invoiceData.code}${invoiceData.invoice}${
-            replaceAndComplete(invoiceData.num_doc)
+            replaceAndComplete(invoiceData.num_doc, 10)
         }(3900)${invoiceData.amount}(96)${invoiceData.date_end[0]}${
             invoiceData.date_end[1]
         }${invoiceData.date_end[2]}`
@@ -347,17 +347,17 @@ function drawOthers(pdf, invoiceData, BcodeIMG) {
         58,
         711,
         `(415)${invoiceData.local_code}(8020)${invoiceData.code}${invoiceData.invoice}${
-            replaceAndComplete(invoiceData.num_doc)
+            replaceAndComplete(invoiceData.num_doc, 10)
         }(3900)${invoiceData.amount}(96)${invoiceData.date_end[0]}${
             invoiceData.date_end[1]
         }${invoiceData.date_end[2]}`
     );
 }
 
-function replaceAndComplete(string) {
+function replaceAndComplete(value, cant) {
     let re = /[a-zA-Z]/g;
-    let numeric = string.replace(re, '');
-    while (numeric.length < 10) {
+    let numeric = value.toString().replace(re, '');
+    while (numeric.length < cant) {
         numeric = '0' + numeric;
     }
     return numeric;
@@ -379,8 +379,8 @@ function generatePDF(invoiceData) {
     };
     let pdf = new jsPDF(param);
     let code = `415${invoiceData.local_code}8020${invoiceData.code}${invoiceData.invoice}${
-        replaceAndComplete(invoiceData.num_doc)
-    }\xCF3900${invoiceData.amount}\xCF96${invoiceData.date_end[0]}${
+        replaceAndComplete(invoiceData.num_doc, 10)
+    }\xCF3900${replaceAndComplete(invoiceData.amount, 14)}\xCF96${invoiceData.date_end[0]}${
         invoiceData.date_end[1]
     }${invoiceData.date_end[2]}`
     let Bcontain = document.createElement("canvas");

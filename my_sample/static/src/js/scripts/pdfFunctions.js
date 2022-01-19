@@ -332,10 +332,10 @@ function drawOthers(pdf, invoiceData, BcodeIMG) {
     pdf.setFontSize(8.45);
     pdf.setFont("arial", "normal");
     pdf.text(
-        58,
+        40,
         369,
         `(415)${invoiceData.local_code}(8020)${invoiceData.code}${invoiceData.invoice}${
-            replaceAndComplete(invoiceData.num_doc, 10)
+            replaceAndComplete(invoiceData.num_doc, 14)
         }(3900)${invoiceData.amount}(96)${invoiceData.date_end[0]}${
             invoiceData.date_end[1]
         }${invoiceData.date_end[2]}`
@@ -344,10 +344,10 @@ function drawOthers(pdf, invoiceData, BcodeIMG) {
     pdf.setFontSize(8.45);
     pdf.setFont("arial", "normal");
     pdf.text(
-        58,
+        40,
         711,
         `(415)${invoiceData.local_code}(8020)${invoiceData.code}${invoiceData.invoice}${
-            replaceAndComplete(invoiceData.num_doc, 10)
+            replaceAndComplete(invoiceData.num_doc, 14)
         }(3900)${invoiceData.amount}(96)${invoiceData.date_end[0]}${
             invoiceData.date_end[1]
         }${invoiceData.date_end[2]}`

@@ -15,7 +15,7 @@
                                     <t t-if="len(servicio) == 1">
                                         <h6 class="fw700"> Valor del trámite vigencia <t t-esc="datetime.date.today().year"/>:
                                             <span class="price fw700">
-                                                $<t t-esc="'{:,}'.format(servicio.x_rate).replace(',','.')"/>
+                                                $<t t-esc="'{:,.2f}'.format(servicio.x_rate).replace(',', '@').replace('.', ',').replace('@', '.')"/>
                                             </span>
                                         </h6>
                                     </t>
@@ -26,13 +26,13 @@
                                         <span class="price fw700">
                                             <t t-set="servicio" t-value="request.env['x_cpnaa_service'].sudo().browse(24)"/>
                                             <t t-set="tarifa" t-value="int(servicio.x_rate - servicio.x_discount)"/>
-                                            $<t t-esc="'{:,}'.format(tarifa).replace(',','.')"/>
+                                            $<t t-esc="'{:,.2f}'.format(servicio.x_rate).replace(',', '@').replace('.', ',').replace('@', '.')"/>
                                         </span>
                                         <br/><br/>Certificado de Inscripción Profesional: 
                                         <span class="price fw700">
                                             <t t-set="servicio" t-value="request.env['x_cpnaa_service'].sudo().browse(26)"/>
                                             <t t-set="tarifa" t-value="int(servicio.x_rate - servicio.x_discount)"/>
-                                            $<t t-esc="'{:,}'.format(tarifa).replace(',','.')"/>
+                                            $<t t-esc="'{:,.2f}'.format(servicio.x_rate).replace(',', '@').replace('.', ',').replace('@', '.')"/>
                                         </span>
                                     </h6>
                                 </t>                                        

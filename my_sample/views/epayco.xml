@@ -77,9 +77,6 @@
                                             style="border: 1px solid #7b7b7b; border-radius: 5px; font-weight: 600; color: #7b7b7b;">
                                         Imprimir recibo para pago en oficina
                                     </button>
-                                    <h1 class="h6 mt-3 mb-0 text-center font-weight-bold text-danger">
-                                        * Imprimir recibo solo para pagos en BANCOLOMBIA.
-                                    </h1>
                                 </div>
                             </div>
                             <div class="modal fade" id="modal-recibo-pdf" tabindex="-1" role="dialog" aria-labelledby="modal-recibo-pdfTitle" aria-hidden="true">

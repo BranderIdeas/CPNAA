@@ -384,6 +384,14 @@
                                             </option>
                                         </t>
                                     </select>
+                                    <select t-elif="form != 'matricula' and not cliente and not user" class="form-control i_required" name="x_gender_ID" id="x_gender_ID">
+                                        <option value="">Seleccione...</option>
+                                        <t t-foreach="request.env['x_cpnaa_gender'].search([('x_name','!=','OTRO')])" t-as="gender">
+                                            <option t-att-value="gender.id">
+                                                <t t-esc="gender.x_name"/>
+                                            </option>
+                                        </t>
+                                    </select>
                                     <select t-else="" class="form-control i_required" name="x_gender_ID" id="x_gender_ID">
                                         <option value="">Seleccione...</option>
                                         <t t-foreach="request.env['x_cpnaa_gender'].search([])" t-as="gender">
@@ -392,6 +400,8 @@
                                             </option>
                                         </t>
                                     </select>
+                                    <span class="help-block mt-1 d-none" id="help-genero">
+                                        Al seleccionar el género verifique el título otorgado por la universidad</span>
                                 </div>
                                 </div>
                                 <t t-if="cliente" t-set="mostrar_diploma" t-value="cliente.x_grado_ID.x_agreement_ID.x_before_after_agreement"/>
@@ -691,10 +701,10 @@
                                             <t t-esc="user.x_institute_career.x_name" />
                                         </option>
                                     </select>
-                                    <select t-if="(form == 'licencia' or form == 'matricula' or form == 'renovacion')" class="form-control i_required inputDisabled" 
+                                    <select t-if="(form in ['licencia', 'matricula', 'renovacion'])" class="form-control i_required inputDisabled" 
                                             name="x_institute_career" id="x_institute_career">
-                                        <t t-foreach="request.env['x_cpnaa_career'].search([('x_level_ID.x_name','=','PROFESIONAL')])" t-as="career">
-                                            <option t-att-value="career.id">
+                                        <t t-foreach="request.env['x_cpnaa_career'].search([('x_level_ID.x_name','=','PROFESIONAL')], order='id desc')" t-as="career">
+                                            <option t-att-value="career.id" selected="true" >
                                                 <t t-esc="career.x_name"/>
                                             </option>
                                         </t>

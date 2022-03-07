@@ -88,7 +88,10 @@
                                             <label class="col-form-label" for="x_studio_carrera"> Profesión </label>
                                         </div>
                                         <div class="col-md-8">
-                                            <input type="text" class="form-control" name="x_studio_carrera" 
+                                            <input t-if="tramites[0].x_studio_gnero.x_name == 'FEMENINO'" 
+                                                type="text" class="form-control" name="x_studio_carrera" 
+                                                t-attf-value="{{tramites[0].x_studio_carrera_1.x_female_name}}" disabled="1"/>
+                                            <input t-else="" type="text" class="form-control" name="x_studio_carrera" 
                                                 t-attf-value="{{tramites[0].x_studio_carrera_1.x_name}}" disabled="1"/>
                                         </div>
                                     </div>

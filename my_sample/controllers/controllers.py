@@ -84,7 +84,7 @@ class MySample(http.Controller):
             resp = { 'ok': True, 'message': 'Usuario creado con exito',
                      'data_user': {'tipo_doc': kw['x_document_type_ID'], 'documento': kw['x_document']} }
         except:
-            tb = sys.exc_info()[2]
+            # tb = sys.exc_info()[2]
             resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }
             _logger.info(sys.exc_info())
             return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
@@ -413,7 +413,6 @@ class MySample(http.Controller):
     @http.route('/realizar_consulta', methods=["POST"], type="json", auth='public', website=True)
     def realizar_consulta(self, **kw):
         data = kw.get('data')
-        _logger.info(data)
         tramites = []
         if self.validar_captcha(kw.get('token')):
             ahora = datetime.now() - timedelta(hours=5)
@@ -431,7 +430,9 @@ class MySample(http.Controller):
                                                                               ('x_cycle_ID.x_order','=',5)],campos)
             if tramites:
                 for tramite in tramites:
-                    tramite['x_female_career'] = http.request.env['x_cpnaa_career'].sudo().search([('id','=',tramite['x_studio_carrera_1'][0])]).x_female_name
+                    carrera = http.request.env['x_cpnaa_career'].sudo().search([('id','=',tramite['x_studio_carrera_1'][0])])
+                    tramite['x_female_career'] = carrera.x_female_name
+#                     tramite['x_other_career'] = carrera.x_other_name
                     resolution = http.request.env['x_cpnaa_resolution'].sudo().search([
                         ('id','=',tramite['x_resolution_ID'][0])])
                     tramite['x_resolution_number'] = resolution.x_consecutive
@@ -1321,28 +1322,40 @@ class MySample(http.Controller):
                                                                                ('x_name', 'ilike', cadena)],['id','x_name'], limit=6)}
     
     # Retorna las carreas que coinciden con la cadena y nivel profesional recibidos
+    # Retorna las carreas que coinciden con la cadena y nivel profesional recibidos
     @http.route('/get_carreras', methods=["POST"], type="json", auth='public', website=True)
     def get_carreras(self, **kw):
         cadena = kw.get('cadena')
         nivel_profesional = [kw.get('nivel_profesional')]
         if not kw.get('nivel_profesional'):
             nivel_profesional = [1,2,3]
-        id_genero = kw.get('id_genero')
-        nombre_carrera = 'x_name'
-        _logger.info(id_genero)
-        if id_genero == '2':
-            nombre_carrera = 'x_female_name'
-        return {'carreras': http.request.env['x_cpnaa_career'].sudo().search_read([('x_level_ID.id','in',nivel_profesional),
-                                                                                   ('x_profession_type_ID.x_name','not ilike','NO ACTIVA'),
-                                                                                   (nombre_carrera, 'ilike', cadena)],
-                                                                                    ['id',nombre_carrera], limit=8)}
+        id_genero = int(kw.get('id_genero'))
+        genero = http.request.env['x_cpnaa_gender'].sudo().browse(id_genero)
+        nombre_carrera = genero.x_field_to_career_name if genero else 'x_name'
+        data = http.request.env['x_cpnaa_career'].sudo().search_read([('x_level_ID.id','in',nivel_profesional),
+                                                                      ('x_profession_type_ID.x_name','not ilike','NO ACTIVA'),
+                                                                      (nombre_carrera, 'ilike', cadena)],
+                                                                      ['id',nombre_carrera], limit=8)
+        for d in data:
+            x_name = d[nombre_carrera]
+            del d[nombre_carrera]
+            d['x_name'] = x_name
+        return { 'carreras': data }
     
     # Retorna el nombre de la carrera según el genero 
     @http.route('/get_carrera_genero', methods=["POST"], type="json", auth='public', website=True)
     def get_carrera_genero(self, **kw):
-        campo = kw.get('campo')
-        id_carrera = kw.get('id_carrera')
-        return {'carrera': http.request.env['x_cpnaa_career'].sudo().search_read([('id','=',id_carrera)],[campo])}
+        id_genero = int(kw.get('genero'))
+        id_carrera = int(kw.get('id_carrera'))
+        genero = http.request.env['x_cpnaa_gender'].sudo().browse(id_genero)
+        campo = genero.x_field_to_career_name
+        carrera = http.request.env['x_cpnaa_career'].sudo().search_read([('id','=',id_carrera)], ['x_name', campo])[0]
+        level_prof = http.request.env['x_cpnaa_career'].sudo().browse(id_carrera).x_level_ID.x_name
+        if carrera and level_prof != 'PROFESIONAL':
+            x_name = carrera[campo]
+            del carrera[campo]
+            carrera['x_name'] = x_name
+        return carrera
     
     # Escribe en el mailthread del trámite
     def mailthread_tramite(self, id_tramite, nombres, apellidos, asunto, mensaje, id_contacto):
@@ -1553,8 +1566,6 @@ class MySample(http.Controller):
         registros = kw.get('registros')
         data = kw.get('data')
         hoy = date.today()
-        _logger.info('TODAY')
-        _logger.info(kw)
         id_carrera = data['profesion']
         id_universidad = data['universidad']
         id_convenio = data['convenio']
@@ -1607,7 +1618,6 @@ class MySample(http.Controller):
         except Exception as e:
             _logger.info(e)
             return {'ok': False, 'message': 'Ha ocurrido un error al leer el archivo, verifique su contenido'}
-        _logger.info(data_str)
         rows = data_str.split('\n')
         results = []
         for i in range(0,len(rows)):
@@ -1624,8 +1634,6 @@ class MySample(http.Controller):
     def validar_fecha_limite(self, fecha_maxima):
         ahora = datetime.now() - timedelta(hours=5)
         hora_maxima = datetime.combine(fecha_maxima + timedelta(days=1), datetime.min.time())
-        _logger.info(ahora)
-        _logger.info(hora_maxima)
         if hora_maxima > ahora:
             return True
         else:
@@ -1635,7 +1643,6 @@ class MySample(http.Controller):
     
     def validar_datos(self, row, fecha_grado):
         datos = row.split(';')
-        ok = True
         vals = {'a_document_type':'','b_document':'','c_name':'','d_lastname':'',
                 'e_fecha_grado':{'valor': fecha_grado, 'clase':'valido'},'f_gender':'','g_email':''}
         if len(datos) < 5:

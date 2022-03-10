@@ -1462,7 +1462,7 @@ class MySample(http.Controller):
     def form_archivo_csv(self, universidad, convenio):
         if universidad.x_email != http.request.session.login or universidad.x_user_type_ID.x_name != 'IES':
             return http.request.redirect('/')
-        profesiones = http.request.env['x_cpnaa_career'].search([('x_profession_type_ID.x_name','not ilike','NO ACTIVA')], order="x_name")
+        profesiones = http.request.env['x_cpnaa_career'].search([('x_profession_type_ID.x_name','not ilike','NO ACTIVA'),('x_name','!=','ARQUITECTE')], order="x_name")
         convenios = http.request.env['x_cpnaa_agreement'].search([('x_user_ID','=',universidad.id)])
         return http.request.render('my_sample.convenios_archivo_csv', {'profesiones': profesiones, 'convenios': convenios,
                                                                        'universidad':universidad, 'convenio':convenio})
@@ -1485,7 +1485,7 @@ class MySample(http.Controller):
                 
         if redirect:
             return http.request.redirect('/')
-        profesiones = http.request.env['x_cpnaa_career'].search([('x_profession_type_ID.x_name','not ilike','NO ACThoyIVA')], order="x_name")
+        profesiones = http.request.env['x_cpnaa_career'].search([('x_profession_type_ID.x_name','not ilike','NO ACTIVA'),('x_name','!=','ARQUITECTE')], order="x_name")
         convenios = http.request.env['x_cpnaa_agreement'].search([('x_user_ID','=',universidad.id)])
         convenio = http.request.env['x_cpnaa_agreement'].search([('id','=',grado.x_agreement_ID.id)])
         return http.request.render('my_sample.convenios_archivo_csv', {'profesiones': profesiones, 'convenios': convenios,
@@ -1509,7 +1509,7 @@ class MySample(http.Controller):
     def form_archivo_actas_grado(self, universidad, grado):
         if universidad.x_email != http.request.session.login or universidad.x_user_type_ID.x_name != 'IES':
             return http.request.redirect('/')
-        profesiones = http.request.env['x_cpnaa_career'].search([('x_profession_type_ID.x_name','not ilike','NO ACTIVA')], order="x_name")
+        profesiones = http.request.env['x_cpnaa_career'].search([('x_profession_type_ID.x_name','not ilike','NO ACTIVA'),('x_name','!=','ARQUITECTE')], order="x_name")
         convenios = http.request.env['x_cpnaa_agreement'].search([('x_user_ID','=',universidad.id)])
         convenio = http.request.env['x_cpnaa_agreement'].search([('id','=',grado.x_agreement_ID.id)])
         return http.request.render('my_sample.convenios_grado_actas', {'profesiones': profesiones, 'convenios': convenios,
@@ -1520,7 +1520,7 @@ class MySample(http.Controller):
     def detalles_grado(self, universidad, grado):
         if universidad.x_email != http.request.session.login or universidad.x_user_type_ID.x_name != 'IES':
             return http.request.redirect('/')
-        profesiones = http.request.env['x_cpnaa_career'].search([('x_profession_type_ID.x_name','not ilike','NO ACTIVA')], order="x_name")
+        profesiones = http.request.env['x_cpnaa_career'].search([('x_profession_type_ID.x_name','not ilike','NO ACTIVA'),('x_name','!=','ARQUITECTE')], order="x_name")
         convenios = http.request.env['x_cpnaa_agreement'].search([('x_user_ID','=',universidad.id)])
         convenio = http.request.env['x_cpnaa_agreement'].search([('id','=',grado.x_agreement_ID.id)])
         return http.request.render('my_sample.detalles_grado', {'profesiones': profesiones, 'convenios': convenios,

@@ -55,7 +55,6 @@ odoo.define("website.consulta", function (require) {
                 grecaptcha.reset();
                 return;
             } else if (!response.ok) {
-                console.log(await response.json());
                 div_results.removeClass("invisible").attr("aria-hidden", false);
                 let texto = `<h5><i class="fa fa-exclamation-triangle"></i> ${response.mensaje.toUpperCase()}
                                  <h5>Por favor envie su solicitud al correo electrónico info@cpnaa.gov.co</h5>`;

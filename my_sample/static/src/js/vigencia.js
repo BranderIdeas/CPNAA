@@ -37,6 +37,20 @@ odoo.define('website.vigencia', function(require) {
                     console.log('No se ha podido completar su solicitud');
                 });
             },
+            verificar_fallecidos: function(token, data, _this){
+                rpc.query({
+                    route: '/verificar_fallecidos',
+                    params: {'data': data, 'token': token}
+                }).then(function(response){
+                    if (response.error_captcha){
+                        grecaptcha.reset();
+                        return;
+                    } 
+                    _this.mostrar_resultado(response);
+                }).catch(function(e){
+                    console.log('No se ha podido completar su solicitud');
+                });
+            },
             verificar_autenticidad: function(token, data, _this){
                 rpc.query({
                     route: '/verificar_autenticidad',
@@ -130,9 +144,9 @@ odoo.define('website.vigencia', function(require) {
                 }
             },
             mostrar_resultado: function(response){
-                const route_tramite = location.pathname === '/tramites/certificado_de_vigencia' 
-                                    ? 'certificado_de_vigencia'
-                                    : 'certificado_vigencia_exterior';
+                const route_tramite = location.pathname.indexOf('certificado_vigencia_exterior') != -1 
+                                    ? 'certificado_vigencia_exterior'
+                                    : 'certificado_de_vigencia';
                 let div_msj = $('#msj_result');
                     if (!response.ok){
                         div_msj.removeClass('invisible').attr('aria-hidden',false);
@@ -181,7 +195,12 @@ odoo.define('website.vigencia', function(require) {
                 grecaptcha.ready(async function() {
                     let result = await grecaptcha.getResponse();
                     if(result != ''){
-                        vigencia.verificar_certificado(result, data, vigencia);
+                        const fallecidos = location.pathname.indexOf('certificado_vigencia_fallecidos') != -1;
+                        if (fallecidos){
+                            vigencia.verificar_fallecidos(result, data, vigencia);
+                        }else{
+                            vigencia.verificar_certificado(result, data, vigencia);   
+                        }
                         $(this).attr('disabled', 'disabled');
                         validaciones.ocultar_helper(false);
                     }else{
@@ -206,6 +225,7 @@ odoo.define('website.vigencia', function(require) {
             let valido = validaciones.validar_campos_inicial(validaciones, 'x_document', 'x_document_type');
             vigencia.habilitarBtn(valido, 'btn_enviar_exterior');
             vigencia.habilitarBtn(valido, 'btn_enviar_vigencia');
+            vigencia.habilitarBtn(valido, 'btn_enviar_fallecidos');
             if($('#btn_vigencia_auth').length > 0){
                 vigencia.validar_input_codigo(valido);
             }
@@ -216,6 +236,7 @@ odoo.define('website.vigencia', function(require) {
             let valido = validaciones.validar_campos_inicial(validaciones, 'x_document', 'x_document_type');
             vigencia.habilitarBtn(valido, 'btn_enviar_exterior');
             vigencia.habilitarBtn(valido, 'btn_enviar_vigencia');
+            vigencia.habilitarBtn(valido, 'btn_enviar_fallecidos');
             if($('#btn_vigencia_auth').length > 0){
                 vigencia.validar_input_codigo(valido);
             }
@@ -231,7 +252,7 @@ odoo.define('website.vigencia', function(require) {
         $('#btn_generar_certificado').click(()=>{
             const input_email   = $('#email_vigencia');
             const input_celular = $('#celular_vigencia');
-            const exterior = location.pathname.indexOf('/tramites/certificado_de_vigencia') === -1;
+            const exterior = location.pathname.indexOf('/tramites/certificado_vigencia_exterior') != -1;
             if(exterior && input_celular.val().trim().length < 1){
                 vigencia.class_invalido(input_celular);
                 validaciones.mostrar_alerta_vacio('celular de contacto');

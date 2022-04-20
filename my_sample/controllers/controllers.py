@@ -897,6 +897,13 @@ class MySample(http.Controller):
             return http.request.render('my_sample.certificado_vigencia', {'tramite': tramite, 'digital': True})
         else:
             return http.request.redirect('/tramites/certificado_de_vigencia')
+
+            
+    # Ruta que renderiza el inicio del trámite certificado de vigencia virtual fallecidos
+    @http.route('/tramites/certificado_vigencia_fallecidos', auth='public', website=True)
+    def inicio_cert_fallecidos(self):
+        return http.request.render('my_sample.inicio_cert_vigencia', {'fallecidos': True})
+
     
     # Valida si existe un trámite completo
     @http.route('/verificar_certificado', methods=["POST"], type="json", auth='public', website=True)
@@ -916,6 +923,27 @@ class MySample(http.Controller):
         else:
             return { 'ok': False, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página', 'error_captcha': True  }
     
+    
+    # Valida si existe un trámite y el profesional esta registrado como fallecido
+    @http.route('/verificar_fallecidos', methods=["POST"], type="json", auth='public', website=True)
+    def verificar_fallecidos(self, **kw):
+        data = kw.get('data')
+        sancionado = False
+        if self.validar_captcha(kw.get('token')):
+            tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',data['tipo_doc']),
+                                                                          ('x_studio_documento_1','=',data['documento']),
+                                                                          ('x_fallecido','=',True),
+                                                                          ('x_cycle_ID.x_order','=',5)],
+                                                                          ['id','x_studio_carrera_1','x_legal_status'])
+            if tramites:
+                mensaje = 'Si existe registro de profesional fallecido para este tipo y número de documento'
+                return {'ok': True, 'mensaje': mensaje, 'tramites': tramites }
+            else:
+                return {'ok': False, 'mensaje': 'No existe registro de profesional fallecido para este tipo y número de documento', 'tramites': tramites }
+        else:
+            return { 'ok': False, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página', 'error_captcha': True  }
+
+
     # Enviar el certificado de vigencia al email y lo retorna al navegador para su descarga
     @http.route('/enviar_certificado_vigencia', methods=["POST"], type="json", auth='public')
     def enviar_certificado_vigencia(self, **kw):

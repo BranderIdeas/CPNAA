@@ -6,6 +6,7 @@
                 <h1 class="formTitle mt-5 mb-5" data-tramite="matricula">
                     <font t-if="digital">SOLICITUD DE CERTIFICADO DE VIGENCIA PROFESIONAL DIGITAL</font>
                     <font t-if="exterior">SOLICITUD DE CERTIFICADO DE VIGENCIA PROFESIONAL CON DESTINO AL EXTERIOR</font>
+                    <font t-if="fallecidos">SOLICITUD DE CERTIFICADO DE VIGENCIA PROFESIONAL DIGITAL FALLECIDOS</font>
                 </h1>
                 <div class="container">
                     <div class="formSection mt-3">
@@ -45,6 +46,8 @@
                                 <button t-if="digital" type="submit" id="btn_enviar_vigencia" 
                                         class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="true">Enviar</button>
                                 <button t-if="exterior" type="submit" id="btn_enviar_exterior" 
+                                        class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="true">Enviar</button>
+                                <button t-if="fallecidos" type="submit" id="btn_enviar_fallecidos" 
                                         class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="true">Enviar</button>
                             </div>
                         </form>

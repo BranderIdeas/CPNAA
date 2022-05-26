@@ -40,21 +40,18 @@ class MySample(http.Controller):
         else:
             return http.request.redirect('/my/home')
 
-#             user = http.request.env['res.users'].search([('login','=',http.request.session.login)])
-#             if len(user.groups_id) == 2 and user.groups_id[0].id == 43 and user.groups_id[1].id == 43:
-#                 return http.request.redirect('/convenios')
-#                 return http.request.redirect('/historial-tramites')
-#             else:
-#                 return http.request.redirect('/my/home')
-            
-#     @http.route('/my', website=True)
-#     def redirect_home(self):
-#         user = http.request.env['res.users'].search([('login','=',http.request.session.login)])
-#         if len(user.groups_id) == 2 and user.groups_id[0].id == 43 and user.groups_id[1].id == 43:
-#             return http.request.redirect('/convenios')
-#         elif len(user.groups_id) == 2 and user.groups_id[0].id == 45 and user.groups_id[1].id == 45:
-#             return http.request.redirect('/historial-tramites')
-    
+    @http.route(['/my','/my/home'], website=True)
+    def redirect_home(self):
+        user = http.request.env['res.users'].search([('login','=',http.request.session.login)])
+        try:
+            if len(user.groups_id) == 2 and  user.groups_id[0].id == 45 and user.groups_id[1].id == 8:
+                _logger.info('Client person => %s' % user.login)
+                return http.request.render('website.password_change_confirm', {})
+            else:
+                return http.request.render('portal.portal_my_home', {})
+        except:
+            return http.request.render('portal.portal_my_home', {})
+
     # Crea un usuario tipo persona desde el formulario del website
     # Activa la automatización para la creación y seguimiento del trámite
     @http.route('/create_user', methods=["POST"], auth='public', website=True)

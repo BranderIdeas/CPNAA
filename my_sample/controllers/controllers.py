@@ -128,7 +128,42 @@ class MySample(http.Controller):
             tb = sys.exc_info()[2]
             resp = { 'ok': False, 'message': str(sys.exc_info()[1]) }
         return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
+
+    # Actualiza la contraseña usuarios tipo portal
+    @http.route('/update_password', methods=["POS"], type="json", auth='user', website=True)
+    def update_password(self, **kw):
+        _logger.info(http.request.session)
+        try:
+            user = http.request.env['res.users'].sudo().search([('login','=',kw["email"])])
+            if len(user.groups_id) == 2:
+                if user.groups_id[0].id == 45 or user.groups_id[0].id == 8 and user.groups_id[1].id == 45 or user.groups_id[1].id == 8:
+                    user.write(kw["data"])
+                else:
+                    raise Exception('Is not a CPNAAPP user')
+            return { 'ok': True, 'message': 'Password actualizado con exito' }
+        except:
+            tb = sys.exc_info()[2]
+            _logger.info(sys.exc_info())
+            return { 'ok': False, 'message': str(sys.exc_info()[1]) }
     
+    # Envia email de reestablecimiento de contraseña
+    @http.route('/email_forget_password', methods=["POST"], type="json", auth='user', website=True)
+    def email_forget_password(self, **kw):
+        user = http.request.env['res.users'].sudo().search([('login','=',kw["email"])])
+        _logger.info(http.request.session)
+        try:
+            if not user:
+                return { 'ok': False, 'message': 'No se encontro profesional registrado con el email ' + kw["email"] }
+            if len(user.groups_id) == 2:
+                user.sudo().reset_password_cpnapp()
+                return { 'ok': True, 'message': 'Correo electrónico enviado con exito a ' + kw["email"] }
+            else:
+                raise Exception('Is not a CPNAAPP user')
+        except:
+            tb = sys.exc_info()[2]
+            _logger.info(sys.exc_info())
+            return { 'ok': False, 'message': str(sys.exc_info()[1]) }
+
     # Ruta que renderiza pagina de pagos, si no existe un trámite por pagar lo redirige al inicio del trámite
     @http.route('/pagos/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)
     def epayco(self, tipo_doc, documento):

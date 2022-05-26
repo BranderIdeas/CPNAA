@@ -130,7 +130,7 @@ class MySample(http.Controller):
         return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
 
     # Actualiza la contraseña usuarios tipo portal
-    @http.route('/update_password', methods=["POS"], type="json", auth='user', website=True)
+    @http.route('/update_password', methods=["POST"], type="json", auth='user', website=True)
     def update_password(self, **kw):
         _logger.info(http.request.session)
         try:

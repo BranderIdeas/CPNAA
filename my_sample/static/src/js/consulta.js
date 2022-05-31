@@ -174,9 +174,9 @@ odoo.define("website.consulta", function (require) {
                 registrado = "registrade";
             }
             const carrera =
-                tram.x_studio_gnero[1] === "FEMENINO"
-                    ? tram.x_female_career
-                    : (carrera = tram.x_studio_carrera_1[1]);
+                tramite.x_studio_gnero[1] === "FEMENINO"
+                    ? tramite.x_female_career
+                    : (carrera = tramite.x_studio_carrera_1[1]);
             return tramite.x_resolution_date && tramite.resolucion_fallecido
                 ? `<i class="fa fa-info-circle"></i>
             <b>${sr} ${tramite.x_studio_nombres} ${

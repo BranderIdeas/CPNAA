@@ -50,7 +50,6 @@ odoo.define('website.activacion', function(require) {
                 }).then(function(response){
                     _this.mostrar_resultado(response, elem, _this);
                 }).catch(function(err){
-                    console.log(err);
                     console.log('No se ha podido completar su solicitud');
                 });
             },
@@ -59,11 +58,42 @@ odoo.define('website.activacion', function(require) {
                 if (response.error_captcha){
                     grecaptcha.reset();
                     return;
+                } else if (response.result && response.data_user.fallecido){
+                    const nombre_tramite = response.data_user.matricula ? 'Matrícula Profesional' : 'Certificado de Incripción Profesional';
+                    const cancel = response.data_user.matricula ? 'Cancelada' : 'Cancelado';
+                        const html_msj =
+                            response.result.resolucion_fallecido &&
+                            response.result.fecha_resolucion_fallecido
+                                ? `<i class="fa fa-info-circle"></i>
+                          El documento ${validaciones.capitalizeFromUpper(
+                              response.data_user.tipo_documento
+                          )}: 
+                          ${response.data_user.documento} se encuentra registrado como: 
+                          ${validaciones.capitalizeFromUpper(
+                              response.data_user.carrera
+                          )} y su ${nombre_tramite} 
+                          tiene el Estado: ${cancel} por muerte, de acuerdo con la información de la Registraduría Nacional del Estado Civil,
+                          Resolución: ${response.result.resolucion_fallecido}. Fecha Resolución: ${
+                                      response.result.fecha_resolucion_fallecido
+                                  }.`
+                                : `<i class="fa fa-info-circle"></i>
+                          El documento ${validaciones.capitalizeFromUpper(
+                              response.data_user.tipo_documento
+                          )}: 
+                          ${response.data_user.documento} se encuentra registrado como: 
+                          ${validaciones.capitalizeFromUpper(
+                              response.data_user.carrera
+                          )} y su ${nombre_tramite} 
+                          tiene el Estado: ${cancel} por muerte, de acuerdo con la información de la Registraduría Nacional del Estado Civil.`;
+                    $('#data_result').html(html_msj);
+                    $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
+                    $('#msj_result').find('#data_result').removeClass('alert-primary').addClass('alert-info');
                 } else if (!response.ok){
                     div_results.removeClass('invisible').attr('aria-hidden',false);
                     let texto = `<h5><i class="fa fa-exclamation-triangle"></i> ${response.result}</h5>
                                  <h5>Por favor envie su solicitud al correo electrónico info@cpnaa.gov.co</h5>`;
                     div_results.find('#data_result').html(texto);
+                    $('#msj_result').find('#data_result').removeClass('alert-info').addClass('alert-primary');
                 } else if (response.result && response.result.length > 0){
                     $(location).attr('href','/tramites/solicitud_virtual/'+ response.result[0].id);
                 }
@@ -80,7 +110,6 @@ odoo.define('website.activacion', function(require) {
                     route: '/get_universidades',
                     params: {'cadena': cadena, 'tipo_universidad': tipo_universidad}
                 }).then(function(response){
-//                     console.log(response);
                     return response;
                 }).catch(function(err){
                     console.log(err);
@@ -159,6 +188,7 @@ odoo.define('website.activacion', function(require) {
                     }
                 }).catch(function(err){
                     $('#enviar_respuestas').removeAttr('disabled');
+                    console.log(err);
                 });
             },
             confirmar_email: function(){

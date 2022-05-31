@@ -33,12 +33,10 @@ odoo.define('website.correccion', function(require) {
                 });
             },
             buscar_tramite: function(token, elem, _this){
-                console.log(data);
                 rpc.query({
                     route: '/get_correccion',
                     params: {'tipo_doc': data.tipo_doc, 'documento': data.documento, 'token': token}
                 }).then(function(response){
-                    console.log(response);
                     _this.mostrar_resultado(response, elem, _this);
                 }).catch(function(err){
                     console.log(err);
@@ -64,28 +62,59 @@ odoo.define('website.correccion', function(require) {
                              <h5>Por favor envie su solicitud al correo electrónico info@cpnaa.gov.co</h5>`;
                     div_results.find('#data_result').html(texto);
                 } else if (response.result && response.result.length == 1){
-                    if(response.result[0].solicitud_en_curso){
+                    const first_result = response.result[0];
+                    if(first_result.x_fallecido){
+                        const nombre_tramite = first_result.x_matricula ? 'Matrícula Profesional' : 'Certificado de Incripción Profesional';
+                        const cancel = first_result.x_matricula ? 'Cancelada' : 'Cancelado';
+                        texto = first_result.x_resolucion_fallecido &&
+                                first_result.x_fecha_resolucion_fallecido
+                                ? `<i class="fa fa-info-circle"></i>
+                          El documento ${validaciones.capitalizeFromUpper(
+                              first_result.x_studio_tipo_de_documento_1[1]
+                          )}: 
+                          ${first_result.x_studio_documento_1} se encuentra registrado como: 
+                          ${validaciones.capitalizeFromUpper(
+                              first_result.x_studio_carrera_1[1]
+                          )} y su ${nombre_tramite} 
+                          tiene el Estado: ${cancel} por muerte, de acuerdo con la información de la Registraduría Nacional del Estado Civil,
+                          Resolución: ${first_result.x_resolucion_fallecido}. Fecha Resolución: ${
+                                      first_result.x_fecha_resolucion_fallecido
+                                  }.`
+                                : `<i class="fa fa-info-circle"></i>
+                          El documento ${validaciones.capitalizeFromUpper(
+                              first_result.x_studio_tipo_de_documento_1[1]
+                          )}: 
+                          ${first_result.x_studio_documento_1} se encuentra registrado como: 
+                          ${validaciones.capitalizeFromUpper(
+                              first_result.x_studio_carrera_1[1]
+                          )} y su ${nombre_tramite} 
+                          tiene el Estado: ${cancel} por muerte, de acuerdo con la información de la Registraduría Nacional del Estado Civil.`;
+                        div_results.find('#data_result').removeClass('alert-primary').addClass('alert-info');
+                        div_results.find('#data_result').html(texto);
                         div_results.removeClass('invisible').attr('aria-hidden',false);
-                        if(response.result[0].tiene_rechazo){
+                    } else if(first_result.solicitud_en_curso){
+                        div_results.removeClass('invisible').attr('aria-hidden',false);
+                        if(first_result.tiene_rechazo){
                             texto = `<h5><i class="fa fa-info-circle"></i> 
-                                         ${response.result[0].x_studio_nombres} ${response.result[0].x_studio_apellidos} <br/>
-                                         Profesión: ${response.result[0].x_studio_carrera_1[1]} <br/>
-                                         Su solicitud ${response.result[0].nombre_solicitud} fue devuelta, 
-                                         <a href="/tramites/editar/solicitud_correccion/${response.result[0].id}">
+                                         ${first_result.x_studio_nombres} ${first_result.x_studio_apellidos} <br/>
+                                         Profesión: ${first_result.x_studio_carrera_1[1]} <br/>
+                                         Su solicitud ${first_result.nombre_solicitud} fue devuelta, 
+                                         <a href="/tramites/editar/solicitud_correccion/${first_result.id}">
                                          click aquí </a> para continuar con su trámite <br/>
                                         * Recuerde cargar nuevamente todos los archivos que le solicita el formulario para completar su trámite
                                     </h5>`;
                         }else{
                             texto = `<h5><i class="fa fa-info-circle"></i> 
-                                         ${response.result[0].x_studio_nombres} ${response.result[0].x_studio_apellidos} <br/>
-                                         Profesión: ${response.result[0].x_studio_carrera_1[1]} <br/>
-                                         Su solicitud ${response.result[0].nombre_solicitud} está en proceso, la respuesta la recibiras por
+                                         ${first_result.x_studio_nombres} ${first_result.x_studio_apellidos} <br/>
+                                         Profesión: ${first_result.x_studio_carrera_1[1]} <br/>
+                                         Su solicitud ${first_result.nombre_solicitud} está en proceso, la respuesta la recibiras por
                                         correo electrónico
                                      </h5>`;
                         }
+                        div_results.find('#data_result').removeClass('alert-primary').addClass('alert-info');
                         div_results.find('#data_result').html(texto);
                     }else{
-                        $(location).attr('href','/tramites/solicitud_correccion/'+ response.result[0].id);
+                        $(location).attr('href','/tramites/solicitud_correccion/'+ first_result.id);
                     }
                 } else if (response.result && response.result.length > 1){    
                     response.result.forEach((res) => {
@@ -117,6 +146,7 @@ odoo.define('website.correccion', function(require) {
                                         </h5>`;
                         }
                     })
+                    div_results.find('#data_result').removeClass('alert-primary').addClass('alert-info');
                     div_results.removeClass('invisible').attr('aria-hidden',false);
                     div_results.find('#data_result').html(texto);
                 }
@@ -155,7 +185,6 @@ odoo.define('website.correccion', function(require) {
                         if (request.readyState == 4) {
                             if(request.status == 200){
                                 let resp = JSON.parse(request.responseText);
-                                console.log(resp);
                                 if(resp.ok){
                                     ocultarSpinner();
                                     $('#mssg_result_correccion').addClass('alert alert-info').text(resp.message);

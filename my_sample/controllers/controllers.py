@@ -653,41 +653,39 @@ class MySample(http.Controller):
     # Ruta que renderiza página de formulario de denuncias
     @http.route('/get_correccion', methods=["POST"], type="json", auth='public', website=True)
     def get_correccion(self, **kw):
-        registros = []
-        solicitud_en_curso = False
         if kw.get('token'):
             if not self.validar_captcha(kw.get('token')):
                 return { 'ok': False, 'error_captcha': True }
-        campos = ['x_names','x_lastnames','x_document_type_ID','x_document_number','x_issue','x_state', 'x_procedure_ID', 'x_name', 'x_rejected'] 
-        correccion = http.request.env['x_registry_correction_request'].sudo().search_read([('x_document_type_ID.id','=',kw['tipo_doc']),
-                                                                      ('x_document_number','=',kw['documento'])],campos)
-        campos_tramites = ['x_studio_nombres','x_studio_apellidos','x_studio_carrera_1','x_studio_documento_1','x_enrollment_number'] 
+
+        campos = ['x_studio_nombres','x_studio_apellidos','x_studio_carrera_1','x_studio_documento_1','x_enrollment_number',
+                  'x_fallecido', 'x_user_ID', 'x_studio_tipo_de_documento_1'] 
         tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',kw['tipo_doc']),
-                                                                      ('x_studio_documento_1','=',kw['documento']),
-                                                                      ('x_cycle_ID.x_order','=',5)],campos_tramites)
-        if len(correccion) > 0:
-            for corr in correccion:
-                if corr['x_state'] != 'x_completed':
-                    campos = ['x_studio_nombres','x_studio_apellidos','x_studio_carrera_1','x_studio_documento_1','x_enrollment_number'] 
-                    tramite = http.request.env['x_cpnaa_procedure'].search_read([('id','=',corr['x_procedure_ID'][0])],campos)
-                    tramite[0]['solicitud_en_curso'] = True
-                    tramite[0]['nombre_solicitud'] = corr['x_name']
-                    tramite[0]['tiene_rechazo'] = corr['x_rejected']
-                    registros.append(tramite[0])
-            for tram in tramites:
-                for reg in registros:
-                    if reg['id'] != tram['id']:
-                        tram['solicitud_en_curso'] = False
-                        registros.append(tram)
-        else:
-            for tram in tramites:
+                                                                             ('x_studio_documento_1','=',kw['documento']),
+                                                                             ('x_cycle_ID.x_order','=',5)], campos)
+        
+        for tram in tramites:
+            campos = ['x_names','x_lastnames','x_document_type_ID','x_document_number','x_issue','x_state', 'x_procedure_ID', 
+                      'x_name', 'x_rejected']
+            correccion = http.request.env['x_registry_correction_request'].sudo().search_read([('x_procedure_ID','=',tram['id']),
+                                                                                               ('x_state','!=','x_completed')], campos)
+        
+            if len(correccion) > 0:
+                for corr in correccion:
+                    tram['solicitud_en_curso'] = True
+                    tram['nombre_solicitud'] = corr['x_name']
+                    tram['tiene_rechazo'] = corr['x_rejected']
+            else:
                 tram['solicitud_en_curso'] = False
-                registros.append(tram)
-        _logger.info(tramites)
-        _logger.info(registros)
-        if len(registros) < 1:
+            
+            if tram['x_fallecido']:
+                user = http.request.env['x_cpnaa_user'].sudo().browse(tram['x_user_ID'][0])
+                tram['x_matricula'] = user.x_institute_career.x_level_ID.x_name == 'PROFESIONAL'
+                tram['x_resolucion_fallecido'] = user.x_resolucion_fallecido
+                tram['x_fecha_resolucion_fallecido'] = user.x_fecha_resolucion_fallecido
+
+        if len(tramites) < 1:
             return {'ok': False, 'result': 'No hay registros con la información suministrada'}
-        return {'ok': True, 'result': registros}
+        return {'ok': True, 'result': tramites}
 
         
     # Ruta que renderiza el inicio del trámite actualización/coreeción de registro
@@ -941,15 +939,25 @@ class MySample(http.Controller):
     @http.route('/verificar_certificado', methods=["POST"], type="json", auth='public', website=True)
     def verificar_certificado(self, **kw):
         data = kw.get('data')
-        sancionado = False
+        campos = ['id','x_studio_carrera_1','x_legal_status', 'x_fallecido', 'x_user_ID']
         if self.validar_captcha(kw.get('token')):
             tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',data['tipo_doc']),
                                                                           ('x_studio_documento_1','=',data['documento']),
-                                                                          ('x_cycle_ID.x_order','=',5)],
-                                                                          ['id','x_studio_carrera_1','x_legal_status'])
+                                                                          ('x_cycle_ID.x_order','=',5)], campos)
             if tramites:
+                fallecido, user = False, False
                 mensaje = 'Si existen registros para este tipo y número de documento'
-                return {'ok': True, 'mensaje': mensaje, 'tramites': tramites }
+                if tramites[0]['x_fallecido']:
+                    fallecido = True
+                    user = http.request.env['x_cpnaa_user'].sudo().browse(tramites[0]['x_user_ID'][0])
+                if fallecido:
+                    matricula = user.x_institute_career.x_level_ID.x_name == 'PROFESIONAL'
+                    return {'ok': True, 'tramites': tramites, 'mensaje': mensaje, 'data_user': { 'matricula': matricula, 'fallecido': True, 
+                            'fecha_resolucion_fallecido': user.x_fecha_resolucion_fallecido, 'documento': user.x_document,
+                            'resolucion_fallecido': user.x_resolucion_fallecido, 'tipo_documento': user.x_document_type_ID.x_name,
+                            'carrera': user.x_institute_career.x_name}}
+                else:
+                    return {'ok': True, 'mensaje': mensaje, 'tramites': tramites, 'data_user': {'fallecido': False}}
             else:
                 return {'ok': False, 'mensaje': 'No existen registros para este tipo y número de documento', 'tramites': tramites }
         else:
@@ -960,7 +968,6 @@ class MySample(http.Controller):
     @http.route('/verificar_fallecidos', methods=["POST"], type="json", auth='public', website=True)
     def verificar_fallecidos(self, **kw):
         data = kw.get('data')
-        sancionado = False
         if self.validar_captcha(kw.get('token')):
             tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',data['tipo_doc']),
                                                                           ('x_studio_documento_1','=',data['documento']),

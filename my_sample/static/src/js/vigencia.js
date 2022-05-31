@@ -1,11 +1,11 @@
 odoo.define('website.vigencia', function(require) {
     'use strict';
-        
+    
         const Class = require('web.Class');
         const rpc = require('web.rpc');
         const Validaciones = require('website.validations');
         const validaciones = new Validaciones();
-            
+    
         const Vigencia = Class.extend({
             validar_email: function(input, _this){
                 const entrada = validaciones.quitarAcentos(input.val().trim().toLowerCase().replace(/\s+/g, ' '));
@@ -35,6 +35,7 @@ odoo.define('website.vigencia', function(require) {
                     _this.mostrar_resultado(response);
                 }).catch(function(e){
                     console.log('No se ha podido completar su solicitud');
+                    console.log(e);
                 });
             },
             verificar_fallecidos: function(token, data, _this){
@@ -49,6 +50,7 @@ odoo.define('website.vigencia', function(require) {
                     _this.mostrar_resultado(response);
                 }).catch(function(e){
                     console.log('No se ha podido completar su solicitud');
+                    console.log(e);
                 });
             },
             verificar_autenticidad: function(token, data, _this){
@@ -147,28 +149,60 @@ odoo.define('website.vigencia', function(require) {
                 const route_tramite = location.pathname.indexOf('certificado_vigencia_exterior') != -1 
                                     ? 'certificado_vigencia_exterior'
                                     : 'certificado_de_vigencia';
+                const cert_exterior = location.pathname.indexOf('certificado_vigencia_exterior') != -1;
                 let div_msj = $('#msj_result');
-                    if (!response.ok){
-                        div_msj.removeClass('invisible').attr('aria-hidden',false);
-                        div_msj.find('div').text(response.mensaje);
-                    } else if (response.tramites.length == 1){
-                        $(location).attr('href',`/tramites/${route_tramite}/${response.tramites[0].id}`);
-                    } else if (response.tramites.length > 1){
-                        div_msj.removeClass('invisible').attr('aria-hidden',false);
-                        div_msj.find('div').removeClass('alert-primary').addClass('alert-info');
-                        let texto = '<h5 class="text-center">Se han encontrado varias coincidencias, por favor selecciona</h5>';
-                        response.tramites.forEach((tram)=>{
-                            let mensaje = 'Seleccione para generar certificado';
-                            let enlace = `href="/tramites/${route_tramite}/${tram.id}"`;
-                            texto += `<a class="card card-link fw700" ${enlace}>
-                                        <div class="card-header results-vigencia">
-                                            PROFESIÓN: ${tram.x_studio_carrera_1[1]}
-                                            <h5>${mensaje}</h5>
-                                        </div>
-                                        </a></br>`;
-                        })
-                        div_msj.find('div').html(texto);
-                    }
+                if (response.ok && cert_exterior && response.data_user.fallecido){
+                    const data_user = response.data_user;
+                    const nombre_tramite = data_user.matricula ? 'Matrícula Profesional' : 'Certificado de Incripción Profesional';
+                    const cancel = data_user.matricula ? 'Cancelada' : 'Cancelado';               
+                    const html_msj =
+                                data_user.resolucion_fallecido &&
+                                data_user.fecha_resolucion_fallecido
+                                    ? `<i class="fa fa-info-circle"></i>
+                              El documento ${validaciones.capitalizeFromUpper(
+                                  data_user.tipo_documento
+                              )}: 
+                              ${data_user.documento} se encuentra registrado como: 
+                              ${validaciones.capitalizeFromUpper(
+                                  data_user.carrera
+                              )} y su ${nombre_tramite} 
+                              tiene el Estado: ${cancel} por muerte, de acuerdo con la información de la Registraduría Nacional del Estado Civil,
+                              Resolución: ${data_user.resolucion_fallecido}. Fecha Resolución: ${
+                                          data_user.fecha_resolucion_fallecido
+                                      }.`
+                                    : `<i class="fa fa-info-circle"></i>
+                              El documento ${validaciones.capitalizeFromUpper(
+                                  data_user.tipo_documento
+                              )}: 
+                              ${data_user.documento} se encuentra registrado como: 
+                              ${validaciones.capitalizeFromUpper(
+                                  data_user.carrera
+                              )} y su ${nombre_tramite} 
+                              tiene el Estado: ${cancel} por muerte, de acuerdo con la información de la Registraduría Nacional del Estado Civil.`;
+                    div_msj.html(html_msj);
+                    div_msj.removeClass('alert-primary').addClass('alert-info');
+                    div_msj.removeClass('invisible').attr('aria-hidden',false);
+                } else if (!response.ok){
+                    div_msj.removeClass('invisible').attr('aria-hidden',false);
+                    div_msj.find('div').text(response.mensaje);
+                } else if (response.tramites.length == 1){
+                    $(location).attr('href',`/tramites/${route_tramite}/${response.tramites[0].id}`);
+                } else if (response.tramites.length > 1){
+                    div_msj.removeClass('invisible').attr('aria-hidden',false);
+                    div_msj.find('div').removeClass('alert-primary').addClass('alert-info');
+                    let texto = '<h5 class="text-center">Se han encontrado varias coincidencias, por favor selecciona</h5>';
+                    response.tramites.forEach((tram)=>{
+                        let mensaje = 'Seleccione para generar certificado';
+                        let enlace = `href="/tramites/${route_tramite}/${tram.id}"`;
+                        texto += `<a class="card card-link fw700" ${enlace}>
+                                    <div class="card-header results-vigencia">
+                                        PROFESIÓN: ${tram.x_studio_carrera_1[1]}
+                                        <h5>${mensaje}</h5>
+                                    </div>
+                                    </a></br>`;
+                    })
+                    div_msj.find('div').html(texto);
+                }
             },
             downloadPDF: function() {
                 const linkSource = $('#pdfFrameVigencia').attr('src');
@@ -210,16 +244,16 @@ odoo.define('website.vigencia', function(require) {
                 });
             }
         })
-        
+    
         const vigencia = new Vigencia();
-        
+    
         // Muestra los resultados para el cert de vigencia si no hay coincidencias o si existen varias
         // Si solo hay una coincidencia lo dirige al formulario de generar certificado
         $('#inicio_vigencia').submit(function(e){
             e.preventDefault();
             vigencia.enviar_form_inicio();
         });
-        
+    
         // Validar formatos de datos
         $('#x_document').on('keyup change input', function(){
             let valido = validaciones.validar_campos_inicial(validaciones, 'x_document', 'x_document_type');
@@ -230,7 +264,7 @@ odoo.define('website.vigencia', function(require) {
                 vigencia.validar_input_codigo(valido);
             }
         });
-        
+    
         // Validar formatos de datos
         $('#x_document_type').change(function(){
             let valido = validaciones.validar_campos_inicial(validaciones, 'x_document', 'x_document_type');
@@ -241,13 +275,13 @@ odoo.define('website.vigencia', function(require) {
                 vigencia.validar_input_codigo(valido);
             }
         });
-        
+    
         // Valida si la dirección de email tiene el formato correcto
         $('#email_vigencia').change(() => vigencia.validar_email($('#email_vigencia'), vigencia));
-        
+    
         // Valida si la dirección de email tiene el formato correcto
         $('#celular_vigencia').change(() => vigencia.validar_cel_number($('#celular_vigencia'), vigencia));
-        
+    
         // Realiza la petición del certificado de vigencia al email y genera la descarga del pdf en el navegador
         $('#btn_generar_certificado').click(()=>{
             const input_email   = $('#email_vigencia');
@@ -277,7 +311,7 @@ odoo.define('website.vigencia', function(require) {
             }
     
         })
-        
+    
         // Validar formatos de datos validacion de autenticidad
         $('#x_code_vigencia').on('keyup change input', function(){
             let valido = validaciones.validar_campos_inicial(validaciones, 'x_document', 'x_document_type');
@@ -285,9 +319,9 @@ odoo.define('website.vigencia', function(require) {
                 vigencia.validar_input_codigo(valido);
             }
         });
-        
-        
-        
+    
+    
+    
         // Realiza la petición para validar el certificado por medio del codigo de seguridad
         $('#autenticidad_vigencia').submit((e)=>{
             e.preventDefault();
@@ -308,7 +342,7 @@ odoo.define('website.vigencia', function(require) {
                 }
             });
         })
-        
+    
         // Realiza la petición del certificado de vigencia al email y genera la descarga del pdf en el navegador
         $('#btn_validar_vigencia').click(()=>{
             let el = $('#email_vigencia');
@@ -324,16 +358,16 @@ odoo.define('website.vigencia', function(require) {
                 vigencia.class_invalido(el);
             }
         })
-        
+    
         function mostrarSpinner(){
             $('#div_spinner_vig').attr('aria-hidden', false).removeClass('invisible');
             $('#div_results_vig').attr('aria-hidden', true).addClass('invisible');
             $('#btn_generar_certificado').attr('disabled','disabled');
         }
-        
+    
         function ocultarSpinner(){
             $('#div_results_vig').attr('aria-hidden', false).removeClass('invisible');
             $('#div_spinner_vig').attr('aria-hidden', true).addClass('invisible');
         }
-        
+    
     })

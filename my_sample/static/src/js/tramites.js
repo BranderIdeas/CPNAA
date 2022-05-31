@@ -45,8 +45,49 @@ odoo.define("website.tramites", function (require) {
                             "/tramite/convenios/" + response.id
                         );
                     } else if (response.id) {
-                        // console.log(response);
-                        if (response.tramite_en_curso) {
+                        if (response.fallecido) {
+                            const nombre_tramite = response.matricula
+                                ? "Matrícula Profesional"
+                                : "Certificado de Incripción Profesional";
+                            const cancel = response.matricula
+                                ? "Cancelada"
+                                : "Cancelado";
+                            const html_msj =
+                                response.result.resolucion_fallecido &&
+                                response.result.fecha_resolucion_fallecido
+                                    ? `<i class="fa fa-info-circle"></i>
+                              El documento ${validaciones.capitalizeFromUpper(
+                                  response.data_user.tipo_documento
+                              )}: 
+                              ${
+                                  response.data_user.documento
+                              } se encuentra registrado como: 
+                              ${validaciones.capitalizeFromUpper(
+                                  response.data_user.carrera
+                              )} y su ${nombre_tramite} 
+                              tiene el Estado: ${cancel} por muerte, de acuerdo con la información de la Registraduría Nacional del Estado Civil,
+                              Resolución: ${
+                                  response.result.resolucion_fallecido
+                              }. Fecha Resolución: ${
+                                          response.result
+                                              .fecha_resolucion_fallecido
+                                      }.`
+                                    : `<i class="fa fa-info-circle"></i>
+                              El documento ${validaciones.capitalizeFromUpper(
+                                  response.data_user.tipo_documento
+                              )}: 
+                              ${
+                                  response.data_user.documento
+                              } se encuentra registrado como: 
+                              ${validaciones.capitalizeFromUpper(
+                                  response.data_user.carrera
+                              )} y su ${nombre_tramite} 
+                              tiene el Estado: ${cancel} por muerte, de acuerdo con la información de la Registraduría Nacional del Estado Civil.`;
+                            $("#text_message").html(html_msj);
+                            $("#msj_result")
+                                .removeClass("invisible")
+                                .attr("aria-hidden", false);
+                        } else if (response.tramite_en_curso) {
                             $(location).attr(
                                 "href",
                                 "/cliente/" + response.id + "/tramites"
@@ -168,7 +209,7 @@ odoo.define("website.tramites", function (require) {
                             .attr("aria-hidden", false);
                         $("#text_message").text(
                             `No se ha encontrado trámite en curso con los datos ingresados`
-                        );
+                            );
                     } else if (
                         response.ok == "False" &&
                         location.href.indexOf("/renovacion")
@@ -188,11 +229,9 @@ odoo.define("website.tramites", function (require) {
                                 data.doc +
                                 "]"
                         );
-                        //_this.mostrar_resultado()
                     }
                 });
         },
-
         validar_convenios: function (token) {
             let div_msj = $("#msj_nombre");
             if (data.nombres == "") {
@@ -206,7 +245,6 @@ odoo.define("website.tramites", function (require) {
                     params: { data: data, token: token },
                 })
                 .then(function (response) {
-                    console.log(response);
                     if (response.error_captcha) {
                         resetCaptcha();
                         div_msj
@@ -219,11 +257,11 @@ odoo.define("website.tramites", function (require) {
                         div_msj
                             .removeClass("invisible")
                             .attr("aria-hidden", false);
-                        div_msj.find("div").text(
-                            `Usted no se encuentra registrado por Convenio, si ya intentó la búsqueda por documento 
-                         y nombre por favor comuníquese con la universidad ó con el CPNAA al siguiente correo 
-                         electrónico: convenios@cpnaa.gov.co o al número telefónico (1)3502700 ext 111-115 en Bogotá`
-                        );
+                            div_msj.find("div").text(
+                                `Usted no se encuentra registrado por Convenio, si ya intentó la búsqueda por documento 
+                             y nombre por favor comuníquese con la universidad ó con el CPNAA al siguiente correo 
+                             electrónico: convenios@cpnaa.gov.co o al número telefónico (601)3502700 ext 111-115 en Bogotá`
+                            );
                     } else if (response.graduandos.length == 1) {
                         if (response.graduandos[0].id_user_tramite) {
                             $(location).attr(
@@ -270,7 +308,7 @@ odoo.define("website.tramites", function (require) {
                             .find("div")
                             .removeClass("alert-primary")
                             .addClass("alert-info");
-                        let texto =
+                            let texto =
                             '<h5 class="text-center">Se han encontrado varias coincidencias, por favor selecciona</h5>';
                         response.graduandos.forEach((grad) => {
                             let enlace = grad.id_user_tramite

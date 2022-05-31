@@ -1063,7 +1063,7 @@ class MySample(http.Controller):
     @http.route('/validar_tramites', methods=["POST"], type="json", auth='public', website=True)
     def validar_tramites(self, **kw):
         data = kw.get('data')
-        user, data_user = False, False
+        user, data_user, fallecido = False, False, False
         if self.validar_captcha(kw.get('token')):
             if kw['data']['origen'] == 'renovacion':
                 campos = ['x_studio_tipo_de_documento_1', 'x_studio_documento_1',  'x_expedition_date', 'x_expiration_date', 'x_renovacion_licencia', 'x_service_ID']    
@@ -1115,8 +1115,12 @@ class MySample(http.Controller):
                 if tramite.x_service_ID.x_name.find('CERT') != -1 and tramite.x_cycle_ID.x_order == 5:
                     certificado = True
                     user = tramite.x_user_ID
-                    result = {'carrera': tramite.x_studio_carrera_1.x_name, 'tipo_documento': tramite.x_studio_tipo_de_documento_1.x_name, 
-                              'documento': tramite.x_studio_documento_1 }
+                result = {'carrera': tramite.x_studio_carrera_1.x_name, 'tipo_documento': tramite.x_studio_tipo_de_documento_1.x_name, 
+                          'documento': tramite.x_studio_documento_1, 'fallecido': tramite.x_fallecido,
+                          'resolucion_fallecido': tramite.x_user_ID.x_resolucion_fallecido, 
+                          'fecha_resolucion_fallecido': tramite.x_user_ID.x_fecha_resolucion_fallecido }
+                if tramite.x_fallecido:
+                    fallecido = True
                 if user:
                     data_user = { 'tipo_documento': user.x_document_type_ID.x_name, 'documento': user.x_document, 'carrera': user.x_institute_career.x_name }
             _logger.info(user)
@@ -1125,7 +1129,8 @@ class MySample(http.Controller):
             if (tramite_en_curso):
                 return { 'ok': True, 'id': user.id, 'tramite_en_curso': tramite_en_curso }
             if (matricula or certificado):
-                return { 'ok': True, 'id': user.id, 'matricula': matricula, 'certificado': certificado, 'result': result, 'data_user': data_user }
+                return { 'ok': True, 'id': user.id, 'matricula': matricula, 'certificado': certificado, 'result': result, 
+                        'data_user': data_user, 'fallecido': fallecido }
             elif (grado):
                 return { 'ok': True, 'id': graduando.id, 'convenio': True }
             elif (user):
@@ -1133,7 +1138,6 @@ class MySample(http.Controller):
             else:
                 return { 'ok': False, 'id': False, 'convenio': False }
         else:
-            _logger.info('no se ha validado catcha')
             return { 'ok': False, 'id': False, 'convenio': False, 'error_captcha': True,
                     'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página' }
         

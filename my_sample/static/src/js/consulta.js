@@ -129,7 +129,7 @@ odoo.define("website.consulta", function (require) {
                 const carrera =
                     tram.x_studio_gnero[1] === "FEMENINO"
                         ? tram.x_female_career
-                        : (carrera = tram.x_studio_carrera_1[1]);
+                        : tram.x_studio_carrera_1[1];
 
                 texto += `${_this.capitalize(
                     carrera
@@ -176,7 +176,7 @@ odoo.define("website.consulta", function (require) {
             const carrera =
                 tramite.x_studio_gnero[1] === "FEMENINO"
                     ? tramite.x_female_career
-                    : (carrera = tramite.x_studio_carrera_1[1]);
+                    : tramite.x_studio_carrera_1[1];
             return tramite.x_resolution_date && tramite.resolucion_fallecido
                 ? `<i class="fa fa-info-circle"></i>
             <b>${sr} ${tramite.x_studio_nombres} ${

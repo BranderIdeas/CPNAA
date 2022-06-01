@@ -450,9 +450,9 @@ class MySample(http.Controller):
             ahora = datetime.now() - timedelta(hours=5)
             hora_consulta = ahora.strftime('%Y-%m-%d %H:%M:%S')
             campos = ['id','x_studio_tipo_de_documento_1', 'x_studio_documento_1','x_service_ID','x_studio_pas_de_expedicin_1',
-                      'x_origin_type', 'x_studio_ciudad_de_expedicin','x_resolution_ID', 'x_legal_status', 'x_sanction',
-                      'x_studio_ciudad_de_expedicin','x_studio_carrera_1','x_studio_gnero','x_studio_fecha_de_resolucin','x_enrollment_number',
-                      'x_studio_nombres','x_studio_apellidos','x_fecha_resolucion_corte', 'x_expedition_date', 'x_expiration_date']
+                      'x_origin_type', 'x_studio_ciudad_de_expedicin','x_resolution_ID', 'x_legal_status', 'x_sanction', 'x_user_ID',
+                      'x_studio_ciudad_de_expedicin','x_studio_carrera_1','x_studio_gnero','x_studio_fecha_de_resolucin',
+                      'x_studio_nombres','x_studio_apellidos','x_enrollment_number','x_fecha_resolucion_corte', 'x_fallecido']
             if data['numero_tarjeta'] != '':
                 tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_enrollment_number','=',data['numero_tarjeta']),
                                                                               ('x_cycle_ID.x_order','=',5)],campos)
@@ -462,21 +462,22 @@ class MySample(http.Controller):
                                                                               ('x_cycle_ID.x_order','=',5)],campos)
             if tramites:
                 for tramite in tramites:
-                    carrera = http.request.env['x_cpnaa_career'].sudo().search([('id','=',tramite['x_studio_carrera_1'][0])])
-                    tramite['x_female_career'] = carrera.x_female_name
-#                     tramite['x_other_career'] = carrera.x_other_name
-                    resolution = http.request.env['x_cpnaa_resolution'].sudo().search([
-                        ('id','=',tramite['x_resolution_ID'][0])])
-                    tramite['x_resolution_number'] = resolution.x_consecutive
-                    tramite['x_resolution_date']   = resolution.x_date if resolution.x_date else tramite['x_fecha_resolucion_corte']
-                    if tramite['x_expiration_date'] and ahora.date() > tramite['x_expiration_date']:
-                        tramite['x_legal_status'] = 'VENCIDA'
-                        tramite['x_sanction'] = ''
+                    tramite['x_female_career'] = http.request.env['x_cpnaa_career'].sudo().search([('id','=',tramite['x_studio_carrera_1'][0])]).x_female_name
+                    tramite['x_resolution_number'] = http.request.env['x_cpnaa_resolution'].sudo().search([
+                        ('id','=',tramite['x_resolution_ID'][0])]).x_consecutive
+                    if tramite['x_fallecido']:
+                        user = http.request.env['x_cpnaa_user'].sudo().browse(tramite['x_user_ID'][0])
+                        tramite['x_resolucion_fallecido'] = user.x_resolucion_fallecido
+                        tramite['x_fecha_resolucion_fallecido'] = user.x_fecha_resolucion_fallecido
+                    if tramite['x_origin_type'] and tramite['x_origin_type'][1] == 'CONVENIO':
+                        tramite['x_resolution_date'] = tramite['x_studio_fecha_de_resolucin']
+                    else:
+                        tramite['x_resolution_date'] = tramite['x_fecha_resolucion_corte']
                 return {'ok': True, 'mensaje': 'Usuario registrado', 'tramites': tramites, 'hora_consulta': hora_consulta }
             else:
                 return {'ok': False, 'mensaje': 'El usuario no esta registrado', 'hora_consulta': hora_consulta }
         else:
-            return { 'ok': True, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página', 'error_captcha': True }                     
+            return { 'ok': True, 'mensaje': 'Ha ocurrido un error al validar el captcha, por favor recarga la página', 'error_captcha': True }                      
     
     """
     Valida si el trámite tiene recibo de pago, si es necesario actualiza el consecutivo de los recibos

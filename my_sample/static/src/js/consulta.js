@@ -51,7 +51,6 @@ odoo.define("website.consulta", function (require) {
         },
         mostrar_resultado: async function (response, elem, _this) {
             let div_results = $("#results");
-            console.log(response);
             if (response.error_captcha) {
                 grecaptcha.reset();
                 return;
@@ -62,7 +61,6 @@ odoo.define("website.consulta", function (require) {
                 div_results.find("#data_result").html(texto);
             } else if (response.tramites && response.tramites.length > 0) {
                 const first = response.tramites[0];
-                console.log(first.x_fallecido);
                 const texto = first.x_fallecido
                     ? _this.mensaje_fallecido(response, _this)
                     : _this.mensaje_tramites(response, _this);

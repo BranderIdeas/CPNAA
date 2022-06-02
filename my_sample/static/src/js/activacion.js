@@ -50,6 +50,7 @@ odoo.define('website.activacion', function(require) {
                 }).then(function(response){
                     _this.mostrar_resultado(response, elem, _this);
                 }).catch(function(err){
+                    console.log(err);
                     console.log('No se ha podido completar su solicitud');
                 });
             },

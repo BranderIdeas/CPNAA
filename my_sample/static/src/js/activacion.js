@@ -58,6 +58,12 @@ odoo.define('website.activacion', function(require) {
                 if (response.error_captcha){
                     grecaptcha.reset();
                     return;
+                }  else if (!response.ok){
+                    div_results.removeClass('invisible').attr('aria-hidden',false);
+                    let texto = `<h5><i class="fa fa-exclamation-triangle"></i> ${response.result}</h5>
+                                 <h5>Por favor envie su solicitud al correo electrónico info@cpnaa.gov.co</h5>`;
+                    div_results.find('#data_result').html(texto);
+                    $('#msj_result').find('#data_result').removeClass('alert-info').addClass('alert-primary');
                 } else if (response.result && response.data_user.fallecido){
                     const nombre_tramite = response.data_user.matricula ? 'Matrícula Profesional' : 'Certificado de Incripción Profesional';
                     const cancel = response.data_user.matricula ? 'Cancelada' : 'Cancelado';
@@ -88,12 +94,6 @@ odoo.define('website.activacion', function(require) {
                     $('#data_result').html(html_msj);
                     $('#msj_result').removeClass('invisible').attr('aria-hidden',false);
                     $('#msj_result').find('#data_result').removeClass('alert-primary').addClass('alert-info');
-                } else if (!response.ok){
-                    div_results.removeClass('invisible').attr('aria-hidden',false);
-                    let texto = `<h5><i class="fa fa-exclamation-triangle"></i> ${response.result}</h5>
-                                 <h5>Por favor envie su solicitud al correo electrónico info@cpnaa.gov.co</h5>`;
-                    div_results.find('#data_result').html(texto);
-                    $('#msj_result').find('#data_result').removeClass('alert-info').addClass('alert-primary');
                 } else if (response.result && response.result.length > 0){
                     $(location).attr('href','/tramites/solicitud_virtual/'+ response.result[0].id);
                 }

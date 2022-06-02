@@ -320,19 +320,31 @@ class MySample(http.Controller):
             _logger.info(sys.exc_info())
             return {'ok': False, 'error': 'No se podido completar su solicitud', 'file': False}
     
-    # Ruta que renderiza página de formulario de denuncias
+    # Controller para consulta de profesional por tipo y número de documento
     @http.route('/get_profesional', methods=["POST"], type="json", auth='public', website=True)
     def get_profesional(self, **kw):
         _logger.info(kw)
         if kw.get('token'):
             if not self.validar_captcha(kw.get('token')):
                 return { 'ok': False, 'error_captcha': True }
-        campos = ['x_studio_nombres','x_studio_apellidos','x_studio_carrera_1','x_studio_documento_1','x_enrollment_number'] 
+        campos = ['x_studio_nombres','x_studio_apellidos','x_studio_carrera_1','x_studio_documento_1','x_enrollment_number',
+                  'x_fallecido','x_user_ID'] 
         tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',kw['tipo_doc']),
                                                                       ('x_studio_documento_1','=',kw['documento']),
                                                                       ('x_cycle_ID.x_order','=',5)],campos)
         if tramites:
-            return {'ok': True, 'result': tramites}
+            fallecido, user = False, False
+            if tramites[0]['x_fallecido']:
+                fallecido = True
+                user = http.request.env['x_cpnaa_user'].sudo().browse(tramites[0]['x_user_ID'][0])
+            if fallecido:
+                matricula = user.x_institute_career.x_level_ID.x_name == 'PROFESIONAL'
+                return {'ok': True, 'result': tramites, 'data_user': { 'matricula': matricula, 'fallecido': True, 
+                        'fecha_resolucion_fallecido': user.x_fecha_resolucion_fallecido, 'documento': user.x_document,
+                        'resolucion_fallecido': user.x_resolucion_fallecido, 'tipo_documento': user.x_document_type_ID.x_name,
+                        'carrera': user.x_institute_career.x_name}}
+            else:
+                return {'ok': True, 'result': tramites, 'data_user': {'fallecido': False}}
         else:
             return {'ok': False, 'result': 'No hay registros con la información suministrada'}
     

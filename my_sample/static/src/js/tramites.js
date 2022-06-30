@@ -28,14 +28,19 @@ odoo.define("website.tramites", function (require) {
     const Tramites = Class.extend({
         validar_tramites: function (token, _this) {
             let origen = data.origen;
+            const is_beneficio = location.href.indexOf("beneficio") != -1;
+            const route = is_beneficio
+                ? "/validar_tramites_beneficio"
+                : "/validar_tramites";
             !origen ? (origen = "") : (origen = `/${data.origen}`);
             return rpc
                 .query({
-                    route: "/validar_tramites",
-                    params: { data: data, token: token },
+                    route,
+                    params: { data, token },
                 })
                 .then(function (response) {
                     resetCaptcha();
+                    console.log(response);
                     if (response.error_captcha) {
                         return;
                     }
@@ -189,6 +194,102 @@ odoo.define("website.tramites", function (require) {
                                 )
                                 .attr("target", "_self");
                         } else {
+                            if(response.aplica_beneficio){
+                                Swal.fire({
+                                  text: response.mensaje_beneficiario,
+                                  focusConfirm: true,
+                                  confirmButtonText: 'Continuar',
+                                  confirmButtonColor: '#c8112d',
+                                }).then(({value}) => {
+                                  if (value) {
+                                    // Redirect formulario beneficio
+                                      console.log('Redirect formulario beneficio');
+                                    $(location).attr(
+                                        "href",
+                                        "/beneficio/tramite" +
+                                            origen +
+                                            "/[" +
+                                            data.doc_type +
+                                            ":" +
+                                            data.doc +
+                                            "]"
+                                    );
+                                  }
+                                });
+                            } else {
+                                $(location).attr(
+                                    "href",
+                                    "/tramite" +
+                                        origen +
+                                        "/[" +
+                                        data.doc_type +
+                                        ":" +
+                                        data.doc +
+                                        "]"
+                                );
+                            }
+                            }
+                    } else if (
+                        !response.id &&
+                        location.href.indexOf("/consulta") != -1
+                    ) {
+                        $("#msj_result")
+                            .removeClass("invisible")
+                            .attr("aria-hidden", false);
+                        $("#text_message").text(
+                            `No se ha encontrado trámite en curso con los datos ingresados`
+                        );
+                    } else if (
+                        response.ok == "False" &&
+                        location.href.indexOf("/renovacion")
+                    ) {
+                        $("#msj_result")
+                            .removeClass("invisible")
+                            .attr("aria-hidden", false);
+                        $("#text_message").text(response.messaje);
+                    } else if (
+                        response.consulta_beneficio &&
+                        !response.aplica_beneficio
+                    ) {
+                        $("#msj_result")
+                            .removeClass("invisible")
+                            .attr("aria-hidden", false);
+                        $("#text_message").text(response.mensaje_no_beneficiario);
+                    } else if (response.consulta_beneficio && response.aplica_beneficio) {
+                        $(location).attr(
+                            "href",
+                            "/beneficio/tramite" +
+                                origen +
+                                "/[" +
+                                data.doc_type +
+                                ":" +
+                                data.doc +
+                                "]"
+                        );
+                    } else {
+                        if(response.aplica_beneficio){
+                            Swal.fire({
+                              text: response.mensaje_beneficiario,
+                              focusConfirm: true,
+                              confirmButtonText: 'Continuar',
+                              confirmButtonColor: '#c8112d',
+                            }).then(({value}) => {
+                              if (value) {
+                                // Redirect formulario beneficio
+                                  console.log('Redirect formulario beneficio');
+                                $(location).attr(
+                                    "href",
+                                    "/beneficio/tramite" +
+                                        origen +
+                                        "/[" +
+                                        data.doc_type +
+                                        ":" +
+                                        data.doc +
+                                        "]"
+                                );
+                              }
+                            });
+                        } else {
                             $(location).attr(
                                 "href",
                                 "/tramite" +
@@ -200,35 +301,6 @@ odoo.define("website.tramites", function (require) {
                                     "]"
                             );
                         }
-                    } else if (
-                        !response.id &&
-                        location.href.indexOf("/consulta") != -1
-                    ) {
-                        $("#msj_result")
-                            .removeClass("invisible")
-                            .attr("aria-hidden", false);
-                        $("#text_message").text(
-                            `No se ha encontrado trámite en curso con los datos ingresados`
-                            );
-                    } else if (
-                        response.ok == "False" &&
-                        location.href.indexOf("/renovacion")
-                    ) {
-                        $("#msj_result")
-                            .removeClass("invisible")
-                            .attr("aria-hidden", false);
-                        $("#text_message").text(response.messaje);
-                    } else {
-                        $(location).attr(
-                            "href",
-                            "/tramite" +
-                                origen +
-                                "/[" +
-                                data.doc_type +
-                                ":" +
-                                data.doc +
-                                "]"
-                        );
                     }
                 });
         },
@@ -257,11 +329,11 @@ odoo.define("website.tramites", function (require) {
                         div_msj
                             .removeClass("invisible")
                             .attr("aria-hidden", false);
-                            div_msj.find("div").text(
-                                `Usted no se encuentra registrado por Convenio, si ya intentó la búsqueda por documento 
+                        div_msj.find("div").text(
+                            `Usted no se encuentra registrado por Convenio, si ya intentó la búsqueda por documento 
                              y nombre por favor comuníquese con la universidad ó con el CPNAA al siguiente correo 
                              electrónico: convenios@cpnaa.gov.co o al número telefónico (601)3502700 ext 111-115 en Bogotá`
-                            );
+                        );
                     } else if (response.graduandos.length == 1) {
                         if (response.graduandos[0].id_user_tramite) {
                             $(location).attr(
@@ -308,7 +380,7 @@ odoo.define("website.tramites", function (require) {
                             .find("div")
                             .removeClass("alert-primary")
                             .addClass("alert-info");
-                            let texto =
+                        let texto =
                             '<h5 class="text-center">Se han encontrado varias coincidencias, por favor selecciona</h5>';
                         response.graduandos.forEach((grad) => {
                             let enlace = grad.id_user_tramite
@@ -612,7 +684,7 @@ odoo.define("website.tramites", function (require) {
                                 $("#mssg_result")
                                     .addClass("alert alert-danger")
                                     .text(
-                                        "Error: " + resp.message.slice(0, 80)
+                                        "Error: " + resp.message.slice(0, 250)
                                     );
                                 $("#btn-registrar").removeAttr("disabled");
                             }
@@ -678,9 +750,11 @@ odoo.define("website.tramites", function (require) {
             if (campos_validos) {
                 $("#btn_verificar").removeAttr("disabled");
                 $("#btn_verificar_convenios").removeAttr("disabled");
+                $("#btn_verificar_beneficio").removeAttr("disabled");
             } else {
                 $("#btn_verificar").attr("disabled", "disabled");
                 $("#btn_verificar_convenios").attr("disabled", "disabled");
+                $("#btn_verificar_beneficio").attr("disabled", "disabled");
             }
         },
     });
@@ -691,6 +765,32 @@ odoo.define("website.tramites", function (require) {
     if (location.href.indexOf("/edicion/") != -1) {
         tramites.get_data_edicion();
     }
+
+    // Inicio del trámite boton de enviar beneficio
+    $("#validar_tramites_beneficio").submit(function (e) {
+        e.preventDefault();
+        grecaptcha.ready(async function () {
+            let result = await grecaptcha.getResponse();
+            if (result != "") {
+                let valido = validaciones.validar_campos_inicial(
+                    validaciones,
+                    "doc",
+                    "doc_type"
+                );
+                tramites.habilitarBtn(valido);
+                if (valido) {
+                    tramites.validar_tramites(result);
+                    $("#btn_verificar_beneficio").attr("disabled", "disabled");
+                }
+            } else {
+                $("#btn_verificar_beneficio").removeAttr("disabled");
+                validaciones.mostrar_helper(
+                    false,
+                    "Por favor, realiza la validación"
+                );
+            }
+        });
+    });
 
     // Inicio del trámite boton de enviar
     $("#validar_tramites").submit(function (e) {
@@ -1191,6 +1291,17 @@ odoo.define("website.tramites", function (require) {
         $("#btn_verificar_convenios").removeAttr("disabled");
     }
 
+    function getMaxDateGrade() {
+        const is_beneficio = location.href.indexOf("beneficio") != -1;
+        if (is_beneficio) {
+            const fecha_max = $("#fecha_maxima").attr("value");
+            const fecha = new Date(Date.parse(fecha_max));
+            fecha.setHours(fecha.getHours() + 5); //Hora Colombia
+            return fecha;
+        }
+        return "0";
+    }
+
     // Opciones para idioma e inicializar el datepicker
     $.datepicker.regional["es"] = {
         closeText: "Cerrar",
@@ -1245,7 +1356,7 @@ odoo.define("website.tramites", function (require) {
     };
     $.datepicker.setDefaults($.datepicker.regional["es"]);
     $("[name=x_grade_date]").datepicker({
-        maxDate: "0",
+        maxDate: getMaxDateGrade(),
         dateFormat: "dd-mm-yy",
         changeMonth: true,
         changeYear: true,

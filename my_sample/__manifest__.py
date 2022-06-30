@@ -26,6 +26,7 @@
         'views/textos_tramite.xml',
         'views/nav_bar_convenios.xml',
         'views/inicio_tramite.xml',
+        'views/inicio_tramite_beneficio.xml',
         'views/lista_tramites.xml',
         'views/inicio_convenios.xml',
         'views/convenios_archivo_csv.xml',

@@ -30,6 +30,8 @@
                                        t-attf-value="{{ (request.env['x_cpnaa_service'].search_read([('x_name','=','RENOVACIÓN - LICENCIA TEMPORAL ESPECIAL')], ['id'])[0]['id']) }}"/>
                                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                 <input type="hidden" id="x_origin_type" name="x_origin_type" t-attf-value="{{ (origen) }}"/>
+                                <input t-if="beneficio" type="hidden" id="campo_beneficio" name="campo_beneficio" t-attf-value="{{ (beneficio) }}" />
+                                <input t-if="beneficio" type="hidden" id="fecha_maxima" t-attf-value="{{ (fecha_maxima) }}" />
                                 <div class="col-md-4">
                                     <label class="col-form-label o_fake_editable" for="x_user_type_ID">
                                         Tipo de usuario
@@ -951,8 +953,8 @@
                                         </div>
                                     </div>
                                 <div class="row mt-3">
-                                    <div id="div_results" class="offset-md-2 col-md-8">
-                                        <span id="mssg_result" role="alert"/>
+                                    <div id="div_results" class="col-md-10 d-flex justify-content-center">
+                                        <span id="mssg_result" class="text-center m-0" role="alert"/>
                                     </div>
                                     <div id="div_spinner" class="offset-md-5 col-md-5" aria-hidden="true">
                                         <div class="spinner-border text-primary" role="status">

@@ -101,7 +101,7 @@ class MySample(http.Controller):
         
     
     def validar_campos_egresado_acuerdo(self, record):
-        error, previo = '', False
+        error, campos, previo = '', '', False
         egresado = http.request.env['x_procedure_temp'].search([('x_documento','=',record['x_document'])])
         nombres = record['x_name'] == egresado.x_nombres
         apellidos = record['x_last_name'] == egresado.x_apellidos
@@ -109,22 +109,23 @@ class MySample(http.Controller):
         carrera = record['x_institute_career'] == str(egresado.x_carrera_select.id)
         universidad = record['x_institution_ID'] == str(egresado.x_universidad_select.id)
         if not nombres or not apellidos or not fecha_de_grado or not carrera or not universidad:
-            error = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Mensaje error formulario registro')]).x_value + ' '
+            error = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Mensaje error formulario registro')]).x_value
         if not nombres:
-            error += " 'Nombres'"
+            campos += " 'Nombres'"
             previo = True
         if not apellidos:
-            error += ", 'Apellidos'" if previo else " 'Apellidos'"
+            campos += ", 'Apellidos'" if previo else " 'Apellidos'"
             previo = True
         if not universidad:
-            error += ", 'Universidad'" if previo else " 'Universidad'"
+            campos += ", 'Universidad'" if previo else " 'Universidad'"
             previo = True
         if not fecha_de_grado:
-            error += ", 'Fecha de grado'" if previo else " 'Fecha de grado'"
+            campos += ", 'Fecha de grado'" if previo else " 'Fecha de grado'"
             previo = True
         if not carrera:
-            error += ", 'Carrera'" if previo else " 'Carrera'"
+            campos += ", 'Carrera'" if previo else " 'Carrera'"
             previo = True
+        error = error.replace('<campos>', campos)
         return error
     
     

@@ -1,168 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <data>
-        <template id="inicio_tramite" name="Inicio de Trámite">
-            <t t-call="website.layout">
-                <t t-set="additional_title">Inicio de Trámite</t>
-                <t t-call="my_sample.titulo_tramites"/>
-                <form t-if="form != 'convenio'" id="validar_tramites" class="container formSection mt-3">
-                    <div class="tab-content" id="nav-tabContent">
-                        <div class="tab-pane fade show active" id="nav-document" role="tabpanel" aria-labelledby="nav-document-tab">
-                            <div class="row form-group form-field wInput mx-auto">
-                                <label class="col-form-label" for="x_document_type_ID">
-                                    Tipo de Documento
-                                </label>
-                                <select class="form-control" name="x_document_type_ID" id="doc_type" required="required">
-                                    <option value="1">
-                                        CÉDULA DE CIUDADANÍA
-                                    </option>
-                                    <option value="2">
-                                        CÉDULA DE EXTRANJERÍA
-                                    </option>
-                                    <option value="5">
-                                        PASAPORTE
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="row form-group form-field wInput mx-auto">
-                                <label class="col-form-label" for="x_document">
-                                    Documento
-                                </label>
-                                <input type="text" class="form-control" name="x_document" id="doc" maxlength="45" required="required" />
-                            </div>
-                            <div class="form-group row d-flex justify-content-center">
-                                <small id="help_text" class="text-danger invisible" area-hidden="false">Helper-text</small>
-                            </div>
-                            <div class="form-group row d-flex justify-content-center">
-                                <div class="g-recaptcha" data-sitekey="6Lf2UcMZAAAAAMBlukQO3XsknMUsIEnWI2GXuX0z"></div>
-                            </div>           
-                            <div class="form-group row d-flex justify-content-center">
-                                <button type="submit" id="btn_verificar" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
-                            </div>
-                            <div id="msj_result" class="invisible mb-3 text-center" aria-hidden="true">
-                                <div id="text_message" class="alert alert-info d-flex justify-content-center" role="alert">
-                                </div>
-                                <div class="d-flex justify-content-center">
-<!--                                     <a id="btn-cancelar" type="button" class="btn btn-light">Cancelar</a> -->
-                                    <a id="btn-result" href="#" type="button" class="btn btn-light"></a>
-                                </div>
-                            </div>
-                            <div id="msj_documento" class="invisible mb-3 text-center" aria-hidden="true">
-                                <div class="alert alert-primary" role="alert"></div>
-                            </div>
+   <data>
+      <template id="inicio_tramite_beneficio" name="Inicio de Trámite">
+         <t t-call="website.layout">
+            <t t-set="additional_title">Inicio de Trámite</t>
+            <t t-call="my_sample.titulo_tramites" />
+             <h1 t-if="texto_beneficio" class="formTitle mt-0">
+              <font><span t-esc="texto_beneficio"/></font>
+            </h1>
+            <form t-if="form != 'convenio'" id="validar_tramites" class="container formSection mt-3">
+               <div class="tab-content" id="nav-tabContent">
+                  <div class="tab-pane fade show active" id="nav-document" role="tabpanel" aria-labelledby="nav-document-tab">
+                     <div class="row form-group form-field wInput mx-auto">
+                        <label class="col-form-label" for="x_document_type_ID">Tipo de Documento</label>
+                        <select class="form-control" name="x_document_type_ID" id="doc_type" required="required">
+                           <option value="1">CÉDULA DE CIUDADANÍA</option>
+                           <option value="2">CÉDULA DE EXTRANJERÍA</option>
+                           <option value="5">PASAPORTE</option>
+                        </select>
+                     </div>
+                     <div class="row form-group form-field wInput mx-auto">
+                        <label class="col-form-label" for="x_document">Documento</label>
+                        <input type="text" class="form-control" name="x_document" id="doc" maxlength="45" required="required" />
+                     </div>
+                     <div class="form-group row d-flex justify-content-center">
+                        <small id="help_text" class="text-danger invisible" area-hidden="false">Helper-text</small>
+                     </div>
+                     <div class="form-group row d-flex justify-content-center">
+                        <div class="g-recaptcha" data-sitekey="6Lf2UcMZAAAAAMBlukQO3XsknMUsIEnWI2GXuX0z" />
+                     </div>
+                     <div class="form-group row d-flex justify-content-center">
+                        <button type="submit" id="btn_verificar_beneficio" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
+                     </div>
+                     <div id="msj_result" class="invisible mb-3 text-center" aria-hidden="true">
+                        <div id="text_message" class="alert alert-info d-flex justify-content-center" role="alert" />
+                        <div class="d-flex justify-content-center">
+                           <a id="btn-result" href="#" type="button" class="btn btn-light" />
                         </div>
-                    </div>
-                </form>
-                <form t-if="form == 'convenio' and not por_nombre" id="validar_convenios_doc" class="container formSection mt-3">
-                    <nav>
-                        <ul class="nav nav-tabs tabradius mb-3 mt-0 wInput mx-auto">
-                            <li class="nav-item">
-                                <a class="nav-link tabradius active" href="/convenios/tramite">
-                                    Buscar por Documento
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link tabradius" href="/convenios/tramite/por_nombre">
-                                    Buscar por Nombres y Apellidos
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                    <div>
-                        <div>
-                            <div class="row form-group form-field wInput mx-auto">
-                                <label class="col-form-label" for="x_document_type_ID"> 
-                                    Tipo de Documento
-                                </label>
-                                <select class="form-control" name="x_document_type_ID" id="doc_type" required="required">
-                                    <option value="1">
-                                        CÉDULA DE CIUDADANÍA
-                                    </option>
-                                    <option value="2">
-                                        CÉDULA DE EXTRANJERÍA
-                                    </option>
-                                    <option value="5">
-                                        PASAPORTE
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="row form-group form-field wInput mx-auto">
-                                <label class="col-form-label" for="x_document">
-                                    Documento
-                                </label>
-                                <input type="text" class="form-control" name="x_document" id="doc" maxlength="45" required="required" />
-                            </div>
-                            <div class="form-group row d-flex justify-content-center">
-                                <small id="help_text" class="text-danger invisible" area-hidden="false">Helper-text</small>
-                            </div>
-                            <div class="form-group row d-flex justify-content-center">
-                                <div class="g-recaptcha" data-sitekey="6Lf2UcMZAAAAAMBlukQO3XsknMUsIEnWI2GXuX0z"></div>
-                            </div> 
-                            <div class="form-group row d-flex justify-content-center">
-                                <button type="submit" id="btn_verificar_convenios" 
-                                    class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar
-                                </button>
-                            </div>
-                            <div id="msj_result" class="invisible mb-3 text-center" aria-hidden="true">
-                                <div id="text_message" class="alert alert-info d-flex justify-content-center" role="alert">
-                                </div>
-                                <div class="d-flex justify-content-center">
-<!--                                     <a id="btn-cancelar" type="button" class="btn btn-light">Cancelar</a> -->
-                                    <a id="btn-result" href="#" type="button" class="btn btn-light"></a>
-                                </div>
-                            </div>                            
-                            <div id="msj_documento" class="invisible mb-3 text-center" aria-hidden="true">
-                                <div class="alert alert-primary" role="alert"></div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-                <form t-if="form == 'convenio' and por_nombre" id="validar_convenios_nombre" class="container formSection mt-3">
-                    <nav>
-                        <ul class="nav nav-tabs tabradius mb-3 mt-0 wInput mx-auto">
-                            <li class="nav-item">
-                                <a class="nav-link tabradius" href="/convenios/tramite">
-                                    Buscar por Documento
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link tabradius active" href="/convenios/tramite/por_nombre">
-                                    Buscar por Nombres y Apellidos
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                    <div>
-                        <div>
-                            <div class="row form-group form-field wInput mx-auto">
-                                <label class="col-form-label" for="x_names">
-                                    Ingrese sus nombres
-                                </label>
-                                <input type="text" class="form-control" name="x_names" id="x_names" maxlength="80" required="required" />
-                            </div>
-                            <div class="row form-group form-field wInput mx-auto">
-                                <label class="col-form-label" for="x_lastnames">
-                                    Ingrese sus apellidos
-                                </label>
-                                <input type="text" class="form-control" name="x_lastnames" id="x_lastnames" maxlength="80" required="required" />
-                            </div>
-                            <div class="form-group row d-flex justify-content-center">
-                                <small id="help_text" class="text-danger invisible" area-hidden="false">Helper-text</small>
-                            </div>
-                            <div class="form-group row d-flex justify-content-center">
-                                <div class="g-recaptcha" data-sitekey="6Lf2UcMZAAAAAMBlukQO3XsknMUsIEnWI2GXuX0z"></div>
-                            </div>
-                            <div class="form-group row d-flex justify-content-center">
-                                <button type="submit" id="btn_verificar_nombres" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="1">Enviar</button>
-                            </div>
-                            <div id="msj_nombre" class="invisible mb-3 text-center" aria-hidden="true">
-                                <div class="alert alert-primary" role="alert"></div>
-                            </div>
-                        </div>
-                    </div>                    
-                </form>    
-                <br/>
-                <t t-if="form != 'consulta'" t-call="my_sample.textos_tramite"/>
-             </t>
-        </template>
-    </data>
+                     </div>
+                     <div id="msj_documento" class="invisible mb-3 text-center" aria-hidden="true">
+                        <div class="alert alert-primary" role="alert" />
+                     </div>
+                  </div>
+               </div>
+            </form>
+            <br />
+            <t t-if="form != 'consulta'" t-call="my_sample.textos_tramite" />
+         </t>
+      </template>
+   </data>
 </odoo>

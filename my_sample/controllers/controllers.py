@@ -597,10 +597,12 @@ class MySample(http.Controller):
     @http.route('/tramite_fase_inicial', methods=["POST"], type="json", auth='public', website=True)
     def tramite_fase_inicial(self, **kw):
         data = kw.get('data')
+        campo_beneficio = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Nombre campo beneficio')]).x_value
         campos = ['id','x_studio_tipo_de_documento_1', 'x_studio_documento_1','x_service_ID','x_studio_correo_electrnico',
-                  'x_user_celular','x_studio_pas_de_expedicin_1','x_studio_ciudad_de_expedicin','x_studio_direccin','x_studio_telfono',
-                  'x_req_date','x_rate','x_studio_universidad_5','x_studio_carrera_1','x_studio_departamento_estado','x_origin_type',
-                  'x_studio_fecha_de_grado_2','x_studio_ciudad_1','x_origin_name','x_studio_nombres','x_studio_apellidos','x_grade_ID']
+                  'x_user_celular','x_studio_pas_de_expedicin_1','x_studio_ciudad_de_expedicin','x_studio_direccin',
+                  'x_req_date','x_rate','x_studio_universidad_5','x_studio_carrera_1','x_studio_departamento_estado',
+                  'x_studio_fecha_de_grado_2','x_studio_ciudad_1','x_origin_name','x_studio_nombres','x_studio_apellidos',
+                  'x_studio_telfono','x_origin_type','x_grade_ID',campo_beneficio]
         tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',data['doc_type']),
                                                                       ('x_studio_documento_1','=',data['doc']),
                                                                       ('x_cycle_ID.x_order','=',0)],campos)
@@ -610,6 +612,12 @@ class MySample(http.Controller):
             if (tramites[0]['x_origin_type'][1] == 'CORTE'):
                 corte_vigente = self.buscar_corte(tramites[0]['x_origin_name'])
                 _logger.info(corte_vigente)
+                #Si el tramite es por beneficio que la fecha limite de pago no sea mayor a la fecha fin del beneficio
+                if tramites[0][campo_beneficio]:
+                    fecha_fin = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha fin descuento')]).x_value
+                    fecha_fin_descuento = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
+                    if fecha_fin_descuento < corte_vigente['x_lim_pay_date']:
+                        corte_vigente['x_lim_pay_date'] = fecha_fin_descuento
                 tramites[0]['x_origin_name'] = corte_vigente['x_name']
                 return {'ok': True, 'tramite': tramites[0], 'codigo': codigo, 'corte': corte_vigente}
             elif tramites[0]['x_grade_ID']:
@@ -1210,6 +1218,8 @@ class MySample(http.Controller):
                             _logger.info('Graduando reportado por IES con plazo vencido => ['+data['doc_type']+':'+data['doc']+']')
                         else:
                             grado = False
+                            if egresado.x_fecha_de_grado < fecha_maxima_grado:
+                                beneficiario = True
                 else:
                     if egresado.x_fecha_de_grado < fecha_maxima_grado:
                         beneficiario = True

@@ -15,7 +15,7 @@
                 <div class="container">
                     <div class="formSection mt-3">
                         <form id="form_respuestas">
-                            <input type="hidden" id="genero" name="genero" t-attf-value="{{ tramite.x_studio_gnero.id }}" />
+                            <input type="hidden" id="genero" t-attf-value="{{ tramite.x_studio_gnero.id }}" />
                             <input type="hidden" id="x_doc_type_ID" name="x_doc_type_ID" 
                                    t-attf-value="{{ tramite.x_studio_tipo_de_documento_1.id }}" />
                             <input type="hidden" id="x_document" name="x_document" t-attf-value="{{ tramite.x_studio_documento_1 }}" />
@@ -24,10 +24,10 @@
                                     <label class="col-form-label o_fake_editable" for="universidades_preguntas"> Universidad donde se graduo </label>
                                 </div>
                                 <div class="col-md-12">
-                                    <input type="text" id="universidades_preguntas" placeholder="Buscar..." class="form-control"/>
+                                    <input type="text" id="universidades_preguntas" placeholder="Buscar..." class="form-control" autocomplete="off"/>
                                     <ul class="list-group" id="result_univ"></ul>
                                     <select class="form-control invisible i_required"
-                                            aria-hidden="true" name="x_institution_ID" id="x_institution_ID">
+                                            aria-hidden="true" name="x_studio_universidad_5" id="x_studio_universidad_5">
                                         <option id="seleccion_univ" value="" selected="true">universidad</option>
                                     </select>
                                 </div> 
@@ -37,10 +37,10 @@
                                     <label class="col-form-label o_fake_editable" for="carreras_preguntas"> Carrera registrada </label>
                                 </div>
                                 <div class="col-md-12">
-                                    <input type="text" id="carreras_preguntas" placeholder="Buscar..." class="form-control"/>
+                                    <input type="text" id="carreras_preguntas" placeholder="Buscar..." class="form-control" autocomplete="off"/>
                                     <ul class="list-group" id="result_carreras"></ul>
                                     <select class="form-control invisible i_required"
-                                            aria-hidden="true" name="x_career_ID" id="x_career_ID">
+                                            aria-hidden="true" name="x_studio_carrera_1" id="x_studio_carrera_1">
                                         <option id="seleccion_carreras" value="" selected="true">carrera</option>
                                     </select>
                                 </div> 
@@ -51,8 +51,9 @@
                                 </div>
                                 <div class="col-md-12">
                                     <div id="fecha_grado" class="input-group">
-                                        <input id="x_studio_fecha_de_grado_2" type="text" class="yearpicker hand form-control" maxlength="4"/>
-                                        <div class="input-group-append">
+                                        <input id="x_studio_fecha_de_grado_2" name="x_studio_fecha_de_grado_2" type="text" 
+                                            class="yearpicker hand form-control" maxlength="4"/>
+                                        <div class="input-group-append" for="x_studio_fecha_de_grado_2">
                                             <div class="input-group-text b-rad-right">
                                                 <i class="fa fa-calendar"/>
                                             </div>
@@ -65,7 +66,7 @@
                                     <label class="col-form-label o_fake_editable" for="x_enrollment_number"> Número de Matricula </label>
                                 </div>
                                 <div class="col-md-12">
-                                    <input type="text" id="x_enrollment_number" class="form-control i_required"/>
+                                    <input type="text" id="x_enrollment_number" name="x_enrollment_number" class="form-control i_required"/>
                                 </div> 
                             </div>   
                             <div class="row col-md-12 form-group form-field o_fake_not_editable o_website_form_required_custom">
@@ -75,7 +76,7 @@
                                     </label>
                                 </div>
                                 <div class="col-md-12">
-                                    <select class="form-control i_required" name="x_expedition_city" id="x_expedition_city">
+                                    <select class="form-control i_required" name="x_studio_ciudad_de_expedicin" id="x_studio_ciudad_de_expedicin">
                                         <option value="">Seleccione...</option>
                                         <t t-foreach="request.env['x_cpnaa_city'].search([],order='x_name')" t-as="expedition_city">
                                             <option t-att-value="expedition_city.id">
@@ -93,7 +94,7 @@
                                     </label>
                                 </div>
                                 <div class="col-md-12">
-                                    <input type="text" id="x_request_email" class="form-control i_required"/>
+                                    <input type="text" id="x_request_email" name="x_request_email" class="form-control i_required"/>
                                 </div> 
                             </div>   
                             <div class="form-group row d-flex justify-content-center my-5">

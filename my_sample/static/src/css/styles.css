@@ -141,6 +141,10 @@
     user-select: none;
 }
 
+.yearpicker-container.yearpicker-dropdown{
+    margin-top: 40px;
+}
+
 input[type='file'].btn-file {
     width: 0.1px;
     height: 0.1px;

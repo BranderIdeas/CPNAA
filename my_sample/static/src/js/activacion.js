@@ -128,22 +128,26 @@ odoo.define('website.activacion', function(require) {
             },
             validar_requeridos: function(){
                 let valido = true;
-                data.x_doc_type_ID = $('#x_doc_type_ID').val();
-                data.x_document = $('#x_document').val();
-                data.x_studio_universidad_5 = $('#x_institution_ID').val();
-                data.x_studio_carrera_1 = $('#x_career_ID').val();
-                data.x_studio_fecha_de_grado_2 = isValidYear($('#x_studio_fecha_de_grado_2').val()) ? $('#x_studio_fecha_de_grado_2').val() : '';
-                data.x_enrollment_number = $('#x_enrollment_number').val();
-                data.x_studio_ciudad_de_expedicin = $('#x_expedition_city').val();
-                data.x_request_email = $('#x_request_email').hasClass('is-invalid') ? '' : $('#x_request_email').val();
-                for (const d in data) {
-                    if (data[d] === ''){
-                        $('#'+d).addClass('is-invalid');
-                        validaciones.alert_error_toast( "Por favor, verifica en el formulario los campos no válidos y/o requeridos *", 'top');
-                        valido = false;
+                const form = document.forms[0];
+                for (const input of form.elements) {
+                    const {name, value, type} = input;
+                    if(name){
+                        const validationValues = validationData[name];
+                        if(isInvalid(value, validationValues.type_validator)){
+                            $(`#${validationValues.id_input}`).addClass("is-invalid");
+                            valido = false;
+                        }else{
+                            $(`#${validationValues.id_input}`).removeClass("is-invalid");
+                        }
+                        data[name] = value;
                     }
                 }
-                
+                if(!valido){
+                    validaciones.alert_error_toast(
+                        "Por favor, verifica en el formulario los campos no válidos y/o requeridos *",
+                        "top"
+                    );
+                }
                 return valido;
             },
             enviar_respuestas: function(){
@@ -260,9 +264,12 @@ odoo.define('website.activacion', function(require) {
                let consulta = await activacion.data_autocomplete_carreras(e.target.value, false, genero);
                $('#result_carreras').html('');
                $.each(consulta.carreras, function(key, value) { 
-                   let carrera = genero == '1' ? value.x_name : value.x_female_name;
-                   $('#result_carreras').append('<li class="list-group-item link-carreras"><span id="'+ value.id +'" class="text-gray carreras">' + carrera + '</span></li>');
-               });
+                    $("#result_carreras").append(`
+                        <li class="list-group-item link-carreras">
+                            <span id="${value.id}"class="text-gray carreras">${value.x_name}</span>
+                        </li>`
+                    );
+                });
             }
         })
      
@@ -361,5 +368,58 @@ odoo.define('website.activacion', function(require) {
         })
     
         const isValidYear =  (value) => (Number(value) > MAX_YEAR || Number(value) < MIN_YEAR) ? false : true;
+    
+        const validationData = {
+            genero: {
+                id_input: "genero",
+                type_validator: false,
+            },
+            x_doc_type_ID: {
+                id_input: "x_doc_type_ID",
+                type_validator: "required",
+            },
+            x_document: {
+                id_input: "x_document",
+                type_validator: "required",
+            },
+            x_studio_universidad_5: {
+                id_input: "universidades_preguntas",
+                type_validator: "required",
+            },
+            x_studio_carrera_1: {
+                id_input: "carreras_preguntas",
+                type_validator: "required",
+            },
+            x_studio_fecha_de_grado_2: {
+                id_input: "x_studio_fecha_de_grado_2",
+                type_validator: "required",
+            },
+            x_enrollment_number: {
+                id_input: "x_enrollment_number",
+                type_validator: "required",
+            },
+            x_studio_ciudad_de_expedicin: {
+                id_input: "x_studio_ciudad_de_expedicin",
+                type_validator: "required",
+            },
+            x_request_email: {
+                id_input: "x_request_email",
+                type_validator: "email",
+            },
+        };
+
+        function isInvalid(value, type){
+            switch (type) {
+                case false:
+                    return false;
+                case "email":
+                    return !validaciones.validar_email(value) || value === '';
+                case "required":
+                    return value === '';
+                default:
+                    console.log({value, type});
+                    return true;
+            }
+        }
 
     })

@@ -126,8 +126,25 @@ class MySample(http.Controller):
             campos += ", 'Carrera'" if previo else " 'Carrera'"
             previo = True
         error = error.replace('<campos>', campos)
+        if error != '':
+            self.create_attemp(record, campos)
         return error
     
+    def create_attemp(self, rec, error_fields):
+        http.request.env['x_cpnaa_attempts'].sudo().create({
+            'x_cellphone': rec["x_celphone"],
+            'x_document': rec["x_document"],
+            'x_document_type_ID': int(rec["x_document_type_ID"]),
+            'x_email': rec["x_email"],
+            'x_error_fields': error_fields,
+            'x_phone': rec["x_local_phone"],
+            'x_name': rec["x_name"],
+            'x_last_name': rec["x_last_name"],
+            'x_grade_date': rec["x_grade_date"],
+            'x_institution_ID': rec['x_institution_ID'],
+            'x_career_ID': rec['x_institute_career']
+        })
+
     
     # Actualiza el registro desde el formulario del website cuando el el trámite tiene un rechazo
     @http.route('/update_tramite', methods=["POST"], auth='public', website=True)

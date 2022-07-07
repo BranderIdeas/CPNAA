@@ -683,8 +683,8 @@ odoo.define("website.tramites", function (require) {
                                 ocultarSpinner();
                                 $("#mssg_result")
                                     .addClass("alert alert-danger")
-                                    .text(
-                                        "Error: " + resp.message.slice(0, 250)
+                                    .html(
+                                        resp.message.slice(0, 500)
                                     );
                                 $("#btn-registrar").removeAttr("disabled");
                             }

@@ -58,6 +58,12 @@ class MySample(http.Controller):
     def create_user(self, **kw):
         resp = {}
         _logger.info(kw)
+        ahora     = datetime.now() - timedelta(hours=5)
+        fecha_fin = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha fin descuento')]).x_value
+        fecha_fin_beneficio = datetime.strptime(fecha_fin, '%Y-%m-%d')
+        beneficio_activo = ahora < fecha_fin_beneficio
+        
+        # Validar si viene por el formulario de beneficio
         if kw.get('campo_beneficio'):
             error_egresado = self.validar_campos_egresado_acuerdo(kw)
             if error_egresado != '':
@@ -67,6 +73,21 @@ class MySample(http.Controller):
             kw.pop('campo_beneficio')
             nombre_campo = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Nombre campo beneficio')]).x_value
             kw[nombre_campo] = '1'
+        
+        # Validar fecha de grado si hay beneficio activo y entró por formulario normal
+        if beneficio_activo and not kw.get('campo_beneficio'):
+            
+            fecha_de_grado = kw.get('x_grade_date')
+            fecha_maxima   = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha maxima grado')]).x_value
+            mensaje_info   = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Mensaje profesional beneficiario no encontrado')]).x_value
+
+            fecha_maxima_grado   = datetime.strptime(fecha_maxima, '%Y-%m-%d').date()
+            fecha_grado_tramite  = datetime.strptime(fecha_de_grado, '%Y-%m-%d').date()
+            
+            if fecha_grado_tramite < fecha_maxima_grado:
+                resp = { 'ok': False, 'message': mensaje_info }
+                return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
+            
         if kw['x_tramite'] in self.nombre_tramite:
             _logger.info('validando 1')
             try:

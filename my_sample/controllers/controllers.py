@@ -59,12 +59,14 @@ class MySample(http.Controller):
         resp = {}
         _logger.info(kw)
         ahora     = datetime.now() - timedelta(hours=5)
+        hoy       = ahora.date()
         fecha_fin = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha fin descuento')]).x_value
         fecha_fin_beneficio = datetime.strptime(fecha_fin, '%Y-%m-%d')
         beneficio_activo = ahora < fecha_fin_beneficio
+        from_form_beneficio = kw.get('campo_beneficio')
         
         # Validar si viene por el formulario de beneficio
-        if kw.get('campo_beneficio'):
+        if from_form_beneficio:
             error_egresado = self.validar_campos_egresado_acuerdo(kw)
             if error_egresado != '':
                 _logger.info(error_egresado)
@@ -75,7 +77,7 @@ class MySample(http.Controller):
             kw[nombre_campo] = '1'
         
         # Validar fecha de grado si hay beneficio activo y entró por formulario normal
-        if beneficio_activo and not kw.get('campo_beneficio'):
+        if beneficio_activo and not from_form_beneficio:
             
             fecha_de_grado = kw.get('x_grade_date')
             fecha_maxima   = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha maxima grado')]).x_value

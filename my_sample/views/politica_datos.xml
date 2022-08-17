@@ -1,56 +1,396 @@
 <odoo>
     <data>
         <template id="politica_datos">
-            <div class="modal fade" id="policyModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-xl" role="document">
-                    <div class="modal-content">
-                    <div class="modal-header">
-                        <h3 class="modal-title formTitle">POLÍTICA PROTECCIÓN DE DATOS PERSONALES</h3>
-                    </div>
-                    <div class="modal-body">
-                        <div class="container">
-                        <div class="row">
+          <style>
+            .index {
+                list-style: none;
+            }
+            .disc {
+                list-style: disc;
+            }
+            p {
+                text-align: justify;
+            }
+            .col-md-12 {
+                padding-left: 0;
+            }
+          </style>
+          <div
+             class="modal fade"
+             id="policyModal"
+             tabindex="-1"
+             role="dialog"
+             aria-labelledby="policyModalLabel"
+             >
+             <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                   <div class="modal-header">
+                      <div class="container">
+                         <table>
+                            <tr>
+                               <td style="width: 20%">
+                                  <img
+                                     class="mt-2"
+                                     src="https://branderideas-cpnaa.odoo.com/web/image/website/1/logo/CPNAA%20OFICINA%20VIRTUAL?unique=bf43b16"
+                                     alt="logo-cpnaa"
+                                     style="width: 120%"
+                                     />
+                               </td>
+                               <td style="width: 60%" class="text-center">
+                                  <h3 class="modal-title formTitle" style="font-size: 1.2rem">
+                                     POLÍTICA PROTECCIÓN DE DATOS PERSONALES
+                                  </h3>
+                               </td>
+                               <td style="width: 20%">
+                                  <table style="font-size: 0.9rem">
+                                     <tr>
+                                        <td style="width: 50px"><b>Código</b></td>
+                                        <td>PA-GC-10</td>
+                                     </tr>
+                                     <tr>
+                                        <td style="width: 50px"><b>Versión</b></td>
+                                        <td>3</td>
+                                     </tr>
+                                     <tr>
+                                        <td style="width: 50px"><b>Tipo</b></td>
+                                        <td>Politica</td>
+                                     </tr>
+                                     <tr>
+                                        <td style="width: 50px"><b>Implementación</b></td>
+                                        <td>11/08/2022</td>
+                                     </tr>
+                                     <tr>
+                                        <td style="width: 50px">
+                                           <b
+                                              >Alcance <br />
+                                           Nivel de confidencialidad</b
+                                              >
+                                        </td>
+                                        <td></td>
+                                     </tr>
+                                  </table>
+                               </td>
+                            </tr>
+                         </table>
+                      </div>
+                   </div>
+                   <div class="modal-body">
+                      <div class="container">
+                         <div class="row">
                             <div class="col-md-12">
-                            <ol>
-                                <li>
-                                <p class="lead"><b>OBJETO</b><br/>Establecer las medidas generales para garantizar los niveles de seguridad y privacidad adecuados para la protección de datos personales, con el fin de evitar posibles adulteraciones, pérdidas, consultas, usos o accesos no autorizados.</p>
-                                </li>
-                                <li>
-                                <p class="lead"><b>ALCANCE</b><br/>Aplica a los datos personales registrados en cualquier base de datos del Consejo Profesional Nacional de Arquitectura y sus profesiones Auxiliares cuyo titular sea una persona natural.<br/><br/></p>
-                                </li>
-                                <li>
-                                <p class="lead"><b>DEFINICIONES<br/></b>DATO BIOMETRICO<br/>DATO PERSONAL<br/>HABEAS DATA<br/></p>
-                                </li>
-                                <li>
-                                <p class="lead">
-                                    <b>CONDICIONES GENERALES</b><br/>El CPNAA informa a los titulares de los datos acerca de los mecanismos establecidos para la autorización del tratamiento de los datos personales los cuales incluyen: medios técnicos, orales o por medio de conductas inequívocas que permitan determinar el otorgamiento de la autorización por parte del Titular. Los Responsables del tratamiento de datos conservan el registro de la autorización de tratamiento de datos personales.<br/><br/>Los trabajadores y terceros de la Entidad sólo recopilan la cantidad mínima de datos personales requerida para cumplir con los propósitos del CPNAA o los requerimientos de los interesados. Dicho recaudo sólo se realiza una vez que se obtiene la respectiva autorización por parte del Titular de los datos. <br/><br/>
-                                    Los responsables de las bases de datos adoptan las medidas necesarias para garantizar la seguridad de los datos de carácter personal y así evitar su destrucción, alteración, pérdida o tratamiento no autorizado. Estas medidas incluyen los mecanismos de seguridad físicos y lógicos más adecuados, de acuerdo con el desarrollo tecnológico, de tal forma se garantiza la protección de la información almacenada y el secreto profesional. <br/><br/>
-                                    Las bases de datos que contienen datos personales, son administradas de tal modo que se garantiza el respeto a derechos fundamentales como la intimidad, el buen nombre, y en especial, el Habeas Data de los Titulares de los datos.<br/><br/>
-                                    Ningún trabajador o tercero debe retirar o transmitir información que contenga datos personales sin la debida autorización expresa del Responsable de la base de datos o el registro de información; y en caso de que se facilite información a terceros, se garantiza el buen uso y se cuenta con el debido consentimiento para el tratamiento de los datos conforme a su finalidad por parte el Titular de los datos. Los mecanismos de transferencia se realizan a través de las políticas y procedimientos de seguridad y privacidad descritas las políticas de seguridad de la información de la Entidad.<br/><br/>
-                                    Los responsables y encargados del tratamiento de los datos personales sólo pueden recolectar, almacenar, usar o circular dichos datos durante el tiempo establecido para cumplir las finalidades que se justificaron en el tratamiento. Por lo tanto, una vez se cumpla con los objetivos y las finalidades del tratamiento, el Responsable y el Encargado deben suprimir los datos personales que tengan en su posesión de una forma segura. <br/><br/>
-                                    Los trabajadores o contratistas de la Entidad no pueden realizar el tratamiento de datos personales de niños, niñas y adolescentes, excepto cuando se trate de datos públicos. En este caso, la Entidad respeta los intereses y los derechos fundamentales, conforme a una autorización previa del representante legal de cualquiera de ellos. <br/><br/>
-                                    En el caso de que no sea posible poner a disposición del Titular de la información las políticas de tratamiento, los responsables del tratamiento de datos informan por medio de un Aviso de Privacidad al Titular sobre la existencia de las políticas y la forma en la cual puede acceder a las mismas, en el momento en el que se vaya a realizar la recolección de datos personales.<br/><br/>
-                                    Los trabajadores o terceros que tengan acceso a datos personales tratados y administrados por la Entidad, deben cumplir con la política de protección de datos personales, haciendo uso de los controles y medidas establecidas para la protección de la información conforme a su nivel de clasificación. <br/><br/>El Responsable de las bases de datos que contengan información personal, debe asegurar que antes de realizar cualquier tratamiento de los datos, la Entidad cuenta con las autorizaciones de los Titulares y los mecanismos de control para la protección de la información.<br/><br/>
-                                    Los trabajadores o terceros deben evitar el acceso a los datos personales para los cuales no se encuentren autorizados y en caso de que observen violación o fallas de los mecanismos de control de seguridad y privacidad, estos hechos deberán ser reportados al Profesional Especializado Código 02 Grado 04 de la Oficina Administrativa y Financiera para determinar las acciones de tratamiento del evento de seguridad. <br/><br/>
-                                    En caso de que se requiera realizar transferencia de datos personales, se deberá efectuar de acuerdo con el Procedimiento de Recepción y/o Transferencia de Información de la Entidad. <br/><br/>Se debe realizar la actualización periódica de las listas de acceso de las personas y trabajadores autorizados para efectuar cualquier tipo de tratamiento frente a los datos personales. Así mismo se identificarán, de acuerdo con los niveles de clasificación, los mecanismos apropiados para garantizar la seguridad de los datos de carácter personal y evitar su alteración, pérdida, tratamiento o acceso no autorizado. <br/><br/>
-                                    Una vez se cumpla el plazo de tiempo del tratamiento de los datos personales, el Responsable de los mismos, deberá velar porque sean eliminados de forma segura, para evitar su recuperación <br/><br/>
-                                    <b>DEFINICIONES</b><br/>
-                                    <b>DATO BIOMETRICO</b>: Parámetros físicos únicos de cada persona que comprueban su identidad y se evidencian cuando la persona o una parte de ella interacciona con el sistema (ej. huella digital o voz). <br/>
-                                    <b>DATO PERSONAL</b>: Es cualquier pieza de información vinculada a una o varias personas determinadas o determinables o que puedan asociarse con una persona natural o jurídica. Los datos personales pueden ser públicos, semiprivados o privados. Ley 1266/2008 <br/>
-                                    <b>HABEAS DATA:</b> Derecho a acceder a la información personal que se encuentre en archivos o bases de datos; implica la posibilidad de ser informado acerca de los datos registrados sobre sí mismo y la facultad de corregirlos. <br/>
-                                </p>
-                                </li>
-                            </ol>
+                               <ol class="index">
+                                  <li>
+                                     <p class="lead">
+                                        <b>1. OBJETIVO:</b><br /><br />Establecer los criterios para la recolección,
+                                        almacenamiento, uso, circulación y supresión de datos personales necesarios
+                                        para la Expedición de las correspondientes tarjetas de matrícula profesional
+                                        de arquitectura y certificados de inscripción profesional; realizar la
+                                        cancelación o suspensión de la matrícula profesional de arquitectura y/o
+                                        certificado de inscripción profesional por faltas al Código de Etica y al
+                                        correcto ejercicio profesional; Fomentar el ejercicio de la profesión de la
+                                        arquitectura y profesiones auxiliares dentro de los postulados de la ética
+                                        profesional; Denunciar ante las autoridades competentes las violaciones
+                                        comprobadas a las disposiciones legales que reglamenten el ejercicio
+                                        profesional de la arquitectura y profesiones auxiliares; Elaborar y mantener
+                                        un registro actualizado de arquitectos y profesionales auxiliares de la
+                                        arquitectura; Vigilar y controlar el ejercicio profesional de los
+                                        arquitectos y de los profesionales auxiliares de la arquitectura de los
+                                        datos personales tratados por EL CONSEJO PROFESIONAL NACIONAL DE
+                                        ARQUITECTURA Y SUS PROFESIONES AUXILIARES.
+                                     </p>
+                                  </li>
+                                  <li>
+                                     <p class="lead">
+                                        <br />
+                                        <b>2. ALCANCE:</b><br /><br />Esta política aplica para toda la información personal
+                                        registrada en las bases de datos del CONSEJO PROFESIONAL NACIONAL DE
+                                        ARQUITECTURA Y SUS PROFESIONES AUXILIARES, quien actúa en calidad de
+                                        responsable del tratamiento de los datos personales.
+                                     </p>
+                                  </li>
+                                  <li>
+                                     <p class="lead">
+                                        <br />
+                                        <b>3. OBLIGACIONES:</b><br /><br />Esta política es de obligatorio y estricto
+                                        cumplimiento para todos los trabajadores y terceros con acceso a las bases
+                                        de datos con información personal del CONSEJO PROFESIONAL NACIONACIONAL DE
+                                        ARQUITECTURA Y SUS PROFESIONES AUXILIARES.
+                                     </p>
+                                  </li>
+                                  <li>
+                                     <p class="lead">
+                                        <br />
+                                        <b>4. RESPONSABLE DEL TRATAMIENTO:</b><br /><br />EL CONSEJO PROFESIONAL NACIONAL DE
+                                        ARQUITECTURA Y SUS PROFESIONES AUXILIARES, Entidad legalmente constituida
+                                        mediante la mediante la Ley 435 de 1998, y regulado por el Decreto 932 de
+                                        1998, la Ley 1768 de 2015 y la Ley 1796 de 2016, encargado del fomento,
+                                        promoción, control y vigilancia del ejercicio de la profesión de
+                                        Arquitectura y sus Profesiones Auxiliares identificada con el NIT
+                                        830.059.954- 7, con domicilio principal en la Carrera 6 No. 26 B - 85 -
+                                        Oficina 201 de la ciudad de Bogotá, República de Colombia. Página
+                                        <a href="https://www.cpnaa.gov.co">www.cpnaa.gov.co</a>, Teléfono
+                                        601-3502700 ext. 1101 y ext. 1106 en la ciudad de Bogotá.<br />
+                                     </p>
+                                  </li>
+                                  <li>
+                                     <p class="lead">
+                                        <br />
+                                        <b>5. TRATAMIENTO Y FINALIDAD</b><br /><br />El tratamiento que realizará el CONSEJO
+                                        PROFESIONAL NACIONAL DE ARQUITECTURA Y SUS PROFESIONES AUXILIARES, con la
+                                        información personal será el siguiente:<br />
+                                     <ul class="disc">
+                                        <li>
+                                           <p class="lead">
+                                              La recolección, almacenamiento, uso, circulación de información personal para efectuar las gestiones pertinentes para el
+                                              desarrollo de las funciones designadas en mediante la Ley 435 de 1998, Articulo 10, y regulado por el Decreto 932 de 1998, la
+                                              Ley 1768 de 2015 y la Ley 1796 de 2016.
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Realizar la expedición de las correspondientes tarjetas de matrícula profesional de arquitectura y certificados de inscripción
+                                              profesional;
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Realizar la cancelación o suspensión de la matrícula profesional de arquitectura y/o certificado de inscripción profesional por
+                                              faltas al Código de Etica y al correcto ejercicio profesional;
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Fomentar el ejercicio de la profesión de la arquitectura y profesiones auxiliares dentro de los postulados de la ética
+                                              profesional;
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Denunciar ante las autoridades competentes las violaciones comprobadas a las disposiciones legales que reglamenten el
+                                              ejercicio profesional de la arquitectura y profesiones auxiliares;
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Elaborar y mantener un registro actualizado de arquitectos y profesionales auxiliares de la arquitectura;
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Vigilar y controlar el ejercicio profesional de los arquitectos y de los profesionales auxiliares de la arquitectura.
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Gestionar trámites, solicitudes, quejas, reclamos dentro del alcance de las competencias establecidas a la Entidad
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Realizar invitaciones a eventos y ofrecer nuevos servicios para fomentar el ejercicio de la profesión de la arquitectura y
+                                              profesiones auxiliares dentro de los postulados de la ética profesional
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Efectuar encuestas de satisfacción respecto de los servicios ofrecidos por el CONSEJO PROFESIONAL NACIONAL DE
+                                              ARQUITECTURA Y SUS PROFESIONES AUXILIARES
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Contactar al Titular a través de medios telefónicos para realizar encuestas, estudios y/o confirmación de datos personales
+                                              necesarios para la ejecución de las funciones legalmente establecidas a la Entidad.
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Contactar al Titular a través de medios electrónicos - SMS o chat para el envío de noticias o avances sobre los tramites que
+                                              adelante el titular de los datos ante el CONSEJO PROFESIONAL NACIONAL DE ARQUITECTURA Y SUS PROFESIONES
+                                              AUXILIARES.
+                                           </p>
+                                        </li>
+                                     </ul>
+                                     </p>
+                                  </li>
+                                  <li>
+                                     <p class="lead">
+                                        <br />
+                                        <b>5.1 Tratamiento de datos sensibles</b><br /><br />Cuando se recolecten datos calificados como sensibles, los mismos, serán tratados con las siguientes finalidades: cumplimiento de
+                                        las obligaciones misionales, caracterización de ciudadanos y grupos de interés, adelantar estrategias de mejoramiento en la
+                                        prestación del servicio y alimentar los sistemas de información de la Entidad que soportan el cumplimiento de sus obligaciones
+                                        legales
+                                     </p>
+                                  </li>
+                                  <li>
+                                     <p class="lead">
+                                        <br />
+                                        <b>6. DERECHOS DE LOS TITULARES:</b><br /><br />Como titular de sus datos personales Usted tiene derecho a:<br />
+                                     </p>
+                                     <p class="lead">
+                                        (i) Acceder de forma gratuita a los datos proporcionados que hayan sido objeto de tratamiento. El CONSEJO PROFESIONAL
+                                        NACIONAL DE ARQUITECTURA Y SUS PROFESIONES AUXILIARES. garantiza el derecho de acceso a los datos personales, una vez se
+                                        haya verificado la identidad del titular, su causahabiente o representante, poniendo a disposición de estos, los respectivos datos
+                                        personales. Para tal efecto se garantiza los medios y mecanismos electrónicos o presenciales sencillos y con disponibilidad
+                                        permanente, los cuales permitan el acceso directo del titular a los datos personales, los cuales serán informados en el Aviso de
+                                        Privacidad o en el Formato de Autorización para el tratamiento de datos personales. El CONSEJO PROFESIONAL NACIONAL DE
+                                        ARQUITECTURA Y SUS PROFESIONES AUXILIARES, habilitará los medios electrónicos existentes en la Entidad encaminados a
+                                        garantizar este derecho, que serán los mismos utilizados para la recepción y atención de peticiones, quejas, reclamos y sugerencias.
+                                     </p>
+                                     <p class="lead">
+                                        (ii) Conocer, actualizar y rectificar su información frente a datos parciales, inexactos, incompletos, fraccionados, que induzcan a error,
+                                        o aquellos cuyo tratamiento esté prohibido o no haya sido autorizado. El CONSEJO PROFESIONAL NACIONAL DE ARQUITECTURA Y
+                                        SUS PROFESIONES AUXILIARES, como responsable del tratamiento de los datos, deberá rectificar y actualizar a solicitud del titular
+                                        toda información que de éste resulte ser incompleta o inexacta. Para estos efectos, el titular o su causahabiente o representante,
+                                        señalará las actualizaciones y rectificaciones a que dieran lugar, junto a la documentación que soporte su solicitud.
+                                     </p>
+                                     <p class="lead">
+                                        (iii) Solicitar prueba de la autorización otorgada para el tratamiento de los datos personales.
+                                     </p>
+                                     <p class="lead">
+                                        (iv) Presentar ante la Superintendencia de Industria y Comercio (SIC) quejas por infracciones a lo dispuesto en la normatividad
+                                        vigente.
+                                     </p>
+                                     <p class="lead">
+                                        (v) Revocar la autorización y/o solicitar la supresión del dato, siempre que no exista un deber legal o contractual que impida
+                                        eliminarlos. Los Titulares podrán en todo momento y cuando consideren que los datos no están recibiendo un tratamiento
+                                        adecuado, o los mismos no son pertinentes o necesarios para la finalidad para la cual fueron recolectados, solicitar al CONSEJO
+                                        PROFESIONAL NACIONAL DE ARQUITECTURA Y SUS PROFESIONES AUXILIARES la supresión de sus datos personales mediante la
+                                        presentación de una petición. Si vencido el término legal respectivo, no se han eliminado los datos personales, el titular tendrá
+                                        derecho a solicitar a la Superintendencia de Industria y Comercio que ordene la supresión de los datos personales.
+                                     </p>
+                                     <p class="lead">
+                                        No obstante, la solicitud de supresión de datos no procederá cuando el titular tenga un deber legal o contractual de permanecer en
+                                        la base de datos o la supresión de los datos represente un impedimento en actuaciones administrativas, investigación de delitos o
+                                        actualización de sanciones a cargo del CONSEJO PROFESIONAL NACIONAL DE ARQUITECTURA Y SUS PROFESIONES AUXILIARES.
+                                     </p>
+                                     <p class="lead">
+                                        (vi) Abstenerse de responder las preguntas sobre datos sensibles. Tendrá carácter facultativo las respuestas que versen sobre datos
+                                        sensibles o sobre datos de las niñas y niños y adolescentes.
+                                     </p>
+                                     <br />
+                                  </li>
+                                  <li>
+                                     <p class="lead">
+                                        <b>7. ATENCIÓN DE PETICIONES, CONSULTAS, RECLAMOS Y SUGERENCIAS</b><br /><br />Los titulares o sus causahabientes que consideren que la información contenida en una base de datos debe ser objeto de corrección,
+                                        actualización o supresión, o cuando adviertan el presunto incumplimiento de cualquiera de los deberes contenidos en la Ley y demás
+                                        normas que la desarrollan. La Oficina Administrativa y Financiera es la dependencia que tiene a cargo dar trámite a las solicitudes de
+                                        los titulares para hacer efectivos sus derechos. El CONSEJO PROFESIONAL NACIONAL DE ARQUITECTURA Y SUS PROFESIONES
+                                        AUXILIARES ha dispuesto de los siguientes canales de atención de peticiones, consultar, reclamos y sugerencias
+                                        legales
+                                     </p>
+                                     <ul class="disc">
+                                        <li>
+                                           <p class="lead">
+                                              Canal presencial en las oficinas ubicadas en la Carrera 6 No. 26 B - 85 - Oficina 201 - Bogotá D.C.- Colombia. Horario de
+                                              atención: lunes a viernes de 7:00 a.m. a 1:00 p.m. y 2:00 p.m. a 4:00 p.m.
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Línea de atención al usuario en Bogotá: 601-3502700 ext. 1101 y ext. 1106
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Línea de atención procesos disciplinarios en Bogotá: 601-3502700 ext. 1102
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Línea de atención procesos disciplinarios en Bogotá: 601-3502700 ext. 1102
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Correo electrónico: info@cpnaa.gov.co
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Sitio web institucional <a href="https://cpnaa.gov.co/modulo-pqrs/">https://cpnaa.gov.co/modulo-pqrs/</a>
+                                           </p>
+                                        </li>
+                                     </ul>
+                                  </li>
+                                  <li>
+                                     <p class="lead">
+                                        <br />
+                                        <b>8. PROCEDIMIENTO PARA EL EJERCICIO DEL DERECHO DE HABEAS DATA</b><br /><br />En cumplimiento de las normas sobre protección de datos personales, El CONSEJO PROFESIONAL NACIONAL DE ARQUITECTURA Y
+                                        SUS PROFESIONES AUXILIARES presenta el procedimiento y requisitos mínimos para el ejercicio de sus derechos:
+                                        legales <br />
+                                        Para la radicación y atención de su solicitud le solicitamos suministrar la siguiente información:
+                                     <ul class="disc">
+                                        <li>
+                                           <p class="lead">
+                                              Nombre completo y apellidos
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Numero y tipo de documento de identificación
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Datos de contacto (Dirección de correspondencia y/o electrónica y teléfonos de contacto),
+                                           </p>
+                                        </li>
+                                        <li>
+                                           <p class="lead">
+                                              Motivo(s)/hecho(s) que dan lugar al reclamo con una breve descripción del derecho que desea ejercer (conocer, actualizar,
+                                              rectificar, solicitar prueba de la autorización otorgada, revocarla, suprimir, acceder a la información)
+                                           </p>
+                                        </li>
+                                     </ul>
+                                     <p class="lead">
+                                        Si el reclamo resulta incompleto, se requerirá al interesado dentro de los cinco (5) días siguientes a la recepción para que complete
+                                        los datos. Transcurridos un (1) mes desde la fecha del requerimiento, sin que el solicitante presente la información requerida, se
+                                        entenderá que ha desistido del reclamo.
+                                     </p>
+                                     <p class="lead">
+                                        En caso de que quien reciba el reclamo no sea competente para resolverlo, se dará traslado a la Oficina Administrativa y Financiera
+                                        como encargada de contactar al titular del dato, en un término máximo de dos (2) días hábiles e informará de la situación al
+                                        interesado.
+                                     </p>
+                                     <p class="lead">
+                                        El término máximo previsto por la ley para resolver su reclamación es de quince (15) días hábiles, contados a partir del día siguiente
+                                        a la fecha de su recibo. Cuando no fuere posible atender el reclamo dentro de dicho término, El CONSEJO PROFESIONAL NACIONAL
+                                        DE ARQUITECTURA Y SUS PROFESIONES AUXILIARES informará al interesado los motivos de la demora y la fecha en que se atenderá
+                                        su reclamo, la cual en ningún caso podrá superar los ocho (8) días hábiles siguientes al vencimiento del primer término.
+                                        Una vez cumplidos los términos señalados por la Ley 1581 de 2012 y las demás normas que la reglamenten o complementen, el
+                                        Titular al que se deniegue, total o parcialmente, el ejercicio de los derechos de acceso, actualización, rectificación, supresión y
+                                        revocación podrá poner su caso en conocimiento de la Superintendencia de Industria y Comercio - Delegatura para la Protección de
+                                        Datos Personales-.
+                                     </p>
+                                    </p>
+                                  </li>
+                                  <li>
+                                     <p class="lead">
+                                        <br />
+                                        <b>9. VIGENCIA:</b><br /><br />La presente Política para el Tratamiento de Datos Personales rige a partir del 11 de agosto de 2022.
+                                        Las bases de datos en las que se registrarán los datos personales tendrán una vigencia igual al tiempo en que se mantenga y utilice la 
+                                        información para las finalidades descritas en esta política. Los datos personales proporcionados se conservarán mientras no se
+                                        solicite su supresión por el interesado y siempre que no exista un deber legal de conservarlos.
+                                     </p>
+                                  </li>
+                               </ol>
+                               <br/>
+                               <b>DEFINICIONES</b>
+                               <hr/>
+                               <b>DATO BIOMETRICO</b>: Parámetros físicos únicos de cada persona que comprueban su identidad y se evidencian cuando la persona o una parte de ella interacciona con el sistema (ej. huella digital o voz). <br/>
+                               <b>DATO PERSONAL</b>: Es cualquier pieza de información vinculada a una o varias personas determinadas o determinables o que puedan asociarse con una persona natural o jurídica. Los datos personales pueden ser públicos, semiprivados o privados. Ley 1266/2008 <br/>
+                               <b>HABEAS DATA:</b> Derecho a acceder a la información personal que se encuentre en archivos o bases de datos; implica la posibilidad de ser informado acerca de los datos registrados sobre sí mismo y la facultad de corregirlos. <br/>
                             </div>
-                        </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
-                    </div>
-                    </div>
+                         </div>
+                      </div>
+                   </div>
+                   <div class="modal-footer">
+                      <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
+                   </div>
                 </div>
-            </div>
+             </div>
+          </div>
         </template>
     </data>
 </odoo>

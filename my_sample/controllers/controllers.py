@@ -67,11 +67,11 @@ class MySample(http.Controller):
         
         # Validar si viene por el formulario de beneficio
         if from_form_beneficio:
-            error_egresado = self.validar_campos_egresado_acuerdo(kw)
-            if error_egresado != '':
-                _logger.info(error_egresado)
-                resp = { 'ok': False, 'message': error_egresado }
-                return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
+#             error_egresado = self.validar_campos_egresado_acuerdo(kw)
+#             if error_egresado != '':
+#                 _logger.info(error_egresado)
+#                 resp = { 'ok': False, 'message': error_egresado }
+#                 return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
             kw.pop('campo_beneficio')
             nombre_campo = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Nombre campo beneficio')]).x_value
             kw[nombre_campo] = '1'

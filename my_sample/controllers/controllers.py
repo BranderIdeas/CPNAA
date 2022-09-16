@@ -1327,9 +1327,10 @@ class MySample(http.Controller):
             graduando = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select','=',int(data['doc_type'])),
                                                                             ('x_documento','=',data['doc']),('x_origin_type','=','CONVENIO')])
             
-            aplica_beneficio = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select','=',int(data['doc_type'])),
-                                                                                   ('x_fecha_de_grado','<',fecha_maxima_grado),
-                                                                                   ('x_documento','=',data['doc'])]) 
+#             aplica_beneficio = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select','=',int(data['doc_type'])),
+#                                                                                    ('x_fecha_de_grado','<',fecha_maxima_grado),
+#                                                                                    ('x_documento','=',data['doc'])]) 
+            aplica_beneficio = [1] # Remover validación contra tabla de egresado 16/09/2022
             
             grado = http.request.env['x_cpnaa_grade'].sudo().browse(graduando.x_grado_ID.id)
             
@@ -1522,12 +1523,12 @@ class MySample(http.Controller):
         fecha_maxima_grado = datetime.strptime(fecha_maxima, '%Y-%m-%d').date()
         tramites = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
                                                                         ('x_studio_documento_1','=',documento)])
-        aplica_beneficio = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select.id','=',tipo_doc),
-                                                                        ('x_documento','=',documento),
-                                                                        ('x_fecha_de_grado','<',fecha_maxima_grado)])
-        _logger.info(campo_beneficio)
-        if len(aplica_beneficio) < 1:
-            return http.request.redirect('https://cpnaa.gov.co/')
+        # aplica_beneficio = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select.id','=',tipo_doc),
+        #                                                                 ('x_documento','=',documento),
+        #                                                                 ('x_fecha_de_grado','<',fecha_maxima_grado)])
+        # _logger.info(campo_beneficio)
+        # if len(aplica_beneficio) < 1:
+        #     return http.request.redirect('https://cpnaa.gov.co/')
         if tramites:
             for tramite in tramites:
                 matricula = True if tramite.x_service_ID.x_name == 'MATRÍCULA PROFESIONAL' else False

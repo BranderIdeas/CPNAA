@@ -1209,8 +1209,9 @@ class MySample(http.Controller):
     def validar_tramites(self, **kw):
         data = kw.get('data')
         user, data_user, fallecido = False, False, False
+        origen = data.get('origen')
         if self.validar_captcha(kw.get('token')):
-            if kw['data']['origen'] == 'renovacion':
+            if origen == 'renovacion':
                 campos = ['x_studio_tipo_de_documento_1', 'x_studio_documento_1',  'x_expedition_date', 'x_expiration_date', 'x_renovacion_licencia', 'x_service_ID']    
                 vigencia = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_documento_1','=',kw['data']['doc']), 
                                                                                      ('x_studio_tipo_de_documento_1.id', "=", kw['data']['doc_type']), 
@@ -1261,9 +1262,10 @@ class MySample(http.Controller):
                             if egresado.x_fecha_de_grado < fecha_maxima_grado:
                                 beneficiario = True
                 else:
-                    if egresado.x_fecha_de_grado < fecha_maxima_grado:
+                    if egresado.x_fecha_de_grado < fecha_maxima_grado and origen in ['matricula','inscripciontt']:
                         beneficiario = True
                         
+            _logger.info('origen %s' % origen)
             _logger.info('egresado %s' % egresado)
             _logger.info('beneficiario %s' % beneficiario)
             _logger.info('grado %s' % grado)

@@ -1598,7 +1598,7 @@ class MySample(http.Controller):
                 if grado:
                     fecha_maxima = None
                     if grado.x_agreement_ID.x_before_after_agreement:
-                        fecha_maxima = grado.x_date + timedelta(days=grado.x_agreement_ID.x_days_to_load_later)
+                        fecha_maxima = grado.x_date + timedelta(days=grado.x_agreement_ID.x_days_to_pay_after)
                     else:
                         fecha_maxima = grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)
                     fecha_maxima = datetime.combine(fecha_maxima+timedelta(days=1), datetime.min.time())

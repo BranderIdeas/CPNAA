@@ -58,11 +58,13 @@ class MySample(http.Controller):
     def create_user(self, **kw):
         resp = {}
         _logger.info(kw)
-        ahora     = datetime.now() - timedelta(hours=5)
-        hoy       = ahora.date()
-        fecha_fin = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha fin descuento')]).x_value
+        ahora               = datetime.now() - timedelta(hours=5)
+        hoy                 = ahora.date()
+        no_beneficio        = ['licencia','renovacion']
+        nombre_tramite      = kw.get('x_tramite')
+        fecha_fin           = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha fin descuento')]).x_value
         fecha_fin_beneficio = datetime.strptime(fecha_fin, '%Y-%m-%d')
-        beneficio_activo = ahora < fecha_fin_beneficio
+        beneficio_activo    = ahora < fecha_fin_beneficio and nombre_tramite not in no_beneficio
         from_form_beneficio = kw.get('campo_beneficio')
         
         # Validar si viene por el formulario de beneficio
@@ -90,7 +92,7 @@ class MySample(http.Controller):
                 resp = { 'ok': False, 'message': mensaje_info }
                 return http.request.make_response(json.dumps(resp), headers={'Content-Type': 'application/json'})
             
-        if kw['x_tramite'] in self.nombre_tramite:
+        if nombre_tramite in self.nombre_tramite:
             _logger.info('validando 1')
             try:
                 campos = ['x_studio_carrera_1', 'x_service_ID']    

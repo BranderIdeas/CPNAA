@@ -64,8 +64,10 @@ class MySample(http.Controller):
         nombre_tramite      = kw.get('x_tramite')
         fecha_fin           = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha fin descuento')]).x_value
         fecha_fin_beneficio = datetime.strptime(fecha_fin, '%Y-%m-%d')
-        beneficio_activo    = ahora < fecha_fin_beneficio and nombre_tramite not in no_beneficio
+        univ_extranjera     = kw.get('x_institution_type_ID')        
         from_form_beneficio = kw.get('campo_beneficio')
+        beneficio_activo    = ahora < fecha_fin_beneficio and nombre_tramite not in no_beneficio
+        beneficio_activo    = univ_extranjera == '1' or univ_extranjera == 1
         
         # Validar si viene por el formulario de beneficio
         if from_form_beneficio:

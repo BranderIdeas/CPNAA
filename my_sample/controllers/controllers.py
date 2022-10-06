@@ -67,7 +67,7 @@ class MySample(http.Controller):
         univ_extranjera     = kw.get('x_institution_type_ID')        
         from_form_beneficio = kw.get('campo_beneficio')
         beneficio_activo    = ahora < fecha_fin_beneficio and nombre_tramite not in no_beneficio
-        beneficio_activo    = univ_extranjera == '1' or univ_extranjera == 1
+        beneficio_activo    = beneficio_activo and univ_extranjera == '1' or univ_extranjera == 1
         
         # Validar si viene por el formulario de beneficio
         if from_form_beneficio:

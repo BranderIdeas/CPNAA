@@ -590,7 +590,17 @@
                                 <div class="col-md-6">
                                     <label class="col-form-label o_fake_editable" for="x_institution_type_ID"> Tipo de Universidad </label>
                                 </div>
-                                <div class="col-md-6">
+                                <div t-if="beneficio" class="col-md-6">
+                                    <select class="form-control i_required inputDisabled" 
+                                            name="x_institution_type_ID" id="x_institution_type_ID">
+                                        <t t-foreach="request.env['x_cpnaa_institution_type'].search([('x_name','=','NACIONAL')])" t-as="tipo_universidad">
+                                        <option t-att-value="tipo_universidad.id">
+                                            <t t-esc="tipo_universidad.x_name"/>
+                                        </option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div t-if="not beneficio" class="col-md-6">
                                     <select t-if="cliente" class="form-control i_required inputDisabled" name="x_institution_type_ID">
                                         <option t-attf-value="{{ (cliente.x_universidad_select.x_institution_type_ID.id) }}" >
                                             <t t-esc="cliente.x_universidad_select.x_institution_type_ID.x_name" />

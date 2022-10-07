@@ -1571,18 +1571,22 @@ class MySample(http.Controller):
     # Renderiza formulario para corregir rechazos, si el trámite no tiene rechazo o ya fue corregido lo redirige al inicio
     @http.route('/tramite/<string:form>/edicion/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)
     def editar_tramite(self, form, tipo_doc, documento):
+        campo_beneficio = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Nombre campo beneficio')]).x_value
         tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
                                                                     ('x_studio_documento_1','=',documento),
                                                                     ('x_cycle_ID.x_order','<','5')])
-        rechazos = http.request.env['x_cpnaa_refuse_procedure'].sudo().search_read([('x_procedure_ID','=',tramite.id)])
-        user = http.request.env['x_cpnaa_user'].sudo().browse(tramite.x_user_ID.id)
+        rechazos  = http.request.env['x_cpnaa_refuse_procedure'].sudo().search_read([('x_procedure_ID','=',tramite.id)])
+        user      = http.request.env['x_cpnaa_user'].sudo().browse(tramite.x_user_ID.id)
+        beneficio = tramite[campo_beneficio]
         if user and len(rechazos)>0:
             if not rechazos[-1]['x_corrected']:
-                return http.request.render('my_sample.formulario_tramites', {'form': form, 'user': user, 'origen': tramite.x_origin_type.id})
+                return http.request.render('my_sample.formulario_tramites', {'form': form, 'user': user, 'beneficio': beneficio,
+                                                                             'origen': tramite.x_origin_type.id})
             else:
                 return http.request.redirect('/cliente/tramite/'+form)
         elif user and tramite.x_cycle_ID.x_order == 0:
-            return http.request.render('my_sample.formulario_tramites', {'form': form, 'user': user, 'origen': tramite.x_origin_type.id})
+            return http.request.render('my_sample.formulario_tramites', {'form': form, 'user': user, 'beneficio': beneficio,
+                                                                         'origen': tramite.x_origin_type.id})
         else:
             return http.request.redirect('/cliente/tramite/'+form)
 

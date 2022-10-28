@@ -955,8 +955,9 @@
                                                 </label>
                                             </div>
                                             <div class="col-md-12">
-                                                <label class="col-form-label o_fake_editable" for="x_elec_terminos">
-                                                <input type="checkbox" value="Yes" class="o_website_form_input" required="true" id="x_elec_terminos"/>
+                                                <label class="col-form-label o_fake_editable" for="x_accept_terms_and_conditions">
+                                                <input type="checkbox" value="Yes" class="o_website_form_input" required="true" 
+                                                       name="x_accept_terms_and_conditions" id="x_accept_terms_and_conditions"/>
                                                 Manifiesto y acepto que conozco los términos y condiciones de la <!--<a href="javascript:window.open('https://branderideas-cpnaa-developing-984497.dev.odoo.com/politica-de-proteccion-de-datos-personales', '', 'width=720,height=540');">--><a href="#" data-toggle="modal" data-target="#policyModal">política de protección de datos</a>, uso y tratamiento de datos personales. Y autorizo el uso de mis datos personales para recibir notificaciones sobre los trámites relacionados con las actividades misionales adelantadas por la entidad.
                                                 </label>
                                             </div>

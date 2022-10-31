@@ -464,6 +464,45 @@ class MySample(http.Controller):
                 return {'ok': True, 'result': tramites, 'data_user': {'fallecido': False}}
         else:
             return {'ok': False, 'result': 'No hay registros con la información suministrada'}
+        
+        # Controller para consulta de profesional por tipo y número de documento
+    @http.route('/get_profesional_activacion', methods=["POST"], type="json", auth='public', website=True)
+    def get_profesional_activacion(self, **kw):
+        _logger.info(kw)
+        if kw.get('token'):
+            if not self.validar_captcha(kw.get('token')):
+                return { 'ok': False, 'error_captcha': True }
+        campos = ['x_studio_nombres','x_studio_apellidos','x_studio_carrera_1','x_studio_documento_1','x_enrollment_number',
+                  'x_fallecido','x_user_ID','x_expedition_date','x_service_ID','x_studio_tipo_de_documento_1'] 
+        tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.x_name','=',kw['tipo_doc'].upper()),
+                                                                      ('x_studio_documento_1','=',kw['documento']),
+                                                                      ('x_cycle_ID.x_order','=',5)],campos)
+        
+        activaciones = http.request.env['x_virtual_activacion_procedure'].sudo().search_read([('x_document_type_ID.x_name','=',kw['tipo_doc'].upper()),
+                                                                      ('x_document','=',kw['documento'])],['id'])
+        if activaciones:
+            return { 'ok': False, 'message': 'Ya ha realizado anteriormente la activación virtual' }
+        if tramites:
+            fallecido, user, tramite_virtual = False, False, False
+            for tram in tramites:
+                _logger.info(tram["x_expedition_date"])
+                _logger.info(datetime.strptime('2020-09-01' , '%Y-%m-%d'))
+                if tram["x_expedition_date"] > datetime.strptime('2020-09-01' , '%Y-%m-%d').date():
+                    _logger.info('Ingresando... ')
+                    return { 'ok': False, 'message': 'Su Matrícula/Certificado ya es virtual, no es necesario que realice la activación' }
+            if tramites[0]['x_fallecido']:
+                fallecido = True
+                user = http.request.env['x_cpnaa_user'].sudo().browse(tramites[0]['x_user_ID'][0])
+            if fallecido:
+                matricula = user.x_institute_career.x_level_ID.x_name == 'PROFESIONAL'
+                return {'ok': True, 'result': tramites, 'data_user': { 'matricula': matricula, 'fallecido': True, 
+                        'fecha_resolucion_fallecido': user.x_fecha_resolucion_fallecido, 'documento': user.x_document,
+                        'resolucion_fallecido': user.x_resolucion_fallecido, 'tipo_documento': user.x_document_type_ID.x_name,
+                        'carrera': user.x_institute_career.x_name}}
+            else:
+                return {'ok': True, 'result': tramites, 'data_user': {'fallecido': False}}
+        else:
+            return {'ok': False, 'result': 'No hay registros con la información suministrada'}
     
     # Activa la automatización para la creación y seguimiento del trámite
     @http.route('/registrar_denuncia', methods=["POST"], auth='public', website=True)
@@ -978,7 +1017,7 @@ class MySample(http.Controller):
                          'id_tramite': tramite_valido.id, 'id_usuario': usuario.id, 'email': data.get('x_request_email')}
             actualizacion = self.actualizar_usuario(tramite_valido, usuario, data.get('x_request_email'))
             if actualizacion:
-                return { 'ok': True, 'data': { 'email': data.get('x_request_email'), 
+                return { 'ok': True, 'data': { 'ok': True, 'email': data.get('x_request_email'), 
                                            'servicio': tramite_valido.x_service_ID.x_name } }
         else:
             return { 'ok': False, 'respuestas': False,'message': 'No cumple con el minimo de respuestas validas' }
@@ -992,7 +1031,7 @@ class MySample(http.Controller):
         usuario = http.request.env['res.users'].sudo().browse(data.get('id_usuario'))
         actualizacion = self.actualizar_usuario(tramite, usuario, data.get('x_request_email'))
         if actualizacion:
-            return { 'ok': True, 'data': { 'email': data.get('x_request_email'), 
+            return { 'ok': True, 'data': { 'ok': True, 'email': data.get('x_request_email'), 
                                            'servicio': tramite.x_service_ID.x_name } }
         
     def actualizar_usuario(self, tramite, usuario, email):
@@ -1452,6 +1491,8 @@ class MySample(http.Controller):
     def formulario_tramites(self, origen, tipo_doc, documento):
         doc_validos = ['1','2','5']
         servicio = self.nombres_tramites(origen)
+        service_odoo = http.request.env['x_cpnaa_service'].sudo().search([('x_name','=',servicio)])
+        tarifa = service_odoo.x_rate
         matricula, tramite_en_curso = None, None
         if tipo_doc == '1' and not self.validar_solo_numeros(documento):
             return http.request.redirect('/cliente/tramite/'+origen)
@@ -1499,15 +1540,16 @@ class MySample(http.Controller):
                     fecha_expiracion = datetime.strptime(fecha_expedicion, '%Y-%m-%d %H:%M')
                     dias = (fecha_expiracion + ano - now) / timedelta(days=1)
                     _logger.info('yo soy la fecha de expiración sumando 1 año a la fecha de expedicion: ' + str(fecha_expiracion))
-                if dias >= 30 and not vigencia['x_renovacion_licencia']:
+                if dias < 30 and not vigencia['x_renovacion_licencia']:
                     #_logger.info('formulario tramites')
                     #actualizado = http.request.env['x_cpnaa_procedure'].browse('x_renovacion_licencia').sudo().write(1)
-                    return http.request.render('my_sample.formulario_tramites', {'user': user, 'tipo_doc': tipo_doc, 
+                    return http.request.render('my_sample.formulario_tramites', {'user': user, 'tipo_doc': tipo_doc, 'tarifa': tarifa,
                                                                                  'documento':documento, 'form': origen, 'origen': 1, 'renovar': vigencia})
                 else:
                     return http.request.render('my_sample.inicio_tramite', {'form': 'renovacion', 'inicio_tramite': False})
             else:
-                return http.request.render('my_sample.formulario_tramites', {'tipo_doc': tipo_doc, 'documento':documento, 'form': origen, 'origen': 1})
+                return http.request.render('my_sample.formulario_tramites', {'tipo_doc': tipo_doc, 'documento':documento, 
+                                                                             'form': origen, 'origen': 1, 'tarifa': tarifa})
 
     
     # Renderiza el formulario para trámites, valida si ya ha realizado este trámite y lo redirige al inicio del tramite
@@ -1529,12 +1571,14 @@ class MySample(http.Controller):
         fecha_maxima_grado = datetime.strptime(fecha_maxima, '%Y-%m-%d').date()
         tramites = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',tipo_doc),
                                                                         ('x_studio_documento_1','=',documento)])
-        # aplica_beneficio = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select.id','=',tipo_doc),
-        #                                                                 ('x_documento','=',documento),
-        #                                                                 ('x_fecha_de_grado','<',fecha_maxima_grado)])
-        # _logger.info(campo_beneficio)
-        # if len(aplica_beneficio) < 1:
-        #     return http.request.redirect('https://cpnaa.gov.co/')
+        service_odoo = http.request.env['x_cpnaa_service'].sudo().search([('x_name','=',servicio)])
+        tarifa = service_odoo.x_rate - service_odoo.x_discount
+#         aplica_beneficio = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select.id','=',tipo_doc),
+#                                                                         ('x_documento','=',documento),
+#                                                                         ('x_fecha_de_grado','<',fecha_maxima_grado)])
+#         _logger.info(campo_beneficio)
+#         if len(aplica_beneficio) < 1:
+#             return http.request.redirect('https://cpnaa.gov.co/')
         if tramites:
             for tramite in tramites:
                 matricula = True if tramite.x_service_ID.x_name == 'MATRÍCULA PROFESIONAL' else False
@@ -1545,7 +1589,7 @@ class MySample(http.Controller):
             return http.request.redirect('/cliente/tramite/'+origen)
         elif origen in validos and tipo_doc in doc_validos:
             return http.request.render('my_sample.formulario_tramites', {'tipo_doc': tipo_doc, 'documento':documento, 
-                                                                         'form': origen, 'origen': 1, 'beneficio': True,
+                                                                         'form': origen, 'origen': 1, 'beneficio': True, 'tarifa': tarifa,
                                                                          'fecha_maxima': fecha_maxima, 'campo_beneficio': campo_beneficio })
         
             
@@ -1553,10 +1597,13 @@ class MySample(http.Controller):
     @http.route('/tramite/convenios/<model("x_procedure_temp"):cliente>', auth='public', website=True)
     def formulario_convenio(self, cliente):
         form = 'matricula' if cliente.x_carrera_select.x_level_ID.x_name == 'PROFESIONAL' else 'inscripciontt'
+        servicio = 'MATRÍCULA PROFESIONAL CONVENIO' if form == 'matricula' else 'CERTIFICADO DE INSCRIPCIÓN PROFESIONAL CONVENIO'
         tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',cliente.x_tipo_documento_select.id),
                                                                            ('x_studio_documento_1','=',cliente.x_documento),
                                                                            ('x_cycle_ID.x_order','<','5')])
         grado = http.request.env['x_cpnaa_grade'].sudo().browse(cliente.x_grado_ID.id)
+        service_odoo = http.request.env['x_cpnaa_service'].sudo().search([('x_name','=',servicio)])
+        tarifa = service_odoo.x_rate - service_odoo.x_discount
         if not grado.x_agreement_ID.x_before_after_agreement:
             if not self.validar_fecha_limite(grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)):
                 return http.request.redirect('/cliente/tramite/'+form)
@@ -1566,7 +1613,7 @@ class MySample(http.Controller):
         if tramite:
             return http.request.redirect('/cliente/'+str(tramite.x_user_ID.id)+'/tramites')
         else:
-            return http.request.render('my_sample.formulario_tramites', {'cliente': cliente, 'form': form, 'origen': 2})
+            return http.request.render('my_sample.formulario_tramites', {'cliente': cliente, 'form': form, 'origen': 2, 'tarifa': tarifa })
     
     # Renderiza formulario para corregir rechazos, si el trámite no tiene rechazo o ya fue corregido lo redirige al inicio
     @http.route('/tramite/<string:form>/edicion/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)
@@ -1678,6 +1725,14 @@ class MySample(http.Controller):
             return { 'ok': True, 'email_exists': False }
         else:
             return { 'ok': False, 'email_exists': True }
+        
+            
+    # Retorna las ciudades que contienen la cadena recibidas
+    @http.route('/get_ciudades', methods=["POST"], type="json", auth='public', website=True)
+    def get_ciudades(self, **kw):
+        cadena = kw.get('cadena')
+        data = http.request.env['x_cpnaa_city'].sudo().search_read([('x_name', 'ilike', cadena)],['id','x_name'], limit=8)
+        return { 'ciudades': data }
     
     # Retorna las universidades que coinciden con la cadena recibida
     @http.route('/get_universidades', methods=["POST"], type="json", auth='public', website=True)
@@ -1902,11 +1957,30 @@ class MySample(http.Controller):
         id_universidad = data['universidad']
         id_convenio = data['convenio']
         id_grado = data['grado_id']
+        grado = http.request.env['x_cpnaa_grade'].browse(id_grado)
         archivo_temp = unicodedata.normalize('NFKD', archivo)
         archivo_pdf = archivo_temp.lstrip('data:application/pdf;base64,')
+        template_obj = http.request.env['mail.template'].sudo().search_read([('name','=','cpnaa_template_pdf_definitive_load')])[0]
+        attachment = http.request.env['ir.attachment'].sudo().create({
+            'name': 'listado-definitivo-graduandos-%s.pdf' % grado.x_name,
+            'type': 'binary',
+            'datas': archivo_pdf,
+            'mimetype': 'application/x-pdf'
+        })
         try:
+            if template_obj:
+                body = template_obj['body_html'].replace('${object.x_studio_universidad.x_name}', grado.x_studio_universidad.x_name)
+                body = body.replace('${object.x_date}', grado.x_date.strftime("%d-%m-%Y"))
+                mail_values = {
+                    'subject': template_obj['subject'],
+                    'attachment_ids': [attachment.id],
+                    'body_html': body,
+                    'email_to': template_obj['email_to'],
+                    'email_from': template_obj['email_from'],
+                }
+                http.request.env['mail.mail'].sudo().create(mail_values).send()
             update = {'x_phase_3': True, 'x_archivo_pdf_definitivo': archivo_pdf}
-            http.request.env['x_cpnaa_grade'].browse(id_grado).write(update)
+            grado.write(update)
         except:
             return {'ok': False, 'error': 'Ha ocurrido un error al intentar guardar el archivo, vuelve a intentarlo más tarde'}
         return {'ok': True, 'message': 'Listado guardado con exito', 'grado': id_grado, 'convenio': id_convenio, 'universidad': id_universidad}
@@ -1919,11 +1993,30 @@ class MySample(http.Controller):
         id_universidad = data['universidad']
         id_convenio = data['convenio']
         id_grado = data['grado_id']
+        grado = http.request.env['x_cpnaa_grade'].browse(id_grado)
         archivo_temp = unicodedata.normalize('NFKD', archivo)
         archivo_pdf = archivo_temp.lstrip('data:application/pdf;base64,')
+        template_obj = http.request.env['mail.template'].sudo().search_read([('name','=','cpnaa_template_pdf_diplomas')])[0]
+        attachment = http.request.env['ir.attachment'].sudo().create({
+            'name': 'cargue-diplomas-%s.pdf' % grado.x_name,
+            'type': 'binary',
+            'datas': archivo_pdf,
+            'mimetype': 'application/x-pdf'
+        })
         try:
+            if template_obj:
+                body = template_obj['body_html'].replace('${object.x_studio_universidad.x_name}', grado.x_studio_universidad.x_name)
+                body = body.replace('${object.x_date}', grado.x_date.strftime("%d-%m-%Y"))
+                mail_values = {
+                    'subject': template_obj['subject'],
+                    'attachment_ids': [attachment.id],
+                    'body_html': body,
+                    'email_to': template_obj['email_to'],
+                    'email_from': template_obj['email_from'],
+                }
+                http.request.env['mail.mail'].sudo().create(mail_values).send()
             update = {'x_phase_4': True, 'x_archivo_pdf_actas': archivo_pdf}
-            http.request.env['x_cpnaa_grade'].browse(id_grado).write(update)
+            grado.write(update)
         except:
             return {'ok': False, 'error': 'Ha ocurrido un error al intentar guardar el archivo, vuelve a intentarlo más tarde'}
         return {'ok': True, 'message': 'Listado guardado con exito', 'grado': id_grado, 'convenio': id_convenio, 'universidad': id_universidad}

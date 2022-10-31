@@ -626,7 +626,7 @@ odoo.define("website.tramites", function (require) {
                     console.log(err);
                 });
         },
-        enviar_data: function () {
+        enviar_data: function (ruta) {
             let formSample = document.forms[0];
             let formData = new FormData();
             let elems = formSample.elements;
@@ -653,11 +653,7 @@ odoo.define("website.tramites", function (require) {
             }
             try {
                 const request = new XMLHttpRequest();
-                if (location.href.indexOf("/edicion/") == -1) {
-                    request.open("POST", "/create_user");
-                } else {
-                    request.open("POST", "/update_tramite");
-                }
+                request.open("POST", ruta);
                 request.send(formData);
                 request.onreadystatechange = function (aEvt) {
                     if (request.readyState == 4) {
@@ -945,7 +941,29 @@ odoo.define("website.tramites", function (require) {
         let valido = await validaciones.validar_formulario(validaciones);
         if (valido) {
             mostrarSpinner();
-            tramites.enviar_data();
+            const editando = location.href.indexOf("/edicion/") !== -1;
+            const ruta = editando ? "/update_tramite" : "/create_user";
+            if(editando){
+               tramites.enviar_data(ruta); 
+            }else{
+                Swal.fire({
+                  html: getHtml(),
+                  showConfirmButton: false,
+                }).then(({value}) => {
+                  if (value) {
+                    setTimeout(() => {
+                        window.scroll({
+                          top: $('#mssg_result').offset().top - 520,
+                          behavior: 'smooth'
+                        });
+                    }, 250);
+                    setTimeout(() => {
+                        tramites.enviar_data(ruta);
+                    }, 300);
+                  }
+                });
+                hideLinkTramites();
+            }
         } else {
             $("#mssg_result").text("").removeClass("alert alert-danger");
             setTimeout(() => {
@@ -1263,6 +1281,12 @@ odoo.define("website.tramites", function (require) {
             return '<img src="' + $(this).data("img") + ' width="100%" />';
         },
     });
+    
+    // Mostrar/Ocultar ayuda al seleccionar ciudad y departamento de expedición
+    $('#x_expedition_city').on('focus', ()=>{$("a[rel=popover]").popover('show');});
+    $('#x_expedition_state').on('focus', ()=>{$("a[rel=popover]").popover('show');});
+    $('#x_expedition_city').on('blur', ()=>{$("a[rel=popover]").popover('hide');});
+    $('#x_expedition_state').on('blur', ()=>{$("a[rel=popover]").popover('hide');});
 
     //Controlador de paises/ciudades (Expedición)
     $("select[class*=child_place]")
@@ -1362,4 +1386,99 @@ odoo.define("website.tramites", function (require) {
         changeYear: true,
         yearRange: "-80:+0",
     });
+    
+    $('body').click((e)=>{
+        if(e.target.classList.contains('swal-confirm')){
+            Swal.clickConfirm();
+        };
+        if(e.target.classList.contains('swal-cancel')){
+            Swal.clickCancel();
+            $("#btn-registrar").removeAttr("disabled");
+            ocultarSpinner();
+        };
+    })
+    
+    function getHtml(){
+        const nombres = $('[name=x_name]').val() +' '+$('[name=x_last_name]').val();
+        const nombre_tramite = getNombreTramite();
+        const nombre_institucion = $('#universidades').val();
+        const number = parseFloat($('#tarifa').val());
+        const tarifa = '$'+number.toLocaleString(['ban','id']);
+        const nombre_carrera = getNombreCarrera();
+        const fecha_grado = $('[name=x_grade_date]').val();
+        const document_type = $("[name=x_document_type_ID]").val();
+        const document_number = $("[name=x_document]").val();
+        return `
+            <p>Estimado ${nombres} usted va a realizar un trámite de ${nombre_tramite} 
+              como egresado de la institución ${nombre_institucion}, carrera ${nombre_carrera}
+              de  grado ${fecha_grado}, recuerde que el valor actual del trámite es de: ${tarifa}.
+            </p>
+            <p class="text-center">
+              ¿Esta seguro de continuar con el trámite?
+            </p>
+            <div class="row justify-content-center mb-3">
+              <button type="button" class="btn btn-primary m-1 swal-confirm">Si, continuar</button>
+              <button type="button" class="btn btn-light m-1 swal-cancel">Volver al formulario</button>
+            </div>
+            <hr>
+            <p class="mt-2">En caso de ser otro tipo de tramite por favor seleccionar:</p>
+            <p class="text-center"><a id="link_matricula" href="/tramite/matricula/[${document_type}:${document_number}]">
+              Tramitar Mátricula Profesional de Arquitectura
+            </a></p>
+            <p class="text-center"><a id="link_certificado" href="/tramite/inscripciontt/[${document_type}:${document_number}]">
+              Tramitar Certificado de Inscripción Profesional
+            </a></p>
+            <p class="text-center"><a id="link_licencia" href="/tramite/licencia/[${document_type}:${document_number}]">
+              Tramitar Licencia Temporal Especial
+            </a></p>
+            <p class="text-center"><a id="link_renovacion" href="/tramite/renovacion/[${document_type}:${document_number}]">
+              Tramitar Renovación de Licencia Temporal Especial
+            </a></p>
+        `;
+    }
+    
+    function getNombreTramite(){
+        switch (tramite) {
+          case 'inscripciontt':
+            return 'Certificado de Inscripción Profesional';
+          case 'licencia':
+            return 'Licencia Temporal Especial';
+          case 'renovacion':
+            return 'Renovación de Licencia Temporal Especial';
+          case 'matricula':
+          default:
+            return 'Mátricula Profesional de Arquitectura';
+        }
+    }
+        
+    function getNombreCarrera(){
+        switch (tramite) {
+          case 'inscripciontt':
+            return $('#carreras').val();
+          case 'licencia':
+          case 'renovacion':
+          case 'matricula':
+          default:
+            return $('#x_institute_career option:selected').text().trim();
+        }
+    }
+    
+    function hideLinkTramites(){
+        switch (tramite) {
+          case 'inscripciontt':
+            $('#link_certificado').remove();
+            break;
+          case 'licencia':
+            $('#link_licencia').remove();
+            break;
+          case 'renovacion':
+            $('#link_renovacion').remove();
+            break;
+          case 'matricula':
+            $('#link_matricula').remove();
+            break;
+          default:
+            break;
+        }
+    }
 });

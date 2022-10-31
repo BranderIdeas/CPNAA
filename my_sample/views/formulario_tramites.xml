@@ -32,6 +32,7 @@
                                 <input type="hidden" id="x_origin_type" name="x_origin_type" t-attf-value="{{ (origen) }}"/>
                                 <input t-if="beneficio" type="hidden" id="campo_beneficio" name="campo_beneficio" t-attf-value="{{ (beneficio) }}" />
                                 <input t-if="beneficio" type="hidden" id="fecha_maxima" t-attf-value="{{ (fecha_maxima) }}" />
+                                <input t-if="tarifa" type="hidden" id="tarifa" t-attf-value="{{ (tarifa) }}" />
                                 <div class="col-md-4">
                                     <label class="col-form-label o_fake_editable" for="x_user_type_ID">
                                         Tipo de usuario
@@ -951,7 +952,7 @@
                                         <div class="row form-group form-field o_fake_not_editable o_website_form_required_custom">
                                             <div class="col-md-12">
                                                 <label class="col-form-label o_fake_editable" for="x_elec_autorization"> 
-                                                <input type="checkbox" value="Yes" class="o_website_form_input" required="true" name="x_elec_autorization" id="x_elec_autorization"/>Autorización uso de medios electrónicos: acepto y autorizo de manera expresa para que el CPNAA, envié notificaciones y demás comunicaciones relacionadas con mi trámite y/o solicitudes a través de técnicas y medios electrónicos, informáticos, telemáticos, mensajes de texto SMS (Incluye correo electrónico y pagina web).
+                                                <input type="checkbox" value="Yes" class="o_website_form_input" name="x_elec_autorization" id="x_elec_autorization"/>Autorización uso de medios electrónicos: acepto y autorizo de manera expresa para que el CPNAA, envié notificaciones y demás comunicaciones relacionadas con mi trámite y/o solicitudes a través de técnicas y medios electrónicos, informáticos, telemáticos, mensajes de texto SMS (Incluye correo electrónico y pagina web).
                                                 </label>
                                             </div>
                                             <div class="col-md-12">

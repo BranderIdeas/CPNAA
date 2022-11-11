@@ -153,6 +153,13 @@ odoo.define('website.validations', function(require) {
                     confirmButtonText: 'Ocultar',
                 })
                 return false;
+            }else if(entrada.length < 10){
+                Toast.fire({
+                    title: `<br/>La dirección debe contener mínimo 10 caracteres<br/><br/>`,
+                    icon: 'error',
+                    confirmButtonText: 'Ocultar',
+                })
+                return false;
             }else{
                 return true;
             }

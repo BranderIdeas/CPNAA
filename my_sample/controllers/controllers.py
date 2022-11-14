@@ -489,7 +489,7 @@ class MySample(http.Controller):
                 _logger.info(datetime.strptime('2020-09-01' , '%Y-%m-%d'))
                 if tram["x_expedition_date"] > datetime.strptime('2020-09-01' , '%Y-%m-%d').date():
                     _logger.info('Ingresando... ')
-                    return { 'ok': False, 'message': 'Su Matrícula/Certificado ya es virtual, no es necesario que realice la activación' }
+                    return { 'ok': False, 'message': 'Su Matrícula/Certificado ya es virtual, puede acceder con su documento y contraseña que se envió a su correo. En caso de que no la tenga, acceda por "Olvide mi contraseña"' }
             if tramites[0]['x_fallecido']:
                 fallecido = True
                 user = http.request.env['x_cpnaa_user'].sudo().browse(tramites[0]['x_user_ID'][0])

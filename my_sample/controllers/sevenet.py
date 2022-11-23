@@ -126,7 +126,7 @@ def sevenet_consulta(id_tramite, tipo_pago):
                 <cod_app>2</cod_app>
                 <authType>3</authType>
                 <nurad>"""+radicado+"""</nurad>
-                <usrRadicador>BCASTILLO</usrRadicador>
+                <usrRadicador>"""+user+"""</usrRadicador>
                 #adjuntos
                 </urn:anexarArchivosMasiva>
                 </soapenv:Body>

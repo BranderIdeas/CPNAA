@@ -674,7 +674,7 @@ class MySample(http.Controller):
                           'x_orfeo_date': ahora, 'x_orfeo_radicate': numero_radicado}
             http.request.env['x_cpnaa_parameter'].browse(consecutivo.id).sudo().write({'x_value':str(numero_recibo)})
             http.request.env['x_cpnaa_procedure'].browse(tramite.id).sudo().write(update)
-        return {'ok': True, 'numero_recibo': str(numero_recibo), 'numero_radicado': str(numero_radicado)+'-'+str(ahora.year)}
+        return {'ok': True, 'numero_recibo': str(numero_recibo), 'numero_radicado': str(numero_radicado)}
     
     # Envia la información necesaria para el recibo de pago o para el pago desde la pasarela
     @http.route('/tramite_fase_inicial', methods=["POST"], type="json", auth='public', website=True)
@@ -746,7 +746,6 @@ class MySample(http.Controller):
                               'x_pay_type': data['tipo_pago'],'x_consignment_number': data['numero_pago'], 'x_bank': data['banco'],
                               'x_consignment_price': int(float(data['monto_pago'])),'x_origin_name': origin_name, 'x_orfeo_radicate': numero_radicado}
                     pago_registrado = http.request.env['x_cpnaa_procedure'].browse(tramite['id']).sudo().write(update)
-                    numero_radicado = str(numero_radicado) +'-'+ str(datetime_str.year)
                     if not pago_registrado:
                         raise Exception('Su pago ha sido exitoso pero no se pudo completar el trámite, por favor envie esta información al correo info@cpnaa.gov.co')
             else:

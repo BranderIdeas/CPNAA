@@ -4,6 +4,7 @@ from zeep import Client, xsd
 from lxml import etree
 import requests
 import re
+import base64
 from datetime import date, datetime, timedelta, timezone
 
 _logger = logging.getLogger(__name__)
@@ -118,6 +119,7 @@ def sevenet_consulta(id_tramite, tipo_pago):
             radicado = 0
         
         if n_folios > 1 and radicado_valido:
+            user_radicador = base64.b64decode(user).decode('utf-8')
             payload = """
             <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:Orfeo">
                 <soapenv:Header/>
@@ -126,7 +128,7 @@ def sevenet_consulta(id_tramite, tipo_pago):
                 <cod_app>2</cod_app>
                 <authType>3</authType>
                 <nurad>"""+radicado+"""</nurad>
-                <usrRadicador>"""+user+"""</usrRadicador>
+                <usrRadicador>"""+user_radicador+"""</usrRadicador>
                 #adjuntos
                 </urn:anexarArchivosMasiva>
                 </soapenv:Body>

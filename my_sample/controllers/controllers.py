@@ -671,7 +671,7 @@ class MySample(http.Controller):
             update = {'x_voucher_number': numero_recibo, 'x_radicacion_date': ahora, 'x_rad_number': numero_radicado }
             if data['corte']:
                 update = {'x_voucher_number': numero_recibo,'x_origin_name': data['corte'],
-                          'x_radicacion_date': ahora, 'x_rad_number': numero_radicado}
+                          'x_orfeo_date': ahora, 'x_orfeo_radicate': numero_radicado}
             http.request.env['x_cpnaa_parameter'].browse(consecutivo.id).sudo().write({'x_value':str(numero_recibo)})
             http.request.env['x_cpnaa_procedure'].browse(tramite.id).sudo().write(update)
         return {'ok': True, 'numero_recibo': str(numero_recibo), 'numero_radicado': str(numero_radicado)+'-'+str(ahora.year)}
@@ -742,9 +742,9 @@ class MySample(http.Controller):
                         origin_name = tramite.x_origin_name
                         grado = http.request.env['x_cpnaa_grade'].sudo().browse(tramite.x_grade_ID.id)
                     ciclo_ID = http.request.env["x_cpnaa_cycle"].sudo().search(["&",("x_service_ID.id","=",tramite["x_service_ID"].id),("x_order","=",1)])
-                    update = {'x_cycle_ID': ciclo_ID.id,'x_radicacion_date': datetime_str, 'x_pay_datetime': datetime_str,
+                    update = {'x_cycle_ID': ciclo_ID.id,'x_orfeo_date': datetime_str, 'x_pay_datetime': datetime_str,
                               'x_pay_type': data['tipo_pago'],'x_consignment_number': data['numero_pago'], 'x_bank': data['banco'],
-                              'x_consignment_price': int(float(data['monto_pago'])),'x_origin_name': origin_name, 'x_rad_number': numero_radicado}
+                              'x_consignment_price': int(float(data['monto_pago'])),'x_origin_name': origin_name, 'x_orfeo_radicate': numero_radicado}
                     pago_registrado = http.request.env['x_cpnaa_procedure'].browse(tramite['id']).sudo().write(update)
                     numero_radicado = str(numero_radicado) +'-'+ str(datetime_str.year)
                     if not pago_registrado:

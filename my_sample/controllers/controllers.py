@@ -661,14 +661,14 @@ class MySample(http.Controller):
         ahora = datetime.now() - timedelta(hours=5)
         tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',int(data['id_tramite']))])
         numero_recibo = tramite.x_voucher_number
-        numero_radicado = tramite.x_rad_number
+        numero_radicado = tramite.x_orfeo_radicate
         if (not data['corte'] and numero_recibo) and (data['corte'] == tramite.x_origin_name and numero_recibo):
             pass
         elif not numero_recibo or (data['corte'] and data['corte'] != tramite.x_origin_name):
             consecutivo = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Consecutivo Recibo de Pago')])
             numero_recibo = int(consecutivo.x_value) + 1
             numero_radicado = self.radicado_test() if modo_test else Sevenet.sevenet_consulta(tramite.id, 'Recibo')
-            update = {'x_voucher_number': numero_recibo, 'x_radicacion_date': ahora, 'x_rad_number': numero_radicado }
+            update = {'x_voucher_number': numero_recibo, 'x_orfeo_date': ahora, 'x_orfeo_radicate': numero_radicado }
             if data['corte']:
                 update = {'x_voucher_number': numero_recibo,'x_origin_name': data['corte'],
                           'x_orfeo_date': ahora, 'x_orfeo_radicate': numero_radicado}

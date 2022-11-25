@@ -123,7 +123,7 @@
                                         </div>
                                         <div class="col-md-8">
                                             <input type="text" class="form-control" name="x_radicacion_date"  
-                                                 t-attf-value="{{tramites[0].x_radicacion_date}}" disabled="1"/>
+                                                 t-attf-value="{{tramites[0].x_orfeo_date}}" disabled="1"/>
                                         </div>
                                     </div>
                                     <div class="row col-md-6 form-group form-field" disabled="true">
@@ -132,7 +132,7 @@
                                         </div>
                                         <div class="col-md-8">
                                             <input type="text" class="form-control" name="x_rad_number" 
-                                                t-attf-value="{{tramites[0].x_rad_number}}" disabled="1"/>
+                                                t-attf-value="{{tramites[0].x_orfeo_radicate}}" disabled="1"/>
                                         </div>
                                     </div>
                                 </div>

@@ -122,8 +122,15 @@
                                             <label class="col-form-label" for="x_radicacion_date"> Fecha de Radicado </label>
                                         </div>
                                         <div class="col-md-8">
-                                            <input type="text" class="form-control" name="x_radicacion_date"  
+                                            <input t-if="tramites[0].x_radicacion_date" 
+                                                   type="text" class="form-control" name="x_radicacion_date"  
+                                                 t-attf-value="{{tramites[0].x_radicacion_date}}" disabled="1"/>
+                                            <input t-elif="tramites[0].x_orfeo_date"
+                                                   type="text" class="form-control" name="x_radicacion_date"  
                                                  t-attf-value="{{tramites[0].x_orfeo_date}}" disabled="1"/>
+                                            <input t-else=""
+                                                   type="text" class="form-control" name="x_radicacion_date"  
+                                                 t-attf-value="-" disabled="1"/>
                                         </div>
                                     </div>
                                     <div class="row col-md-6 form-group form-field" disabled="true">
@@ -131,8 +138,15 @@
                                             <label class="col-form-label" for="x_rad_number"> Número de Radicado </label>
                                         </div>
                                         <div class="col-md-8">
-                                            <input type="text" class="form-control" name="x_rad_number" 
+                                            <input t-if="tramites[0].x_rad_number"
+                                                   type="text" class="form-control" name="x_rad_number" 
+                                                t-attf-value="{{tramites[0].x_rad_number}}" disabled="1"/>
+                                            <input t-elif="tramites[0].x_orfeo_radicate"
+                                                   type="text" class="form-control" name="x_rad_number" 
                                                 t-attf-value="{{tramites[0].x_orfeo_radicate}}" disabled="1"/>
+                                            <input t-else=""
+                                                   type="text" class="form-control" name="x_rad_number" 
+                                                t-attf-value="-" disabled="1"/>
                                         </div>
                                     </div>
                                 </div>

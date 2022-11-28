@@ -2,10 +2,11 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 from odoo import http
-
+from datetime import date, datetime, timedelta, timezone
 from zeep import Client
 from lxml import etree
 
+import re
 import base64
 import requests
 import logging
@@ -54,7 +55,7 @@ class my_sample(models.Model):
         if tramite:
             tram_json = http.request.env['x_cpnaa_procedure'].sudo().search_read([('id','=',id_tramite)])[0]
             for key in tram_json:
-                if type(tram_json[key]) == bytes and key_to_name(key):
+                if type(tram_json[key]) == bytes and self.key_to_name(key):
                     n_folios += 1
     
         datos = """
@@ -92,15 +93,15 @@ class my_sample(models.Model):
         datos = datos.replace('#CorreoElectronicoTercero','<CorreoElectronicoTercero>%s</CorreoElectronicoTercero>' % tramite.x_studio_correo_electrnico)
         datos = datos.replace('#DireccionTercero','<DireccionTercero>%s</DireccionTercero>' % tramite.x_studio_direccin)
         datos = datos.replace('#Telefono','<Telefono>%s</Telefono>' % tramite.x_user_celular)
-        datos = datos.replace('#Internacionalizacion', get_internacionalizacion(tramite))
-        datos = datos.replace('#AsuntoRadicado','<AsuntoRadicado>Solicitud - %s - %s</AsuntoRadicado>' % (replace_tildes(tramite.x_service_ID.x_name), tipo_pago))
+        datos = datos.replace('#Internacionalizacion', self.get_internacionalizacion(tramite))
+        datos = datos.replace('#AsuntoRadicado','<AsuntoRadicado>Solicitud - %s - %s</AsuntoRadicado>' % (self.replace_tildes(tramite.x_service_ID.x_name), tipo_pago))
         datos = datos.replace('#FechaOficioRadicado','<FechaOficioRadicado>%s</FechaOficioRadicado>' % hoy.strftime('%Y-%m-%d'))
         datos = datos.replace('#trd','<trd>%s</trd>' % tramite.x_service_ID.x_orfeo_code)
         datos = datos.replace('#Folios','<folios>%s</folios>' % n_folios)
         datos = datos.replace('#cuenta_referencia','<cuenta_referencia>%s</cuenta_referencia>' % tramite.id)
         
-        if type(tram_json['x_studio_documento']) == bytes and key_to_name('x_studio_documento'):
-            nombreArchivo = '<nombreArchivo>%s%s.pdf</nombreArchivo>' % (key_to_name('x_studio_documento'), tramite.x_studio_documento_1)
+        if type(tram_json['x_studio_documento']) == bytes and self.key_to_name('x_studio_documento'):
+            nombreArchivo = '<nombreArchivo>%s%s.pdf</nombreArchivo>' % (self.key_to_name('x_studio_documento'), tramite.x_studio_documento_1)
             archivo       = '<archivo>%s</archivo>' % str(tram_json['x_studio_documento'])[2:-1]
             datos = datos.replace('#archivo', archivo)
             datos = datos.replace('#nombreArchivo', nombreArchivo)
@@ -133,7 +134,7 @@ class my_sample(models.Model):
             _logger.info(contentResp)
             radicado = contentResp[17:31]
             _logger.info(radicado)
-            radicado_valido = validar_radicado_orfeo(radicado)
+            radicado_valido = self.validar_radicado_orfeo(radicado)
             
             if not radicado_valido:
                 radicado = 0
@@ -158,9 +159,9 @@ class my_sample(models.Model):
                 adjuntosReplace = ''
                 countFiles = 0
                 for key in tram_json:
-                    if type(tram_json[key]) == bytes and key_to_name(key) and key != 'x_studio_documento':
+                    if type(tram_json[key]) == bytes and self.key_to_name(key) and key != 'x_studio_documento':
                         num = str(countFiles)
-                        nombreArchivo = '<nombreArchivo%s>%s%s.pdf</nombreArchivo%s>' % (num, key_to_name(key), tramite.x_studio_documento_1, num)
+                        nombreArchivo = '<nombreArchivo%s>%s%s.pdf</nombreArchivo%s>' % (num, self.key_to_name(key), tramite.x_studio_documento_1, num)
                         archivo = '<archivo%s>%s</archivo%s>' % (num, str(tram_json[key])[2:-1], num)
                         adjuntosReplace += nombreArchivo+'\n'+archivo+'\n'
                         countFiles += 1
@@ -280,11 +281,11 @@ class my_sample(models.Model):
             'x_studio_documento': 'DOCUMENTO-',
             'x_studio_imagen_diploma': 'DIPLOMA-',
             'x_min_convalidation_pdf': 'DOC-MIN-EDUC-',
-    #         'x_studio_acreditacin_de_profesin_en_el_extranjero': 'ACRED-PROF-EXTR-',
-    #         'x_studio_certificado_de_existencia_empresa_contratante': 'CERT-EXIS-EMPR-CONT-',
-    #         'x_studio_experiencia_profesional_acreditada': 'EXP-PROF-ACRED-',
-    #         'x_studio_imgen_de_diploma_apostillado': 'IMG-DIPLOMA-APOST-',
-    #         'x_studio_solicitud_empresa_contratante': 'SOLIC-EMPR-CONT-',
+            'x_studio_acreditacin_de_profesin_en_el_extranjero': 'ACRED-PROF-EXTR-',
+            'x_studio_certificado_de_existencia_empresa_contratante': 'CERT-EXIS-EMPR-CONT-',
+            'x_studio_experiencia_profesional_acreditada': 'EXP-PROF-ACRED-',
+            'x_studio_imgen_de_diploma_apostillado': 'IMG-DIPLOMA-APOST-',
+            'x_studio_solicitud_empresa_contratante': 'SOLIC-EMPR-CONT-',
         }
         return names.get(key, False)
     
@@ -328,3 +329,23 @@ class my_sample(models.Model):
         except:
             _logger.info(sys.exc_info())
             return {'ok': False, 'mensaje': 'No se podido completar su solicitud'}
+
+    def validar_radicado_orfeo(self, radicado):
+        regex = '^[0-9]*$'
+        if(re.search(regex, radicado)) and len(radicado) == 14:  
+            return True
+        else:
+            return False
+        
+    def get_internacionalizacion(self, tramite):
+        city = tramite.x_studio_ciudad_1.x_name
+        dpto = tramite.x_studio_departamento_estado.x_name
+        is_bogota = dpto == 'CUNDINAMARCA' and city == 'BOGOTA D.C.'
+        city_orfeo = tramite.x_studio_ciudad_1.x_orfeo_code
+        dpto_orfeo = '11' if is_bogota else tramite.x_studio_departamento_estado.x_orfeo_code
+        return '<Internacionalizacion>1-170-%s-%s</Internacionalizacion>' % (dpto_orfeo, city_orfeo)
+
+    def replace_tildes(self, cadena):
+        a,b = 'áéíóúüÁÉÍÓÚÜ','aeiouuAEIOUU'
+        trans = str.maketrans(a,b)
+        return cadena.translate(trans)

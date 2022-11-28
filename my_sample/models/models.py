@@ -30,81 +30,161 @@ class my_sample(models.Model):
         
     # SEVENET
     def sevenet_tramite(self, id_tramite, tipo_pago):
+        ahora = datetime.now() - timedelta(hours=5)
+        hoy   = ahora.date()
         tram_json = None
-        url = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','URL SERVICIO SEVENET')]).x_value
+        n_folios  = 0
+        url       = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','URL SERVICE ORFEO')]).x_value
+        user      = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','USER ORFEO')]).x_value
+        password  = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','PASS ORFEO')]).x_value
+        key       = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','KEY ORFEO')]).x_value
+        user_xml  = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','USER ORFEO XML')]).x_value
+        cod_app   = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','COD APP ORFEO')]).x_value
+        auth_type = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','AUTH TYPE ORFEO')]).x_value
+        
+        headers = {
+        'Content-Type': 'text/xml; charset=utf-8',
+        'login': user,
+        'password': password,
+        'key': key
+        }
+
         tramite = http.request.env['x_cpnaa_procedure'].browse(id_tramite)
+        
         if tramite:
             tram_json = http.request.env['x_cpnaa_procedure'].sudo().search_read([('id','=',id_tramite)])[0]
-        datos = """ 
-                <datos>
-                #tramite #nombre #apellido #numdocumento #ciudad #genero 
-                #tipoinst #nombrinst #profesion #fechagrado #docminis 
-                #residdirecc #residciudad #residindica #residtelefo #celular 
-                #email #enviodirrec #enviocelula #envioindica #enviotelefo 
-                #enviociudad #enviotelefo #enviociudad #medioelectr #autornombre 
-                #adicionala #adicionalb #pqrdescrip #autordocume #tdepago #adjuntos
-                </datos>
+            for key in tram_json:
+                if type(tram_json[key]) == bytes and key_to_name(key):
+                    n_folios += 1
+    
+        datos = """
+            <cod_app>"""+cod_app+"""</cod_app>
+            <authType>"""+auth_type+"""</authType>
+            <userOrfeo>"""+user_xml+"""</userOrfeo>
+            <TipoTercero>1</TipoTercero>
+            #NombreTercero
+            #PrimerApellidoTercero
+            <SegundoApellidoTercero></SegundoApellidoTercero>
+            #TipoIDTercero
+            #NumeroIDTercero
+            #CorreoElectronicoTercero
+            #DireccionTercero
+            #Internacionalizacion
+            #Telefono
+            <MedioRecep>3</MedioRecep>
+            #AsuntoRadicado
+            #FechaOficioRadicado
+            #trd
+            <dignatario></dignatario>
+            #Folios
+            <causal></causal>
+            <tipo_radicado>2</tipo_radicado>
+            <radi_desc_anex>Soporte anexo al tramite</radi_desc_anex>
+            #cuenta_referencia
+            #archivo
+            #nombreArchivo
+        """
+
+        datos = datos.replace('#NombreTercero','<NombreTercero>%s</NombreTercero>' % tramite.x_studio_nombres)
+        datos = datos.replace('#PrimerApellidoTercero','<PrimerApellidoTercero>%s</PrimerApellidoTercero>' % tramite.x_studio_apellidos)
+        datos = datos.replace('#TipoIDTercero','<TipoIDTercero>%s</TipoIDTercero>' % tramite.x_studio_tipo_de_documento_1.x_orfeo_code)
+        datos = datos.replace('#NumeroIDTercero','<NumeroIDTercero>%s</NumeroIDTercero>' % tramite.x_studio_documento_1)
+        datos = datos.replace('#CorreoElectronicoTercero','<CorreoElectronicoTercero>%s</CorreoElectronicoTercero>' % tramite.x_studio_correo_electrnico)
+        datos = datos.replace('#DireccionTercero','<DireccionTercero>%s</DireccionTercero>' % tramite.x_studio_direccin)
+        datos = datos.replace('#Telefono','<Telefono>%s</Telefono>' % tramite.x_user_celular)
+        datos = datos.replace('#Internacionalizacion', get_internacionalizacion(tramite))
+        datos = datos.replace('#AsuntoRadicado','<AsuntoRadicado>Solicitud - %s - %s</AsuntoRadicado>' % (replace_tildes(tramite.x_service_ID.x_name), tipo_pago))
+        datos = datos.replace('#FechaOficioRadicado','<FechaOficioRadicado>%s</FechaOficioRadicado>' % hoy.strftime('%Y-%m-%d'))
+        datos = datos.replace('#trd','<trd>%s</trd>' % tramite.x_service_ID.x_orfeo_code)
+        datos = datos.replace('#Folios','<folios>%s</folios>' % n_folios)
+        datos = datos.replace('#cuenta_referencia','<cuenta_referencia>%s</cuenta_referencia>' % tramite.id)
+        
+        if type(tram_json['x_studio_documento']) == bytes and key_to_name('x_studio_documento'):
+            nombreArchivo = '<nombreArchivo>%s%s.pdf</nombreArchivo>' % (key_to_name('x_studio_documento'), tramite.x_studio_documento_1)
+            archivo       = '<archivo>%s</archivo>' % str(tram_json['x_studio_documento'])[2:-1]
+            datos = datos.replace('#archivo', archivo)
+            datos = datos.replace('#nombreArchivo', nombreArchivo)
+        else:
+            datos = datos.replace('#archivo', '<archivo>?</archivo>')
+            datos = datos.replace('#nombreArchivo', '<nombreArchivo>?</nombreArchivo>')
+            
+        payload = """
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:Orfeo">
+            <soapenv:Header/>
+            <soapenv:Body>
+                <urn:crearRadicado>"""+datos+"""
+                </urn:crearRadicado>
+            </soapenv:Body>
+        </soapenv:Envelope>
+        """
+        
+        _logger.info(payload)
+        
+        response = requests.request("POST", url, headers=headers, data=payload)
+        
+        _logger.info(response.status_code)
+        _logger.info(response.text)
+        
+        radicado = 0  
+        if response.status_code == 200:
+            xmlResp = (response.text).replace('<?xml version="1.0" encoding="ISO-8859-1"?>','')
+            root = etree.XML(xmlResp)
+            contentResp = root.xpath("//text()")[0]
+            _logger.info(contentResp)
+            radicado = contentResp[17:31]
+            _logger.info(radicado)
+            radicado_valido = validar_radicado_orfeo(radicado)
+            
+            if not radicado_valido:
+                radicado = 0
+            
+            if n_folios > 1 and radicado_valido:
+                user_radicador = base64.b64decode(user).decode('utf-8')
+                payload = """
+                <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:Orfeo">
+                    <soapenv:Header/>
+                    <soapenv:Body>
+                    <urn:anexarArchivosMasiva>
+                    <cod_app>2</cod_app>
+                    <authType>3</authType>
+                    <nurad>"""+radicado+"""</nurad>
+                    <usrRadicador>"""+user_radicador+"""</usrRadicador>
+                    #adjuntos
+                    </urn:anexarArchivosMasiva>
+                    </soapenv:Body>
+                </soapenv:Envelope>
                 """
 
-        datos = datos.replace('#tramite','<tramite>%s</tramite>' % tramite.x_service_ID.x_abbreviation_name)
-        datos = datos.replace('#nombre','<nombre>%s</nombre>' % tramite.x_studio_nombres)
-        datos = datos.replace('#apellido','<apellido>%s</apellido>' % tramite.x_studio_apellidos)
-        datos = datos.replace('#numdocumento','<numdocumento>%s</numdocumento>' % tramite.x_studio_documento_1)
-        datos = datos.replace('#ciudad','<ciudad>%s</ciudad>' % tramite.x_studio_ciudad_1.id)
-        datos = datos.replace('#genero','<genero>%s</genero>' % tramite.x_studio_gnero.x_name)
-        datos = datos.replace('#tipoinst','<tipoinst>%s</tipoinst>' % tramite.x_studio_universidad_5.x_institution_type_ID.x_name)
-        datos = datos.replace('#nombrinst','<nombreinst>%s</nombreinst>' % tramite.x_studio_universidad_5.x_name)
-        datos = datos.replace('#profesion','<profesion>%s</profesion>' % tramite.x_studio_carrera_1.x_name)
-        datos = datos.replace('#fechagrado','<fechagrado>%s</fechagrado>' % tramite.x_studio_fecha_de_grado_2.strftime('%Y%m%d'))
-        datos = datos.replace('#docminis','<docminis>%s</docminis>' % '')
-        datos = datos.replace('#residdirecc','<residdirecc>%s</residdirecc>' % tramite.x_studio_direccin)
-        datos = datos.replace('#residciudad','<residciudad>%s</residciudad>' % tramite.x_studio_ciudad_1.id)
-        datos = datos.replace('#residindica','<residindica>%s</residindica>' % '')
-        datos = datos.replace('#residtelefo','<residtelefo>%s</residtelefo>' % tramite.x_studio_telfono)
-        datos = datos.replace('#celular','<celular>%s</celular>' % tramite.x_user_celular)
-        datos = datos.replace('#email','<email>%s</email>' % tramite.x_studio_correo_electrnico)
-        datos = datos.replace('#enviodirrec','<enviodirrec></enviodirrec>')
-        datos = datos.replace('#enviocelula','<enviocelula></enviocelula>')
-        datos = datos.replace('#envioindica','<envioindica></envioindica>')
-        datos = datos.replace('#enviotelefo','<enviotelefo></enviotelefo>')
-        datos = datos.replace('#enviociudad','<enviociudad></enviociudad>')
-        datos = datos.replace('#enviotelefo','<enviotelefo></enviotelefo>')
-        datos = datos.replace('#enviociudad','<enviociudad></enviociudad>')
-        datos = datos.replace('#medioelectr','<medioelectr>%s</medioelectr>' % tramite.x_elec_autorization)
-        datos = datos.replace('#autornombre','<autornombre></autornombre>')
-        datos = datos.replace('#adicionala','<adicionala></adicionala>')
-        datos = datos.replace('#adicionalb','<adicionalb>%s</adicionalb>' % '')
-        datos = datos.replace('#pqrdescrip','<pqrdescrip>%s</pqrdescrip>' % '')
-        datos = datos.replace('#autordocume','<autordocume>%s</autordocume>' % '')
-        datos = datos.replace('#tdepago','<tipodepago>%s</tipodepago>' % tipo_pago)
+                adjuntosReplace = ''
+                countFiles = 0
+                for key in tram_json:
+                    if type(tram_json[key]) == bytes and key_to_name(key) and key != 'x_studio_documento':
+                        num = str(countFiles)
+                        nombreArchivo = '<nombreArchivo%s>%s%s.pdf</nombreArchivo%s>' % (num, key_to_name(key), tramite.x_studio_documento_1, num)
+                        archivo = '<archivo%s>%s</archivo%s>' % (num, str(tram_json[key])[2:-1], num)
+                        adjuntosReplace += nombreArchivo+'\n'+archivo+'\n'
+                        countFiles += 1
 
-        docs_pdf = []
-        for key in tram_json:
-            if type(tram_json[key]) == bytes and self.key_to_name(key):
-                documento = '<documento> #documento </documento>'
-                nombre_original = '<nombreoriginal>%s%s.pdf</nombreoriginal>' % (self.key_to_name(key), tramite.x_studio_documento_1)
-                cuerpo = '<cuerpo>%s</cuerpo>' % str(tram_json[key])[2:-1]
-                documento = documento.replace('#documento','%s %s' % (nombre_original, cuerpo))
-                docs_pdf.append(documento)
+                maxFiles = 10
+                numRange = maxFiles - (countFiles)
+                for idx in range(numRange):
+                    num = idx+(countFiles)
+                    nombreArchivo = '<nombreArchivo%s></nombreArchivo%s>' % (num, num)
+                    archivo = '<archivo%s></archivo%s>' % (num, num)
+                    adjuntosReplace += nombreArchivo+'\n'+archivo+'\n'
 
-        adjuntos = '<adjuntos> #documentos </adjuntos>'
-        adjuntos = adjuntos.replace('#documentos',' '.join(docs_pdf))
+                payload = payload.replace('#adjuntos',adjuntosReplace)
+                _logger.info(payload)
 
-        datos = datos.replace('#adjuntos',adjuntos)
-        client = Client(url)
-        resp = client.service.Registrar(datos)
-        _logger.info(datos)
+                response = requests.request("POST", url, headers=headers, data=payload)
+                if response.status_code == 200:
+                    xmlResp = (response.text).replace('<?xml version="1.0" encoding="ISO-8859-1"?>','')
+                    root = etree.XML(xmlResp)
+                    contentResp = root.xpath("//text()")[0]
+                    _logger.info(contentResp)
+                else:
+                    _logger.info('Error al tratar de anexar archivos masivamente, radicado nro %s' % radicado)
 
-        root = etree.XML(resp)
-        body = etree.SubElement(root, "textoRespuesta")
-
-        radicado = 0
-        mensaje_respuesta = root.xpath("//text()")[1]
-        codigo_respuesta  = int(root.xpath("//text()")[0])
-        if codigo_respuesta == 0:
-            radicado = int(mensaje_respuesta[10:].split('-')[0])
-        else:
-            _logger.info('Error al radicar en sevenet: %s' % mensaje_respuesta)
         return radicado
 
     def sevenet_denuncia(id_tramite):

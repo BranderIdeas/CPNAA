@@ -118,11 +118,12 @@ class my_sample(models.Model):
             </soapenv:Body>
         </soapenv:Envelope>
         """
-        
-        _logger.info(payload)
-        
-        response = requests.request("POST", url, headers=headers, data=payload)
-        
+    
+        encode_payload = payload.encode('UTF-8')
+        _logger.info(encode_payload)
+
+        response = requests.request("POST", url, headers=headers, data=encode_payload)
+       
         _logger.info(response.status_code)
         _logger.info(response.text)
         

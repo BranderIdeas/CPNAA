@@ -23,7 +23,7 @@ def sevenet_consulta(id_tramite, tipo_pago):
     auth_type = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','AUTH TYPE ORFEO')]).x_value
     
     headers = {
-      'Content-Type': 'text/xml; charset=utf-8',
+      'Content-Type': 'text/xml',
       'login': user,
       'password': password,
       'key': key
@@ -98,9 +98,10 @@ def sevenet_consulta(id_tramite, tipo_pago):
     </soapenv:Envelope>
     """
     
-    _logger.info(payload)
+    encode_payload = payload.encode('UTF-8')
+    _logger.info(encode_payload)
     
-    response = requests.request("POST", url, headers=headers, data=payload)
+    response = requests.request("POST", url, headers=headers, data=encode_payload)
     
     _logger.info(response.status_code)
     _logger.info(response.text)

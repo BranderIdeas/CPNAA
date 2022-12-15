@@ -1252,6 +1252,9 @@ class MySample(http.Controller):
         data = kw.get('data')
         user, data_user, fallecido = False, False, False
         origen = data.get('origen')
+        ano = timedelta(days=365)
+        now = datetime.now() - timedelta(hours=5)
+        today = now.date()
         if self.validar_captcha(kw.get('token')):
             if origen == 'renovacion':
                 campos = ['x_studio_tipo_de_documento_1', 'x_studio_documento_1',  'x_expedition_date', 'x_expiration_date', 'x_renovacion_licencia', 'x_service_ID']    
@@ -1259,8 +1262,6 @@ class MySample(http.Controller):
                                                                                      ('x_studio_tipo_de_documento_1.id', "=", kw['data']['doc_type']), 
                                                                                      ('x_cycle_ID.x_order','=',5)], campos)
                 _logger.info('yo soy el vigencia en consulta renovacion: ' + str(vigencia))
-                ano = timedelta(days=365)
-                now = datetime.now()
                 try:
                     fecha_expiracion = str(vigencia[0]['x_expiration_date']) + ' 00:00'
                     _logger.info('yo soy la fecha de expiración emitida: ' + str(fecha_expiracion))
@@ -1292,6 +1293,7 @@ class MySample(http.Controller):
             fecha_maxima_grado = datetime.strptime(fecha_maxima, '%Y-%m-%d').date()
             fecha_inicio_descuento = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
             fecha_fin_descuento = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
+            beneficio_activo = today >= fecha_inicio_descuento and today <= fecha_fin_descuento
             
             if egresado:
                 if egresado.x_origin_type == 'CONVENIO':
@@ -1301,10 +1303,10 @@ class MySample(http.Controller):
                             _logger.info('Graduando reportado por IES con plazo vencido => ['+data['doc_type']+':'+data['doc']+']')
                         else:
                             grado = False
-                            if egresado.x_fecha_de_grado < fecha_maxima_grado:
+                            if egresado.x_fecha_de_grado < fecha_maxima_grado and beneficio_activo:
                                 beneficiario = True
                 else:
-                    if egresado.x_fecha_de_grado < fecha_maxima_grado and origen in ['matricula','inscripciontt']:
+                    if (egresado.x_fecha_de_grado < fecha_maxima_grado and origen in ['matricula','inscripciontt']) and beneficio_activo:
                         beneficiario = True
                         
             _logger.info('origen %s' % origen)
@@ -1528,7 +1530,7 @@ class MySample(http.Controller):
                 _logger.info('yo soy el vigencia: ' + str(vigencia))
                 
                 ano = timedelta(days=365)
-                now = datetime.now()
+                now = datetime.now() - timedelta(hours=5)
                 try:
                     fecha_expiracion = str(vigencia['x_expiration_date']) + ' 00:00'
                     _logger.info('yo soy la fecha de expiración emitida: ' + str(fecha_expiracion))
@@ -1558,6 +1560,8 @@ class MySample(http.Controller):
         doc_validos = ['1','2','5']
         matricula, tramite_en_curso = None, None
         servicio = 'MATRÍCULA PROFESIONAL'
+        ahora    = datetime.now() - timedelta(hours=5)
+        hoy      = ahora.date()
         
         if tipo_doc == '1' and not self.validar_solo_numeros(documento):
             return http.request.redirect('https://cpnaa.gov.co/')
@@ -1572,12 +1576,23 @@ class MySample(http.Controller):
                                                                         ('x_studio_documento_1','=',documento)])
         service_odoo = http.request.env['x_cpnaa_service'].sudo().search([('x_name','=',servicio)])
         tarifa = service_odoo.x_rate - service_odoo.x_discount
+        
+        fecha_inicio = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha inicio descuento')]).x_value
+        fecha_fin = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha fin descuento')]).x_value
+        fecha_inicio_descuento = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
+        fecha_fin_descuento = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
+        
 #         aplica_beneficio = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select.id','=',tipo_doc),
 #                                                                         ('x_documento','=',documento),
 #                                                                         ('x_fecha_de_grado','<',fecha_maxima_grado)])
 #         _logger.info(campo_beneficio)
 #         if len(aplica_beneficio) < 1:
 #             return http.request.redirect('https://cpnaa.gov.co/')
+
+        beneficio_activo = hoy >= fecha_inicio_descuento and hoy <= fecha_fin_descuento
+        if not beneficio_activo:
+            return http.request.redirect('https://cpnaa.gov.co/')
+
         if tramites:
             for tramite in tramites:
                 matricula = True if tramite.x_service_ID.x_name == 'MATRÍCULA PROFESIONAL' else False
@@ -1590,29 +1605,6 @@ class MySample(http.Controller):
             return http.request.render('my_sample.formulario_tramites', {'tipo_doc': tipo_doc, 'documento':documento, 
                                                                          'form': origen, 'origen': 1, 'beneficio': True, 'tarifa': tarifa,
                                                                          'fecha_maxima': fecha_maxima, 'campo_beneficio': campo_beneficio })
-        
-            
-    # Renderiza el formulario para trámites por convenios, valida si ya hay trámite en curso y lo redirige al estado del tramite
-    @http.route('/tramite/convenios/<model("x_procedure_temp"):cliente>', auth='public', website=True)
-    def formulario_convenio(self, cliente):
-        form = 'matricula' if cliente.x_carrera_select.x_level_ID.x_name == 'PROFESIONAL' else 'inscripciontt'
-        servicio = 'MATRÍCULA PROFESIONAL CONVENIO' if form == 'matricula' else 'CERTIFICADO DE INSCRIPCIÓN PROFESIONAL CONVENIO'
-        tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',cliente.x_tipo_documento_select.id),
-                                                                           ('x_studio_documento_1','=',cliente.x_documento),
-                                                                           ('x_cycle_ID.x_order','<','5')])
-        grado = http.request.env['x_cpnaa_grade'].sudo().browse(cliente.x_grado_ID.id)
-        service_odoo = http.request.env['x_cpnaa_service'].sudo().search([('x_name','=',servicio)])
-        tarifa = service_odoo.x_rate - service_odoo.x_discount
-        if not grado.x_agreement_ID.x_before_after_agreement:
-            if not self.validar_fecha_limite(grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)):
-                return http.request.redirect('/cliente/tramite/'+form)
-        else:
-            if not self.validar_fecha_limite(grado.x_date + timedelta(days=grado.x_agreement_ID.x_days_to_pay_after)):
-                return http.request.redirect('/cliente/tramite/'+form)
-        if tramite:
-            return http.request.redirect('/cliente/'+str(tramite.x_user_ID.id)+'/tramites')
-        else:
-            return http.request.render('my_sample.formulario_tramites', {'cliente': cliente, 'form': form, 'origen': 2, 'tarifa': tarifa })
     
     # Renderiza formulario para corregir rechazos, si el trámite no tiene rechazo o ya fue corregido lo redirige al inicio
     @http.route('/tramite/<string:form>/edicion/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)
@@ -1920,7 +1912,7 @@ class MySample(http.Controller):
             return http.request.redirect('/')
         convenio = http.request.env['x_cpnaa_agreement'].search([('id','=',grado.x_agreement_ID.id)])
         convenios = http.request.env['x_cpnaa_agreement'].search([('x_user_ID','=',universidad.id)])
-        fechaActual = datetime.now()
+        fechaActual = datetime.now() - timedelta(hours=5)
         mes = meses[fechaActual.month]
         fechaActualFormat = mes + fechaActual.strftime(" %d de %Y")
         return http.request.render('my_sample.convenios_definitivo_pdf', {'universidad': universidad, 'grado': grado, 'convenio': convenio,

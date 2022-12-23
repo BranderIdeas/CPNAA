@@ -83,6 +83,7 @@ class MySample(http.Controller):
         # Validar fecha de grado si hay beneficio activo y entró por formulario normal
         if beneficio_activo and not from_form_beneficio:
             
+            
             fecha_de_grado = kw.get('x_grade_date')
             fecha_maxima   = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha maxima grado')]).x_value
             mensaje_info   = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Mensaje profesional beneficiario no encontrado')]).x_value

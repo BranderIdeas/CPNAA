@@ -668,11 +668,11 @@ class MySample(http.Controller):
         elif not numero_recibo or (data['corte'] and data['corte'] != tramite.x_origin_name):
             consecutivo = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Consecutivo Recibo de Pago')])
             numero_recibo = int(consecutivo.x_value) + 1
-            numero_radicado = self.radicado_test() if modo_test else Sevenet.sevenet_consulta(tramite.id, 'Recibo')
+            numero_radicado = Sevenet.sevenet_consulta(tramite.id, 'Recibo')
             update = {'x_voucher_number': numero_recibo, 'x_orfeo_date': ahora, 'x_orfeo_radicate': numero_radicado }
             if data['corte']:
                 update = {'x_voucher_number': numero_recibo,'x_origin_name': data['corte'],
-                          'x_orfeo_date': ahora, 'x_orfeo_radicate': numero_radicado}
+                          'x_orfeo_date': ahora, 'x_orfeo_radicate': numero_radicado}                
             http.request.env['x_cpnaa_parameter'].browse(consecutivo.id).sudo().write({'x_value':str(numero_recibo)})
             http.request.env['x_cpnaa_procedure'].browse(tramite.id).sudo().write(update)
         return {'ok': True, 'numero_recibo': str(numero_recibo), 'numero_radicado': str(numero_radicado)}
@@ -735,7 +735,7 @@ class MySample(http.Controller):
                 if tramite.x_cycle_ID.x_order > 0:
                     raise Exception('Este pago ya fue registrado')
                 if tramite.x_cycle_ID.x_order == 0:
-                    numero_radicado = self.radicado_test() if modo_test else Sevenet.sevenet_consulta(tramite.id, data['tipo_pago'])
+                    numero_radicado = Sevenet.sevenet_consulta(tramite.id, data['tipo_pago'])
                     if (tramite.x_origin_type.x_name == 'CORTE'):
                         corte_vigente = self.buscar_corte(tramite.x_origin_name)
                         origin_name = corte_vigente['x_name']
@@ -1606,6 +1606,29 @@ class MySample(http.Controller):
             return http.request.render('my_sample.formulario_tramites', {'tipo_doc': tipo_doc, 'documento':documento, 
                                                                          'form': origen, 'origen': 1, 'beneficio': True, 'tarifa': tarifa,
                                                                          'fecha_maxima': fecha_maxima, 'campo_beneficio': campo_beneficio })
+        
+            
+    # Renderiza el formulario para trámites por convenios, valida si ya hay trámite en curso y lo redirige al estado del tramite
+    @http.route('/tramite/convenios/<model("x_procedure_temp"):cliente>', auth='public', website=True)
+    def formulario_convenio(self, cliente):
+        form = 'matricula' if cliente.x_carrera_select.x_level_ID.x_name == 'PROFESIONAL' else 'inscripciontt'
+        servicio = 'MATRÍCULA PROFESIONAL CONVENIO' if form == 'matricula' else 'CERTIFICADO DE INSCRIPCIÓN PROFESIONAL CONVENIO'
+        tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1.id','=',cliente.x_tipo_documento_select.id),
+                                                                           ('x_studio_documento_1','=',cliente.x_documento),
+                                                                           ('x_cycle_ID.x_order','<','5')])
+        grado = http.request.env['x_cpnaa_grade'].sudo().browse(cliente.x_grado_ID.id)
+        service_odoo = http.request.env['x_cpnaa_service'].sudo().search([('x_name','=',servicio)])
+        tarifa = service_odoo.x_rate - service_odoo.x_discount
+        if not grado.x_agreement_ID.x_before_after_agreement:
+            if not self.validar_fecha_limite(grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)):
+                return http.request.redirect('/cliente/tramite/'+form)
+        else:
+            if not self.validar_fecha_limite(grado.x_date + timedelta(days=grado.x_agreement_ID.x_days_to_pay_after)):
+                return http.request.redirect('/cliente/tramite/'+form)
+        if tramite:
+            return http.request.redirect('/cliente/'+str(tramite.x_user_ID.id)+'/tramites')
+        else:
+            return http.request.render('my_sample.formulario_tramites', {'cliente': cliente, 'form': form, 'origen': 2, 'tarifa': tarifa })
     
     # Renderiza formulario para corregir rechazos, si el trámite no tiene rechazo o ya fue corregido lo redirige al inicio
     @http.route('/tramite/<string:form>/edicion/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)

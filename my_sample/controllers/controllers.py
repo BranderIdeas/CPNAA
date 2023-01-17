@@ -252,7 +252,6 @@ class MySample(http.Controller):
     # Ruta que renderiza pagina de pagos, si no existe un trámite por pagar lo redirige al inicio del trámite
     @http.route('/pagos/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)
     def epayco(self, tipo_doc, documento):
-        return http.request.redirect('/cliente/tramite/consulta')
         url_base   = http.request.env['ir.config_parameter'].sudo().get_param('web.base.url')
         modo_test  = '.dev.odoo.com' in url_base
         response   = '%s/pagos/confirmacion' % url_base

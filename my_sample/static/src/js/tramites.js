@@ -791,8 +791,6 @@ odoo.define("website.tramites", function (require) {
     // Inicio del trámite boton de enviar
     $("#validar_tramites").submit(function (e) {
         e.preventDefault();
-        console.log('submiting....');
-        return;
         grecaptcha.ready(async function () {
             let result = await grecaptcha.getResponse();
             if (result != "") {

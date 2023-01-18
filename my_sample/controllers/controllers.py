@@ -681,6 +681,8 @@ class MySample(http.Controller):
     @http.route('/tramite_fase_inicial', methods=["POST"], type="json", auth='public', website=True)
     def tramite_fase_inicial(self, **kw):
         data = kw.get('data')
+        now = datetime.now() - timedelta(hours=5)
+        today = now.date()
         campo_beneficio = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Nombre campo beneficio')]).x_value
         campos = ['id','x_studio_tipo_de_documento_1', 'x_studio_documento_1','x_service_ID','x_studio_correo_electrnico',
                   'x_user_celular','x_studio_pas_de_expedicin_1','x_studio_ciudad_de_expedicin','x_studio_direccin',
@@ -690,19 +692,29 @@ class MySample(http.Controller):
         tramites = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_tipo_de_documento_1.id','=',data['doc_type']),
                                                                       ('x_studio_documento_1','=',data['doc']),
                                                                       ('x_cycle_ID.x_order','=',0)],campos)
+        
+        fecha_inicio = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha inicio descuento')]).x_value
+        fecha_fin = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha fin descuento')]).x_value
+        fecha_inicio_descuento = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
+        fecha_fin_descuento = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
+        beneficio_activo = today >= fecha_inicio_descuento and today <= fecha_fin_descuento
+        
         if tramites:
             # Código del servicio para generar el código de barras del recibo
             codigo = http.request.env['x_cpnaa_service'].search([('id','=',tramites[0]['x_service_ID'][0])]).x_code
             if (tramites[0]['x_origin_type'][1] == 'CORTE'):
                 corte_vigente = self.buscar_corte(tramites[0]['x_origin_name'])
                 _logger.info(corte_vigente)
-                #Si el tramite es por beneficio que la fecha limite de pago no sea mayor a la fecha fin del beneficio
-                if tramites[0][campo_beneficio]:
-                    fecha_fin = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha fin descuento')]).x_value
-                    fecha_fin_descuento = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
-                    if fecha_fin_descuento < corte_vigente['x_lim_pay_date']:
-                        corte_vigente['x_lim_pay_date'] = fecha_fin_descuento
-                tramites[0]['x_origin_name'] = corte_vigente['x_name']
+                if beneficio_activo:
+                    #Si el tramite es por beneficio y esta activo que la fecha limite de pago no sea mayor a la fecha fin del beneficio
+                    if tramites[0][campo_beneficio]:
+                        fecha_fin = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha fin descuento')]).x_value
+                        fecha_fin_descuento = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
+                        if fecha_fin_descuento < corte_vigente['x_lim_pay_date']:
+                            corte_vigente['x_lim_pay_date'] = fecha_fin_descuento
+                    tramites[0]['x_origin_name'] = corte_vigente['x_name']
+                # else:
+                #     http.request.env['x_cpnaa_procedure'].sudo().browse(tramites[0]['id']).write({ campo_beneficio: False })
                 return {'ok': True, 'tramite': tramites[0], 'codigo': codigo, 'corte': corte_vigente}
             elif tramites[0]['x_grade_ID']:
                 grado = http.request.env['x_cpnaa_grade'].sudo().browse(tramites[0]['x_grade_ID'][0])

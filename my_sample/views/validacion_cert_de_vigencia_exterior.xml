@@ -1,0 +1,97 @@
+<odoo>
+    <data>
+        <template id="validacion_cert_de_vigencia_exterior">
+            <t t-call="website.layout">
+                <t t-set="additional_title">Verificación del Certificado de Vigencia con Destino al Exterior</t>
+                <h1 class="formTitle mt-5 mb-5" data-tramite="matricula">
+                    <font>VERIFICACIÓN DE AUTENTICIDAD DEL CERTIFICADO DE VIGENCIA PROFESIONAL CON DESTINO AL EXTERIOR</font>
+                </h1>
+                <div class="container">
+                    <div class="formSection mt-3">
+                        <form id="autenticidad_vigencia">
+                            <div class="row form-group form-field wInput mx-auto">
+                                <div class="col-sm-12">
+                                    <label class="col-form-label o_fake_editable" for="x_code_vigencia"> Código único de seguridad </label>
+                                    <input type="text" class="form-control o_website_form_input" id="x_code_vigencia" required="true"/>
+                                </div>
+                            </div>                            
+                            <div class="row form-group form-field wInput mx-auto">
+                                <div class="col-sm-12">
+                                    <label class="col-form-label o_fake_editable" for="x_document_type_ID"> Tipo de documento </label>
+                                    <select class="form-control o_website_form_input inputDisabled" id="x_document_type" required="true">
+                                        <option selected="" value="1">
+                                            CÉDULA DE CIUDADANÍA
+                                        </option>
+                                        <option value="2">
+                                            CÉDULA DE EXTRAJERÍA
+                                        </option>
+                                        <option value="5">
+                                            PASAPORTE
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row form-group form-field wInput mx-auto">
+                                <div class="col-sm-12">
+                                    <label class="col-form-label o_fake_editable" for="x_document"> Documento </label>
+                                    <input type="text" class="form-control o_website_form_input" id="x_document" required="true"/>
+                                </div>
+                            </div>
+                            <div class="form-group row d-flex justify-content-center">
+                                <small id="help_text" class="text-danger invisible" area-hidden="false">Helper-text</small>
+                            </div>
+                            <div class="form-group row d-flex justify-content-center">
+                                <div class="g-recaptcha" data-sitekey="6Lf2UcMZAAAAAMBlukQO3XsknMUsIEnWI2GXuX0z"></div>
+                            </div>
+                            <div id="msj_result" class="invisible mb-3" aria-hidden="true">
+                                <div class="text-center" role="alert"></div>
+                            </div>                            
+                            <div class="form-group row d-flex justify-content-center mb-5 mt-3">
+                                <button type="submit" id="btn_vigencia_auth" class="btn btn-primary btn-lg mb-1 btn-stadium" disabled="true">Verificar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div id="results_table" class="container col-sm-8 col-lg-6 justify-content-md-center invisible" aria-hidden="true">
+                    <div class="formSection">
+                        <h2 class="sectionName">Autenticidad de Certificado de Vigencia con Destino al Exterior</h2>
+                        <table class="table table-striped">
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Número de certificado:</th>
+                                    <td id="numero_cert" class=""></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Fecha de expedición:</th>
+                                    <td class="" id="fecha_expedicion"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Tipo de documento:</th>
+                                    <td id="tipo_documento_prof"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Documento:</th>
+                                    <td id="documento_prof"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Nombres y Apellidos:</th>
+                                    <td class="" id="nombres_prof"></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Vigencia del certificado:</th>
+                                    <td id="fecha_vencimiento"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mb-5">
+                        <a class="btn btn-primary btn-lg btn-stadium"
+                            t-attf-href="https://cpnaa.gov.co" target="_top">
+                            Regresar
+                        </a>
+                    </div>
+                </div>
+            </t>
+        </template>
+    </data>
+</odoo>

@@ -127,7 +127,7 @@
                         <div t-if="exterior" class="form-group row col-sm-12 wInput mx-auto mb-4">
                             <div class="col-sm-12 col-md-6">
                                 <label for="x_cel_number">
-                                    Ingrese un número celular de contacto
+                                    Ingrese su número celular de contacto en caso de ser requerido por el CPNAA para este trámite.
                                 </label>
                             </div>
                             <div class="col-sm-12 col-md-6 mb-3">

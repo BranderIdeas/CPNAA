@@ -84,7 +84,8 @@ odoo.define('website.vigencia', function(require) {
                 });
             },
             insertarDatos: function(data){
-                $('#numero_cert').text(data.certificado.x_consecutivo);
+                const num_cert = data.certificado.x_consecutivo ? data.certificado.x_consecutivo : data.certificado.x_consecutive;
+                $('#numero_cert').text(num_cert);
                 $('#fecha_expedicion').text(validaciones.dateTimeToString(data.certificado.create_date));
                 $('#tipo_documento_prof').text(data.profesional[0].x_studio_tipo_de_documento_1[1]);
                 $('#documento_prof').text(data.profesional[0].x_studio_documento_1);
@@ -103,12 +104,12 @@ odoo.define('website.vigencia', function(require) {
                     if(response.ok){
                         $('#pdfFrameVigencia').attr('src', `data:application/pdf;base64,${response.cert.pdf}`);
                         _this.downloadPDF();
-                        $('#mssg_result').addClass('alert alert-info').text(response.mensaje);
+                        $('#mssg_result').removeClass('alert alert-danger').addClass('alert alert-info').text(response.mensaje);
                         setTimeout(()=>{
                             window.top.location.href = 'https://cpnaa.gov.co/';
                         },5000)
                     }else{
-                        $('#mssg_result').addClass('alert alert-danger').text(response.mensaje);
+                        $('#mssg_result').removeClass('alert alert-info').addClass('alert alert-danger').text(response.mensaje);
                         $('#btn_generar_certificado').removeAttr('disabled');
                     }
                 }).catch(function(e){
@@ -123,13 +124,15 @@ odoo.define('website.vigencia', function(require) {
                     params: {'email': data.email, 'celular': data.celular, 'id_tramite': $('#id_tramite').val()}
                 }).then(function(response){
                     ocultarSpinner();
+                    $('#pdfFrameVigencia').attr('src', `data:application/pdf;base64,${response.cert.pdf}`);
+                    _this.downloadPDF();
                     if(response.ok){
-                        $('#mssg_result').addClass('alert alert-info').text(response.mensaje);
+                        $('#mssg_result').removeClass('alert alert-danger').addClass('alert alert-info').text(response.mensaje);
                         setTimeout(()=>{
                             window.top.location.href = 'https://cpnaa.gov.co/';
                         },10000)
                     }else{
-                        $('#mssg_result').addClass('alert alert-danger').text(response.mensaje);
+                        $('#mssg_result').removeClass('alert alert-info').addClass('alert alert-danger').text(response.mensaje);
                         $('#btn_generar_certificado').removeAttr('disabled');
                     }
                 }).catch(function(e){
@@ -207,7 +210,8 @@ odoo.define('website.vigencia', function(require) {
             downloadPDF: function() {
                 const linkSource = $('#pdfFrameVigencia').attr('src');
                 const downloadLink = document.createElement("a");
-                const fileName = "certificado_de_vigencia.pdf";
+                const fileName = location.pathname.indexOf('certificado_vigencia_exterior') != -1 ? 
+                                 "certificado_de_vigencia_destino_exterior.pdf" : "certificado_de_vigencia.pdf" ;
                 downloadLink.href = linkSource;
                 downloadLink.download = fileName;
                 downloadLink.click();
@@ -328,7 +332,8 @@ odoo.define('website.vigencia', function(require) {
             let data = {
                 tipo_doc: $('#x_document_type').val(),
                 documento: $('#x_document').val(),
-                x_code: $('#x_code_vigencia').val()
+                x_code: $('#x_code_vigencia').val(),
+                is_exterior: location.pathname.indexOf('validacion_cert_de_vigencia_exterior') != -1
             }
             grecaptcha.ready(async function() {
                 let result = await grecaptcha.getResponse();

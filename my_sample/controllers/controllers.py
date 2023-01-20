@@ -83,7 +83,6 @@ class MySample(http.Controller):
         # Validar fecha de grado si hay beneficio activo y entró por formulario normal
         if beneficio_activo and not from_form_beneficio:
             
-            
             fecha_de_grado = kw.get('x_grade_date')
             fecha_maxima   = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha maxima grado')]).x_value
             mensaje_info   = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Mensaje profesional beneficiario no encontrado')]).x_value
@@ -1074,23 +1073,30 @@ class MySample(http.Controller):
     @http.route('/tramites/validacion_cert_de_vigencia', auth='public', website=True)
     def validacion_cert_de_vigencia(self):
         return http.request.render('my_sample.validacion_cert_de_vigencia', {})
+            
+    # Ruta que renderiza el validacion de autenticiadad del certificado de vigencia con destino al exterior
+    @http.route('/tramites/validacion_cert_de_vigencia_exterior', auth='public', website=True)
+    def validacion_cert_de_vigencia_exterior(self):
+        return http.request.render('my_sample.validacion_cert_de_vigencia_exterior', {})
     
     # Valida si existe un certificado con el codigo de seguridad recibido
     @http.route('/verificar_autenticidad', methods=["POST"], type="json", auth='public', website=True)
     def verificar_autenticidad(self, **kw):
         data = kw.get('data')
         _logger.info(data)
+        is_exterior = data.get('is_exterior')
+        model = 'x_procedure_service_exterior' if is_exterior else 'x_procedure_service'
         if self.validar_captcha(kw.get('token')):
-            campos = ['id','x_procedure_ID','create_date', 'x_consecutivo', 'x_create_date_migration']
-            certificado = http.request.env['x_procedure_service'].sudo().search_read([('x_procedure_ID.x_studio_tipo_de_documento_1','=',int(data['tipo_doc'])),
-                                                                               ('x_procedure_ID.x_studio_documento_1','=',data['documento']),
-                                                                               ('x_validity_code','=',data['x_code'])],campos)
+            campos = ['id','x_procedure_ID','create_date', 'x_consecutive'] if is_exterior else ['id','x_procedure_ID','create_date', 'x_consecutivo', 'x_create_date_migration']
+            certificado = http.request.env[model].sudo().search_read([('x_procedure_ID.x_studio_tipo_de_documento_1','=',int(data['tipo_doc'])),
+                                                                      ('x_procedure_ID.x_studio_documento_1','=',data['documento']),
+                                                                      ('x_validity_code','=',data['x_code'])],campos)
             if certificado:
                 campos = ['id','x_studio_nombres','x_studio_apellidos', 'x_studio_tipo_de_documento_1', 'x_studio_documento_1']
                 profesional = http.request.env['x_cpnaa_procedure'].sudo().search_read([('id','=',certificado[0]['x_procedure_ID'][0])], campos)
     #             tiempo_expiracion = http.request.env['x_cpnaa_service'].sudo().search([('id','=',certificado[0]['x_service_ID'][0])]).x_validity
                 _logger.info(certificado[0])
-                if certificado[0]['x_create_date_migration']:
+                if not is_exterior and certificado[0]['x_create_date_migration']:
                     certificado[0]['create_date'] = certificado[0]['x_create_date_migration']
                 certificado[0]['expiration_date'] = certificado[0]['create_date'] + dateutil.relativedelta.relativedelta(months=6)
                 return {'ok': True, 'mensaje': 'El Certificado se encuentra registrado en nuestra Base de Datos.', 
@@ -1230,34 +1236,61 @@ class MySample(http.Controller):
     # Enviar el certificado de vigencia al email y lo retorna al navegador para su descarga
     @http.route('/generar_certificado_exterior', methods=["POST"], type="json", auth='public')
     def generar_certificado_exterior(self, **kw):
+        now   = datetime.now() - timedelta(hours=5)
+        today = now.date()
         nombre_tramite = 'CERTIFICADO DE VIGENCIA CON DESTINO AL EXTERIOR'
-        tramite = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',kw.get('id_tramite'))])
-        cert_template = http.request.env['x_cpnaa_template'].sudo().search([('x_name','=',nombre_tramite)])
-        consecutivo = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=',nombre_tramite)])
-        servicio = http.request.env['x_cpnaa_service'].sudo().search([('x_name','like',nombre_tramite),
-                   ('x_studio_nivel_profesional.x_name','=',tramite.x_service_ID.x_studio_nivel_profesional[0].x_name)])
+        tramite        = http.request.env['x_cpnaa_procedure'].sudo().search([('id','=',kw.get('id_tramite'))])
+        cert_template  = http.request.env['x_cpnaa_template'].sudo().search([('x_name','=',nombre_tramite)])
+        consecutivo    = http.request.env['x_cpnaa_consecutive'].sudo().search([('x_name','=',nombre_tramite)])
+        servicio       = http.request.env['x_cpnaa_service'].sudo().search([('x_name','like',nombre_tramite),
+                                                                            ('x_studio_nivel_profesional.x_name','=',tramite.x_service_ID.x_studio_nivel_profesional[0].x_name)])
         certificado = http.request.env['x_procedure_service_exterior'].sudo().create({
             'x_doc_gen': cert_template.x_html_content,
             'x_procedure_ID': tramite.id,
             'x_service_ID': servicio.id,
             'x_consecutive': consecutivo.x_value + 1,
-            'x_state': 'x_process',
+            'x_state': 'x_completed',
+            'x_completed': True,
+            'x_procedure_finish_date': today,
+            'x_validity_code': self.generar_aleatorio(7),
             'x_name': 'CERT-VIG-EXT-%s-%s' % (tramite.x_studio_nombres, tramite.x_studio_apellidos),
             'x_email': kw.get('email'),
             'x_cel_contact': kw.get('celular')
         })
         if certificado:
+            consecutivo.sudo().write({'x_value': consecutivo.x_value + 1})
 #             numero_radicado = Sevenet.sevenet_certificado_exterior(certificado.id)
 #             certificado.sudo().write({'x_radicate_number': numero_radicado })
-            mail_template = http.request.env['mail.template'].sudo().search([('name','=','x_cpnaa_template_certificate_exterior')])[0]
-            mail_template.send_mail(certificado.id,force_send=True)
-            consecutivo.sudo().write({'x_value': consecutivo.x_value + 1})
+
+        pdf, _ = http.request.env.ref('my_sample.cert_vigencia_exterior').sudo().render_qweb_pdf([certificado.id])
+        pdf64  = base64.b64encode(pdf)
+        pdfStr = pdf64.decode('ascii')
+        cert   = http.request.env['ir.attachment'].sudo().create({
+            'name': 'certificado-vigencia-profesional-destino-exterior-%s.pdf' % tramite.x_studio_documento_1,
+            'type': 'binary',
+            'datas': pdf64,
+            'mimetype': 'application/x-pdf'
+        })
+        mail_template = http.request.env['mail.template'].sudo().search([('name','=','x_cpnaa_template_cert_dest_ext')])[0]
+
+        if not mail_template:
+           return {'ok': False, 'mensaje': 'No se podido completar su solicitud', 'cert': False} 
+            
+        mail_values = {
+            'subject': mail_template['subject'],
+            'attachment_ids': [cert.id],
+            'body_html': mail_template['body_html'],
+            'email_to': kw.get('email'),
+            'email_from': mail_template['email_from'],
+       }
+
         try:
-            mensaje = 'Su certificado de vigencia con destino al exterior será tramitado de 1 a 5 días hábiles y enviado a su correo electrónico "%s" para que sea presentado en el Ministerio de relaciones exteriores". Su solicitud fue radicada con el número R-%s' % (kw.get('email'), consecutivo.x_value + 1)
-            return {'ok': True, 'mensaje': mensaje}
+            http.request.env['mail.mail'].sudo().create(mail_values).send()
+            return {'ok': True, 'mensaje': 'Se ha completado su solicitud exitosamente', 
+                    'cert': {'pdf':pdfStr, 'headers': {'Content-Type', 'application/pdf'}}}
         except:
             _logger.info(sys.exc_info())
-            return {'ok': False, 'mensaje': 'No se podido completar su solicitud'}
+            return {'ok': False, 'mensaje': 'No se podido completar su solicitud', 'cert': False}
     
     # Valida tipo y número de documento, valida si es un usuario nuevo, si tiene trámite o si es un graduando
     @http.route('/validar_tramites', methods=["POST"], type="json", auth='public', website=True)
@@ -1275,6 +1308,7 @@ class MySample(http.Controller):
                                                                                      ('x_studio_tipo_de_documento_1.id', "=", kw['data']['doc_type']), 
                                                                                      ('x_cycle_ID.x_order','=',5)], campos)
                 _logger.info('yo soy el vigencia en consulta renovacion: ' + str(vigencia))
+                
                 try:
                     fecha_expiracion = str(vigencia[0]['x_expiration_date']) + ' 00:00'
                     _logger.info('yo soy la fecha de expiración emitida: ' + str(fecha_expiracion))
@@ -1291,7 +1325,8 @@ class MySample(http.Controller):
                 for i in vigencia:
                     if i['x_service_ID'][1] == 'RENOVACIÓN - LICENCIA TEMPORAL ESPECIAL':
                         return { 'ok': 'False', 'messaje': 'Señor usuario usted ya solicitó una renovación de Licencia Temporal Especial, favor solicitar nuevamente Licencia Temporal Especial por primera vez, dirigirse al link: https://cpnaa.gov.co/tramite-licencia-temporal/'}
-                if (dias >= 30):
+                _logger.info('dias => '+str(dias))
+                if (dias < 0):
                     return { 'ok': 'True'}
                 else:
                     return { 'ok': 'False', 'messaje': 'Su solicitud de Renovación de Licencia Temporal Especial no puede ser recibida, tiempo vencido para radicar la solicitud. Favor tramitar Licencia Temporal Especial por primera vez en el link: https://cpnaa.gov.co/tramite-licencia-temporal/'}                
@@ -1325,8 +1360,7 @@ class MySample(http.Controller):
             _logger.info('origen %s' % origen)
             _logger.info('egresado %s' % egresado)
             _logger.info('beneficiario %s' % beneficiario)
-            _logger.info('grado %s' % grado)
-                
+            _logger.info('grado %s' % grado)              
                         
             tramites = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1','=',int(data['doc_type'])),
                                                                             ('x_studio_documento_1','=',data['doc'])])

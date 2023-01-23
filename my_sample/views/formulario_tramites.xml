@@ -737,7 +737,7 @@
                                     </div>
                                 </div>
                                 </div>
-                                <div t-if="origen == 1 and form != 'licencia' and form != 'renovacion'" class="row col-md-6 form-group form-field o_fake_not_editable">
+                                <div t-if="origen == 1 and (form == 'licencia' or form == 'renovacion')" class="row col-md-6 form-group form-field o_fake_not_editable">
                                     <div class="col-md-6">
                                         <label class="col-form-label o_fake_editable" for="doc_min_educa">
                                             Convalidación de título Ministerio de Educación Nacional

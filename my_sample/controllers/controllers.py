@@ -1344,6 +1344,8 @@ class MySample(http.Controller):
             beneficio_activo = today >= fecha_inicio_descuento and today <= fecha_fin_descuento
             
             if egresado:
+                if len(egresado) > 1:
+                    egresado = egresado[-1]
                 if egresado.x_origin_type == 'CONVENIO':
                     grado = http.request.env['x_cpnaa_grade'].sudo().browse(egresado.x_grado_ID.id)
                     if grado:

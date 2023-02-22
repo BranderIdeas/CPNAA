@@ -23,15 +23,12 @@
                                         <div class="col-md-6">
                                         <select class="form-control o_website_form_input v-document_type" 
                                                 data-input_doc="x_complainant_document" name="x_complainant_document_type_ID">
-                                            <option value="1">
-                                                        CÉDULA DE CIUDADANÍA
+                                                <option value="">Seleccione...</option>
+                                                <t t-foreach="request.env['x_cpnaa_document_type'].search_read([('x_user_type_IDs.x_name','in',['PERSONA NATURAL'])],order='x_name')" t-as="x_document_type">
+                                                    <option t-att-value="x_document_type['id']">
+                                                        <t t-esc="x_document_type['x_name']"/>
                                                     </option>
-                                            <option value="2">
-                                                        CÉDULA DE EXTRANJERÍA
-                                                    </option>
-                                            <option value="5">
-                                                        PASAPORTE
-                                                    </option>
+                                                </t>
                                         </select>
                                         </div>
                                     </div>
@@ -193,15 +190,12 @@ Nota: Para la presentación de quejas ante el CPNAA  no se requiere contar con a
                                         <div class="col-md-6">
                                         <select class="form-control o_website_form_input v-document_type" 
                                                 data-input_doc="x_implicated_document" name="x_implicated_document_type_ID">
-                                            <option value="1">
-                                                        CÉDULA DE CIUDADANÍA
+                                                <option value="">Seleccione...</option>
+                                                <t t-foreach="request.env['x_cpnaa_document_type'].search_read([('x_user_type_IDs.x_name','in',['PERSONA NATURAL'])],order='x_name')" t-as="x_document_type">
+                                                    <option t-att-value="x_document_type['id']">
+                                                        <t t-esc="x_document_type['x_name']"/>
                                                     </option>
-                                            <option value="2">
-                                                        CÉDULA DE EXTRANJERÍA
-                                                    </option>
-                                            <option value="5">
-                                                        PASAPORTE
-                                                    </option>
+                                                </t>
                                         </select>
                                         </div>
                                     </div>

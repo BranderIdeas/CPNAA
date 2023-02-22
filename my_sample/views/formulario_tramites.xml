@@ -121,7 +121,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <t t-if="cliente">
-                                        <select t-if="(cliente.x_tipo_documento_select.id == 1 or cliente.x_tipo_documento_select.id == 2) and form != 'renovacion'"
+                                        <select t-if="(cliente.x_tipo_documento_select.id != 5 or cliente.x_document_type_ID.id != 5) and form != 'renovacion'"
                                                 class="child_place-x_expedition_state form-control i_required" 
                                                 name="x_expedition_country" id="x_expedition_country" >
                                             <t t-foreach="request.env['x_cpnaa_country'].search_read([],order='x_name')" t-as="expedition_country">
@@ -151,7 +151,7 @@
                                                 <t t-esc="renovar['x_studio_pas_de_expedicin_1'][1]" />
                                             </option>
                                         </select>
-                                        <select t-if="(user.x_document_type_ID.id == 1 or user.x_document_type_ID.id == 2) and form != 'renovacion'"
+                                        <select t-if="(user.x_document_type_ID.id != 5) and form != 'renovacion'"
                                                 class="child_place-x_expedition_state form-control i_required"
                                                 name="x_expedition_country" id="x_expedition_country" >
                                             <t t-foreach="request.env['x_cpnaa_country'].search_read([],order='x_name')" t-as="expedition_country">
@@ -174,7 +174,7 @@
                                             </t>
                                         </select>
                                     </t>
-                                    <select t-if="(tipo_doc == '1' or tipo_doc == '2') and form != 'renovacion'" 
+                                    <select t-if="(tipo_doc != '5') and form != 'renovacion'" 
                                             class="child_place-x_expedition_state form-control i_required" 
                                             name="x_expedition_country" id="x_expedition_country">
                                         <t t-foreach="request.env['x_cpnaa_country'].search_read([],order='x_name')" t-as="expedition_country">
@@ -204,7 +204,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div t-if="cliente">
-                                        <select t-if="(cliente.x_tipo_documento_select.id == 1 or cliente.x_tipo_documento_select.id == 2) and form != 'renovacion'" 
+                                        <select t-if="(cliente.x_tipo_documento_select.id != 5) and form != 'renovacion'" 
                                                 class="child_place-x_expedition_city form-control i_required"
                                                 name="x_expedition_state" id="x_expedition_state">
                                             <option value="">Seleccione...</option>
@@ -213,10 +213,6 @@
                                                 <t t-esc="expedition_state.x_name"/>
                                             </option>
                                             </t>
-                                        </select>
-                                        <select t-if="(cliente.x_tipo_documento_select.id != 5) and form != 'renovacion'" name="x_expedition_state"
-                                                id="dpto_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
-                                            <option value="555" selected="true"> NO APLICA </option>
                                         </select>
                                         <select t-if="(cliente.x_tipo_documento_select.id == 5) and form != 'renovacion'" name="x_expedition_state"
                                                 class="form-control inputDisabled i_required">
@@ -231,7 +227,7 @@
                                                 <t t-esc="renovar['x_studio_departamento_de_expedicin'][1]" />
                                             </option>
                                         </select>
-                                        <t t-if="(user.x_document_type_ID.id == 1 or user.x_document_type_ID.id == 2) and form != 'renovacion'">
+                                        <t t-if="(user.x_document_type_ID.id != 5) and form != 'renovacion'">
                                             <select class="child_place-x_expedition_city form-control i_required"
                                                     name="x_expedition_state" id="x_expedition_state">
                                                 <option value="">Seleccione...</option>
@@ -250,7 +246,7 @@
                                             <option value="555" selected="true"> NO APLICA </option>
                                         </select>
                                     </div>
-                                    <div t-if="(tipo_doc == '1' or tipo_doc == '2') and form != 'renovacion'">
+                                    <div t-if="(tipo_doc != '5') and form != 'renovacion'">
                                         <select class="child_place-x_expedition_city form-control i_required"
                                                 name="x_expedition_state" id="x_expedition_state">
                                             <option value="">Seleccione...</option>
@@ -280,7 +276,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div t-if="cliente">
-                                        <div t-if="(cliente.x_tipo_documento_select.id == 1 or cliente.x_tipo_documento_select.id == 2) and form != 'renovacion'">
+                                        <div t-if="(cliente.x_tipo_documento_select.id != 5) and form != 'renovacion'">
                                             <select class="form-control i_required"
                                                     name="x_expedition_city" id="x_expedition_city">
                                                 <option value="">Seleccione...</option>
@@ -306,7 +302,7 @@
                                                 <t t-esc="renovar['x_studio_ciudad_de_expedicin'][1]" />
                                             </option>
                                         </select>
-                                        <div t-if="(user.x_document_type_ID.id  == 1 or user.x_document_type_ID.id  == 2) and form != 'renovacion'">
+                                        <div t-if="(user.x_document_type_ID.id  != 5) and form != 'renovacion'">
                                             <select class="form-control i_required"
                                                     name="x_expedition_city" id="x_expedition_city">
                                                 <option value="">Seleccione...</option>
@@ -325,7 +321,7 @@
                                             <option value="5309" selected="true"> NO APLICA </option>
                                         </select>
                                     </div>
-                                    <div t-if="(tipo_doc == '1' or tipo_doc == '2') and form != 'renovacion'">
+                                    <div t-if="(tipo_doc != '5') and form != 'renovacion'">
                                         <select class="form-control i_required"
                                                 name="x_expedition_city" id="x_expedition_city">
                                             <option value="">Seleccione...</option>

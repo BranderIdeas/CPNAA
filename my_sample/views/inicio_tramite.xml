@@ -12,15 +12,12 @@
                                     Tipo de Documento
                                 </label>
                                 <select class="form-control" name="x_document_type_ID" id="doc_type" required="required">
-                                    <option value="1">
-                                        CÉDULA DE CIUDADANÍA
-                                    </option>
-                                    <option value="2">
-                                        CÉDULA DE EXTRANJERÍA
-                                    </option>
-                                    <option value="5">
-                                        PASAPORTE
-                                    </option>
+                                    <option value="">Seleccione...</option>
+                                    <t t-foreach="request.env['x_cpnaa_document_type'].search_read([('x_user_type_IDs.x_name','in',['PERSONA NATURAL'])],order='x_name')" t-as="x_document_type">
+                                        <option t-att-value="x_document_type['id']">
+                                            <t t-esc="x_document_type['x_name']"/>
+                                        </option>
+                                    </t>
                                 </select>
                             </div>
                             <div class="row form-group form-field wInput mx-auto">
@@ -74,15 +71,12 @@
                                     Tipo de Documento
                                 </label>
                                 <select class="form-control" name="x_document_type_ID" id="doc_type" required="required">
-                                    <option value="1">
-                                        CÉDULA DE CIUDADANÍA
-                                    </option>
-                                    <option value="2">
-                                        CÉDULA DE EXTRANJERÍA
-                                    </option>
-                                    <option value="5">
-                                        PASAPORTE
-                                    </option>
+                                    <option value="">Seleccione...</option>
+                                    <t t-foreach="request.env['x_cpnaa_document_type'].search_read([('x_user_type_IDs.x_name','in',['PERSONA NATURAL'])],order='x_name')" t-as="x_document_type">
+                                        <option t-att-value="x_document_type['id']">
+                                            <t t-esc="x_document_type['x_name']"/>
+                                        </option>
+                                    </t>
                                 </select>
                             </div>
                             <div class="row form-group form-field wInput mx-auto">

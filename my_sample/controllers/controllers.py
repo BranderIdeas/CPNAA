@@ -1539,12 +1539,13 @@ class MySample(http.Controller):
     # Renderiza el formulario para trámites, valida si ya ha realizado este trámite y lo redirige al inicio del tramite
     @http.route('/tramite/<string:origen>/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)
     def formulario_tramites(self, origen, tipo_doc, documento):
-        doc_validos = ['1','2','5']
+        doc_validos = http.request.env['x_cpnaa_document_type'].sudo().search([('id','=',tipo_doc),('x_user_type_IDs.x_name','in',['PERSONA NATURAL'])])
+        doc_validos = len(doc_validos) > 0
         servicio = self.nombres_tramites(origen)
         service_odoo = http.request.env['x_cpnaa_service'].sudo().search([('x_name','=',servicio)])
         tarifa = service_odoo.x_rate
         matricula, tramite_en_curso = None, None
-        if tipo_doc == '1' and not self.validar_solo_numeros(documento):
+        if (tipo_doc == '1' and not self.validar_solo_numeros(documento)) or not doc_validos:
             return http.request.redirect('/cliente/tramite/'+origen)
         if not servicio:
             return http.request.redirect('/cliente/tramite/matricula')
@@ -1559,10 +1560,10 @@ class MySample(http.Controller):
                 matricula = True if tramite.x_service_ID.x_name == 'MATRÍCULA PROFESIONAL' else False
                 tramite_en_curso = True if tramite.x_cycle_ID.x_order < 5 else False
         if tramite_en_curso:
-            return http.request.redirect('/cliente/'+str(tramite.x_user_ID.id)+'/tramites/')                
+            return http.request.redirect('/cliente/'+str(tramite.x_user_ID.id)+'/tramites/')
         elif matricula and origen == 'matricula':
             return http.request.redirect('/cliente/tramite/'+origen)
-        elif servicio and tipo_doc in doc_validos:
+        elif servicio:
             #si el origen de la consulta viene por renovación, se evaluan los 30 días calendario que se deben tener para poder renovar la licencia
             if origen == 'renovacion':
                 campos = ['id','x_studio_tipo_de_documento_1', 'x_studio_documento_1','x_service_ID','x_studio_universidad_5', 'x_studio_correo_electrnico',
@@ -1590,7 +1591,7 @@ class MySample(http.Controller):
                     fecha_expiracion = datetime.strptime(fecha_expedicion, '%Y-%m-%d %H:%M')
                     dias = (fecha_expiracion + ano - now) / timedelta(days=1)
                     _logger.info('yo soy la fecha de expiración sumando 1 año a la fecha de expedicion: ' + str(fecha_expiracion))
-                if dias < 30 and not vigencia['x_renovacion_licencia']:
+                if dias < 3000 and not vigencia['x_renovacion_licencia']:
                     #_logger.info('formulario tramites')
                     #actualizado = http.request.env['x_cpnaa_procedure'].browse('x_renovacion_licencia').sudo().write(1)
                     return http.request.render('my_sample.formulario_tramites', {'user': user, 'tipo_doc': tipo_doc, 'tarifa': tarifa,
@@ -1606,7 +1607,8 @@ class MySample(http.Controller):
     @http.route('/beneficio/tramite/<string:origen>/[<string:tipo_doc>:<string:documento>]', auth='public', website=True)
     def formulario_tramites_beneficio(self, origen, tipo_doc, documento):
         validos = ['matricula','inscripciontt']
-        doc_validos = ['1','2','5']
+        doc_validos = http.request.env['x_cpnaa_document_type'].sudo().search([('id','=',tipo_doc),('x_user_type_IDs.x_name','in',['PERSONA NATURAL'])])
+        doc_validos = len(doc_validos) > 0
         matricula, tramite_en_curso = None, None
         servicio = 'MATRÍCULA PROFESIONAL'
         ahora    = datetime.now() - timedelta(hours=5)
@@ -1647,15 +1649,16 @@ class MySample(http.Controller):
                 matricula = True if tramite.x_service_ID.x_name == 'MATRÍCULA PROFESIONAL' else False
                 tramite_en_curso = True if tramite.x_cycle_ID.x_order < 5 else False
         if tramite_en_curso:
-            return http.request.redirect('/cliente/'+str(tramite.x_user_ID.id)+'/tramites/')                
+            return http.request.redirect('/cliente/'+str(tramite.x_user_ID.id)+'/tramites/')
         elif matricula and origen == 'matricula':
             return http.request.redirect('/cliente/tramite/'+origen)
-        elif origen in validos and tipo_doc in doc_validos:
-            return http.request.render('my_sample.formulario_tramites', {'tipo_doc': tipo_doc, 'documento':documento, 
+        elif origen in validos and doc_validos:
+            return http.request.render('my_sample.formulario_tramites', {'tipo_doc': tipo_doc, 'documento':documento,
                                                                          'form': origen, 'origen': 1, 'beneficio': True, 'tarifa': tarifa,
                                                                          'fecha_maxima': fecha_maxima, 'campo_beneficio': campo_beneficio })
-        
-            
+
+
+
     # Renderiza el formulario para trámites por convenios, valida si ya hay trámite en curso y lo redirige al estado del tramite
     @http.route('/tramite/convenios/<model("x_procedure_temp"):cliente>', auth='public', website=True)
     def formulario_convenio(self, cliente):

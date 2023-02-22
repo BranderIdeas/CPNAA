@@ -19,15 +19,12 @@
                                 <div class="col-sm-12">
                                     <label class="col-form-label o_fake_editable" for="x_document_type_ID"> Tipo de documento </label>
                                     <select class="form-control o_website_form_input inputDisabled" id="x_document_type" required="true">
-                                        <option selected="" value="1">
-                                            CÉDULA DE CIUDADANÍA
-                                        </option>
-                                        <option value="2">
-                                            CÉDULA DE EXTRAJERÍA
-                                        </option>
-                                        <option value="5">
-                                            PASAPORTE
-                                        </option>
+                                        <option value="">Seleccione...</option>
+                                        <t t-foreach="request.env['x_cpnaa_document_type'].search_read([('x_user_type_IDs.x_name','in',['PERSONA NATURAL'])],order='x_name')" t-as="x_document_type">
+                                            <option t-att-value="x_document_type['id']">
+                                                <t t-esc="x_document_type['x_name']"/>
+                                            </option>
+                                        </t>
                                     </select>
                                 </div>
                             </div>

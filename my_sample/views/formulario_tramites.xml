@@ -145,8 +145,8 @@
                                         </select>
                                     </t>
                                     <t t-if="user">
-                                        <select t-if="form == 'renovacion'" class="child_place-x_expedition_state form-control i_required inputDisabled" 
-                                                name="x_expedition_country" id="x_expedition_country" required="true">
+                                        <select t-if="form == 'renovacion'" class="form-control i_required inputDisabled" 
+                                                name="x_expedition_country" required="true">
                                             <option t-attf-value="{{ (renovar['x_studio_pas_de_expedicin_1'][0]) }}" selected="selected">
                                                 <t t-esc="renovar['x_studio_pas_de_expedicin_1'][1]" />
                                             </option>
@@ -174,28 +174,30 @@
                                             </t>
                                         </select>
                                     </t>
-                                    <select t-if="(tipo_doc != '5') and form != 'renovacion'" 
-                                            class="child_place-x_expedition_state form-control i_required" 
-                                            name="x_expedition_country" id="x_expedition_country">
-                                        <t t-foreach="request.env['x_cpnaa_country'].search_read([],order='x_name')" t-as="expedition_country">
-                                        <option t-if="expedition_country['x_name'] != 'COLOMBIA'" t-att-value="expedition_country['id']">
-                                            <t t-esc="expedition_country['x_name']"/>
-                                        </option>
-                                        <option t-else="" t-att-value="expedition_country['id']" selected="selected">
-                                            <t t-esc="expedition_country['x_name']"/>
-                                        </option>
-                                        </t>
-                                    </select>
-                                    <select t-elif="(tipo_doc == '5') and form != 'renovacion'"
-                                            class="child_place-x_expedition_state form-control i_required" 
-                                            name="x_expedition_country" id="x_expedition_country">
-                                        <option value="">Seleccione...</option>
-                                        <t t-foreach="request.env['x_cpnaa_country'].search_read([('x_name','!=','COLOMBIA')],order='x_name')" t-as="expedition_country">
-                                        <option t-att-value="expedition_country['id']">
-                                            <t t-esc="expedition_country['x_name']"/>
-                                        </option>
-                                        </t>
-                                    </select>
+                                    <t t-if="not user and not cliente">
+                                        <select t-if="(tipo_doc != '5') and form != 'renovacion'" 
+                                                class="child_place-x_expedition_state form-control i_required" 
+                                                name="x_expedition_country" id="x_expedition_country">
+                                            <t t-foreach="request.env['x_cpnaa_country'].search_read([],order='x_name')" t-as="expedition_country">
+                                            <option t-if="expedition_country['x_name'] != 'COLOMBIA'" t-att-value="expedition_country['id']">
+                                                <t t-esc="expedition_country['x_name']"/>
+                                            </option>
+                                            <option t-else="" t-att-value="expedition_country['id']" selected="selected">
+                                                <t t-esc="expedition_country['x_name']"/>
+                                            </option>
+                                            </t>
+                                        </select>
+                                        <select t-elif="(tipo_doc == '5') and form != 'renovacion'"
+                                                class="child_place-x_expedition_state form-control i_required" 
+                                                name="x_expedition_country" id="x_expedition_country">
+                                            <option value="">Seleccione...</option>
+                                            <t t-foreach="request.env['x_cpnaa_country'].search_read([('x_name','!=','COLOMBIA')],order='x_name')" t-as="expedition_country">
+                                            <option t-att-value="expedition_country['id']">
+                                                <t t-esc="expedition_country['x_name']"/>
+                                            </option>
+                                            </t>
+                                        </select>
+                                    </t>
                                 </div>
                                 </div>
                                 <div class="row col-md-6 form-group form-field o_website_form_required_custom">
@@ -218,12 +220,14 @@
                                                 class="form-control inputDisabled i_required">
                                             <option value="555" selected="true"> NO APLICA </option>
                                         </select>
+                                        <select id="dpto_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
+                                            <option value="555" selected="true"> NO APLICA </option>
+                                        </select>
                                     </div>
                                     <div t-if="user">
                                         <select t-if="form == 'renovacion'" class="form-control inputDisabled i_required"
-                                                name="x_expedition_state" id="dpto_otro_pais" required="true">
-                                            <option t-if="user.x_document_type_ID.id == 5" value="555" selected="true"> NO APLICA </option>
-                                            <option t-else="" t-attf-value="{{ (renovar['x_studio_departamento_de_expedicin'][0]) }}" selected="selected">
+                                                name="x_expedition_state" required="true">
+                                            <option t-attf-value="{{ (renovar['x_studio_departamento_de_expedicin'][0]) }}" selected="selected">
                                                 <t t-esc="renovar['x_studio_departamento_de_expedicin'][1]" />
                                             </option>
                                         </select>
@@ -240,29 +244,31 @@
                                             <select id="dpto_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
                                                 <option value="555" selected="true"> NO APLICA </option>
                                             </select>
+                                            <select t-if="(user.x_document_type_ID.id == 5 and form != 'renovacion')" 
+                                                    class="form-control inputDisabled i_required">
+                                                <option value="555" selected="true"> NO APLICA </option>
+                                            </select>
                                         </t>
-                                        <select t-if="(user.x_document_type_ID.id == 5 and form != 'renovacion')" 
-                                                class="form-control inputDisabled i_required">
+                                    </div>
+                                    <t t-if="not user and not cliente">
+                                        <div t-if="(tipo_doc != '5') and form != 'renovacion'">
+                                            <select class="child_place-x_expedition_city form-control i_required"
+                                                    name="x_expedition_state" id="x_expedition_state">
+                                                <option value="">Seleccione...</option>
+                                                <t t-foreach="request.env['x_cpnaa_state'].search([],order='x_name')" t-as="expedition_state">
+                                                <option t-att-value="expedition_state.id" style="display: none;" t-att-data-country_id="expedition_state.x_country_ID.id">
+                                                    <t t-esc="expedition_state.x_name"/>
+                                                </option>
+                                                </t>
+                                            </select>
+                                            <select id="dpto_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
+                                                <option value="555" selected="true"> NO APLICA </option>
+                                            </select>
+                                        </div>
+                                        <select t-if="(tipo_doc == '5') and form != 'renovacion'" class="form-control inputDisabled i_required">
                                             <option value="555" selected="true"> NO APLICA </option>
                                         </select>
-                                    </div>
-                                    <div t-if="(tipo_doc != '5') and form != 'renovacion'">
-                                        <select class="child_place-x_expedition_city form-control i_required"
-                                                name="x_expedition_state" id="x_expedition_state">
-                                            <option value="">Seleccione...</option>
-                                            <t t-foreach="request.env['x_cpnaa_state'].search([],order='x_name')" t-as="expedition_state">
-                                            <option t-att-value="expedition_state.id" style="display: none;" t-att-data-country_id="expedition_state.x_country_ID.id">
-                                                <t t-esc="expedition_state.x_name"/>
-                                            </option>
-                                            </t>
-                                        </select>
-                                        <select id="dpto_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
-                                            <option value="555" selected="true"> NO APLICA </option>
-                                        </select>
-                                    </div>
-                                    <select t-if="(tipo_doc == '5') and form != 'renovacion'" class="form-control inputDisabled i_required">
-                                        <option value="555" selected="true"> NO APLICA </option>
-                                    </select>
+                                    </t>
                                 </div>
                                 </div>
                             </div>
@@ -296,8 +302,8 @@
                                         </select>
                                     </div>
                                     <div t-if="user">
-                                        <select t-if="form == 'renovacion'" class="child_place-x_expedition_state form-control i_required inputDisabled" 
-                                                name="x_expedition_city" id="ciudad_otro_pais" required="true">
+                                        <select t-if="form == 'renovacion'" class="form-control i_required inputDisabled" 
+                                                name="x_expedition_city" required="true">
                                             <option t-attf-value="{{ (renovar['x_studio_ciudad_de_expedicin'][0]) }}" selected="selected">
                                                 <t t-esc="renovar['x_studio_ciudad_de_expedicin'][1]" />
                                             </option>
@@ -321,24 +327,26 @@
                                             <option value="5309" selected="true"> NO APLICA </option>
                                         </select>
                                     </div>
-                                    <div t-if="(tipo_doc != '5') and form != 'renovacion'">
-                                        <select class="form-control i_required"
-                                                name="x_expedition_city" id="x_expedition_city">
-                                            <option value="">Seleccione...</option>
-                                            <t t-foreach="request.env['x_cpnaa_city'].search([],order='x_name')" t-as="expedition_city">
-                                                <option t-att-value="expedition_city.id" style="display: none;" t-att-data-state_id="expedition_city.x_state_ID.id">
-                                                <t t-esc="expedition_city.x_name"/>
-                                                </option>
-                                            </t>
-                                        </select>
-                                        <select id="ciudad_otro_pais" class="form-control invisible inputDisabled">
+                                    <t t-if="not user and not cliente">
+                                        <div t-if="(tipo_doc != '5') and form != 'renovacion'">
+                                            <select class="form-control i_required"
+                                                    name="x_expedition_city" id="x_expedition_city">
+                                                <option value="">Seleccione...</option>
+                                                <t t-foreach="request.env['x_cpnaa_city'].search([],order='x_name')" t-as="expedition_city">
+                                                    <option t-att-value="expedition_city.id" style="display: none;" t-att-data-state_id="expedition_city.x_state_ID.id">
+                                                    <t t-esc="expedition_city.x_name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                            <select id="ciudad_otro_pais" class="form-control invisible inputDisabled">
+                                                <option value="5309" selected="true">NO APLICA</option>
+                                            </select>
+                                        </div>
+                                        <select t-if="(tipo_doc == '5') and form != 'renovacion'" name="x_expedition_city" 
+                                                class="form-control inputDisabled i_required" id="ciudad_otro_pais">
                                             <option value="5309" selected="true">NO APLICA</option>
                                         </select>
-                                    </div>
-                                    <select t-if="(tipo_doc == '5') and form != 'renovacion'" name="x_expedition_city" 
-                                            class="form-control inputDisabled i_required" id="ciudad_otro_pais">
-                                        <option value="5309" selected="true">NO APLICA</option>
-                                    </select>
+                                    </t>
                                 </div>
                                 </div>
                                 <div class="row col-md-6 form-group form-field o_fake_not_editable o_website_form_required_custom">

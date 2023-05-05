@@ -1211,7 +1211,7 @@ class MySample(http.Controller):
         pdf, _ = http.request.env.ref('my_sample.cert_vigencia').sudo().render_qweb_pdf([certificado.id])
         pdf64 = base64.b64encode(pdf)
         pdfStr = pdf64.decode('ascii')
-        pdf_firmado = Certicamara.firmar_certificado(pdfStr)
+        pdf_firmado = Certicamara.firmar_certificado(pdfStr, certificado.id, 'vigencia')
         cert = http.request.env['ir.attachment'].sudo().create({
             'name': 'certificado-vigencia-profesional-%s.pdf' % tramite.x_studio_documento_1,
             'type': 'binary',
@@ -1267,7 +1267,7 @@ class MySample(http.Controller):
         pdf, _ = http.request.env.ref('my_sample.cert_vigencia_exterior').sudo().render_qweb_pdf([certificado.id])
         pdf64  = base64.b64encode(pdf)
         pdfStr = pdf64.decode('ascii')
-        pdf_firmado = Certicamara.firmar_certificado(pdfStr)
+        pdf_firmado = Certicamara.firmar_certificado(pdfStr, certificado.id, 'exterior')
         cert   = http.request.env['ir.attachment'].sudo().create({
             'name': 'certificado-vigencia-profesional-destino-exterior-%s.pdf' % tramite.x_studio_documento_1,
             'type': 'binary',

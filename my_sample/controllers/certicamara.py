@@ -5,7 +5,7 @@ import json
 
 _logger = logging.getLogger(__name__)
 
-def firmar_certificado(cert_b64):
+def firmar_certificado(cert_b64, cert_id, type):
     
     url       = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','URL ENDPOINT CERTICAMARA')]).x_value
     api_key   = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','API KEY CERTICAMARA')]).x_value
@@ -45,6 +45,8 @@ def firmar_certificado(cert_b64):
         try:
             resp = json.loads(response.text)
             if resp["exitoso"]:
+                name_model = 'x_procedure_service_exterior' if type == 'exterior' else 'x_procedure_service'
+                http.request.env[name_model].sudo().browse(cert_id).write({ 'x_pdf_signed': True })
                 return resp["signResponse"]["signedBytes"]
         except json.JSONDecodeError:
             _logger.info("La respuesta no está en formato JSON")

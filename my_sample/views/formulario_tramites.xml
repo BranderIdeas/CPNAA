@@ -5,6 +5,7 @@
                 <t t-set="additional_title"><t t-esc="title" /></t>
                 <t t-call="my_sample.titulo_tramites"/>
                 <div id="wrap" class="oe_structure">
+                    <input type="hidden" id="formulario_tramites"/>
                     <section class="container">
                         <div t-if="cliente" class="row s_nb_column_fixed">
                             <div class="col-lg-12" style="text-align: center;">

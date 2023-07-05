@@ -1,0 +1,17 @@
+<odoo>
+    <data>
+        <template id="texto_advertencia_tramites" name="Advertencia Trámites">
+            <hr/>
+            <div class="row justify-content-start">
+                <p class="advertencia-tramites">
+                Señor usuario le informamos que,  al momento de realizar su solicitud de preinscripción para el
+                trámite de Matrícula Profesional o Certificado de Inscripción Profesional, es necesario que <span class="underline-bold">efectúe
+                el pago y cargue toda la documentación</span> para continuar con el trámite. De acuerdo a la Ley 435 de
+                1998 únicamente podrá ejercer su profesión hasta tanto obtenga el documento y <span class="underline-bold">no es válida la
+                preinscripción como constancia de trámite</span>. De no realizar el pago o completar la documentación
+                se aplicará lo preceptuado en el Artículo 17 de la Ley 1755 del 30 de junio de 2015.
+                </p>
+            </div>
+        </template>
+    </data>
+</odoo>

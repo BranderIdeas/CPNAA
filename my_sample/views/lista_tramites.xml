@@ -156,6 +156,14 @@
                                         <t t-raw="(tramites[0].x_cycle_ID.x_description)"/> 
                                     </label>
                                 </div>
+                                <div t-if="tramites[0].x_service_ID[0].id in [1,2,24,26]">
+                                    <div 
+                                         t-if="(tramites[0].x_cycle_ID[0].x_order == 0 and tramites[0].x_origin_type.x_name != 'CONVENIO') or (tramites[0].x_cycle_ID[0].x_order == 0 and tramites[0].x_origin_type.x_name == 'CONVENIO' and not pago_vencido)"
+                                         class="row mb-3"
+                                    >
+                                        <t t-call="my_sample.texto_advertencia_tramites"/>
+                                    </div>
+                                </div>
                             </div>
                             <div t-if="rechazo">
                                 <div class="row justify-content-md-center">

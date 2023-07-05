@@ -861,6 +861,22 @@ odoo.define("website.tramites", function (require) {
             }
         });
     });
+    
+    //Mostrar ventana emeergente con texto de advertencia
+    const isFormProcedure = $("#formulario_tramites")[0] !== undefined;
+    const procedureType   = $("#x_tramite").val()
+    const mostrarWarning  = procedureType === 'inscripciontt' || procedureType === 'matricula';
+    if(isFormProcedure && mostrarWarning){
+        Swal.fire({
+            html: getWarningText(),
+            showConfirmButton: true,
+            focusConfirm: true,
+            confirmButtonText: 'Continuar',
+            confirmButtonColor: '#c8112d',
+            allowEscapeKey : false,
+            allowOutsideClick: false
+        })
+    }
 
     // Inicio del trámite boton de cancelar
     $("#btn-cancelar").click(function (e) {
@@ -1480,5 +1496,18 @@ odoo.define("website.tramites", function (require) {
           default:
             break;
         }
+    }
+    
+    function getWarningText(){
+        return `
+            <p class="mt-2">
+                Señor usuario le informamos que,  al momento de realizar su solicitud de preinscripción para el
+                trámite de Matrícula Profesional o Certificado de Inscripción Profesional, es necesario que <span class="underline-bold">efectúe
+                el pago</span> para continuar con el trámite. De acuerdo a la Ley 435 de 1998 únicamente podrá ejercer
+                su profesión hasta tanto obtenga el documento y <span class="underline-bold">no es válida la
+                preinscripción como constancia de trámite</span>. De no realizar el pago se aplicará lo preceptuado en el Artículo 17 de la Ley 1755 del
+                30 de junio de 2015.
+            </p>
+        `;
     }
 });

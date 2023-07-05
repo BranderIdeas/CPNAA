@@ -869,6 +869,7 @@ odoo.define("website.tramites", function (require) {
     if(isFormProcedure && mostrarWarning){
         Swal.fire({
             html: getWarningText(),
+            position: 'top',
             showConfirmButton: true,
             focusConfirm: true,
             confirmButtonText: 'Continuar',

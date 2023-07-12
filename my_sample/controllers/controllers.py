@@ -65,7 +65,7 @@ class MySample(http.Controller):
         nombre_tramite      = kw.get('x_tramite')
         fecha_fin           = http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Fecha fin descuento')]).x_value
         fecha_fin_beneficio = datetime.strptime(fecha_fin, '%Y-%m-%d')
-        univ_extranjera     = kw.get('x_institution_type_ID')        
+        univ_extranjera     = kw.get('x_institution_type_ID')
         from_form_beneficio = kw.get('campo_beneficio')
         beneficio_activo    = ahora < fecha_fin_beneficio and nombre_tramite not in no_beneficio
         beneficio_activo    = beneficio_activo and univ_extranjera == '1' or univ_extranjera == 1
@@ -98,7 +98,7 @@ class MySample(http.Controller):
         if nombre_tramite in self.nombre_tramite:
             _logger.info('validando 1')
             try:
-                campos = ['x_studio_carrera_1', 'x_service_ID']    
+                campos = ['x_studio_carrera_1', 'x_service_ID']
                 validation = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_documento_1','=',kw['x_document']),
                                                                                        ('x_studio_tipo_de_documento_1.id', "=", kw['x_document_type_ID']), 
                                                                                        ('x_cycle_ID.x_order','=',5)], campos)
@@ -763,7 +763,7 @@ class MySample(http.Controller):
                         raise Exception('Su pago ha sido exitoso pero no se pudo completar el trámite, por favor envie esta información al correo info@cpnaa.gov.co')
             else:
                 raise Exception('No se encontro trámite, no se completado la solicitud')                 
-        except:        
+        except:
             error = str(sys.exc_info()[1])
         try:
             if pago_registrado:
@@ -782,7 +782,7 @@ class MySample(http.Controller):
             _logger.info(error)
             return { 'ok': True, 'message': 'Trámite actualizado con exito', 'error': error, 
                     'id_user': user.id, 'numero_radicado': numero_radicado } 
-        if not pago_registrado:        
+        if not pago_registrado:
             return { 'ok': False, 'error': error, 'id_user': user.id, 'numero_radicado': numero_radicado }
         
     def grado_check_pagos(self, grado):
@@ -1365,7 +1365,7 @@ class MySample(http.Controller):
             _logger.info('origen %s' % origen)
             _logger.info('egresado %s' % egresado)
             _logger.info('beneficiario %s' % beneficiario)
-            _logger.info('grado %s' % grado)              
+            _logger.info('grado %s' % grado)
                         
             tramites = http.request.env['x_cpnaa_procedure'].sudo().search([('x_studio_tipo_de_documento_1','=',int(data['doc_type'])),
                                                                             ('x_studio_documento_1','=',data['doc'])])
@@ -1694,7 +1694,7 @@ class MySample(http.Controller):
         user      = http.request.env['x_cpnaa_user'].sudo().browse(tramite.x_user_ID.id)
         if user and len(rechazos)>0:
             if not rechazos[-1]['x_corrected']:
-                return http.request.render('my_sample.formulario_tramites', {'form': form, 'user': user,
+                return http.request.render('my_sample.formulario_tramites', {'form': form, 'user': user, 'rechazo': True,
                                                                              'origen': tramite.x_origin_type.id})
             else:
                 return http.request.redirect('/cliente/tramite/'+form)
@@ -1876,7 +1876,7 @@ class MySample(http.Controller):
         mes_desde = hoy.month-2 if hoy.month > 10 else '0%s' % str(hoy.month-2)
         desde = '01-%s-%s' % (mes_desde, hoy.year)
         tramites = http.request.env['x_cpnaa_procedure'].search([('create_date','>',fecha_consulta)])
-        _logger.info(hoy)                                                         
+        _logger.info(hoy)
         return http.request.render('my_sample.inicio_pactos', { 'tramites': tramites, 'desde': desde, 'hoy': hoy })
 
     # Ruta que realiza la consulta de convenios inter administrativos
@@ -2212,20 +2212,20 @@ class MySample(http.Controller):
                 
     def validar_solo_letras(self, cadena):
         regex = '^[a-zA-ZÑñ ]*$'
-        if(re.search(regex, cadena)):  
+        if(re.search(regex, cadena)):
             return True
         else:  
             return False
     
     def validar_solo_numeros(self, documento):
         regex = '^[0-9]*$'
-        if(re.search(regex, documento)):  
+        if(re.search(regex, documento)):
             return True
         else:
             return False
         
     def validar_genero(self, genero):
-        if (genero == 'M' or genero == 'm'):  
+        if (genero == 'M' or genero == 'm'):
             return 1
         if (genero == 'F' or genero == 'f'):
             return 2
@@ -2321,9 +2321,9 @@ class MySample(http.Controller):
         "x_resolution_ID": "x_resolution_ID",
     }
 
-    campos_ID_form_tramites = [ 
-        'x_origin_type', 
-        'x_user_type_ID', 
+    campos_ID_form_tramites = [
+        'x_origin_type',
+        'x_user_type_ID',
         'x_document_type_ID',
         'x_expedition_country',
         'x_expedition_state',
@@ -2340,4 +2340,4 @@ class MySample(http.Controller):
         'x_foreign_state',
         'x_foreign_city',
         'x_related_service'
-    ] 
+    ]

@@ -216,6 +216,7 @@ odoo.define("website.tramites", function (require) {
                                     );
                                   }
                                 });
+                                tramites.showBodyContentWhenModal();
                             } else {
                                 $(location).attr(
                                     "href",
@@ -289,6 +290,7 @@ odoo.define("website.tramites", function (require) {
                                 );
                               }
                             });
+                            tramites.showBodyContentWhenModal();
                         } else {
                             $(location).attr(
                                 "href",
@@ -753,6 +755,10 @@ odoo.define("website.tramites", function (require) {
                 $("#btn_verificar_beneficio").attr("disabled", "disabled");
             }
         },
+        showBodyContentWhenModal: function () {
+            const div = document.querySelector('#wrapwrap');
+            div?.removeAttribute('aria-hidden');
+        }
     });
 
     const tramites = new Tramites();
@@ -877,6 +883,7 @@ odoo.define("website.tramites", function (require) {
             allowEscapeKey : false,
             allowOutsideClick: false
         })
+        tramites.showBodyContentWhenModal();
     }
 
     // Inicio del trámite boton de cancelar
@@ -966,6 +973,8 @@ odoo.define("website.tramites", function (require) {
                 Swal.fire({
                   html: getHtml(),
                   showConfirmButton: false,
+                  allowEscapeKey : false,
+                  allowOutsideClick: false
                 }).then(({value}) => {
                   if (value) {
                     setTimeout(() => {
@@ -979,6 +988,7 @@ odoo.define("website.tramites", function (require) {
                     }, 300);
                   }
                 });
+                tramites.showBodyContentWhenModal();
                 hideLinkTramites();
             }
         } else {

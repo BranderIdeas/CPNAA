@@ -5,7 +5,7 @@
                 <t t-set="additional_title"><t t-esc="title" /></t>
                 <t t-call="my_sample.titulo_tramites"/>
                 <div id="wrap" class="oe_structure">
-                    <input type="hidden" id="formulario_tramites"/>
+                    <input t-if="not rechazo" type="hidden" id="formulario_tramites"/>
                     <section class="container">
                         <div t-if="cliente" class="row s_nb_column_fixed">
                             <div class="col-lg-12" style="text-align: center;">
@@ -61,7 +61,7 @@
                                 <div class="col-md-6">
                                     <input t-if="cliente" t-attf-value="{{ (cliente.x_nombres) }}" type="text" class=" o-letters form-control i_required inputDisabled" 
                                            name="x_name" /> 
-                                    <input t-elif="user" t-attf-value="{{ (user.x_name) }}" type="text" class="o-letters form-control i_required inputDisabled" 
+                                    <input t-elif="user" t-attf-value="{{ (user.x_name) }}" type="text" class="o-letters form-control i_required" 
                                            name="x_name" maxlength="80" />
                                     <input t-else="" type="text" class="o-letters form-control i_required" name="x_name" maxlength="80" />
                                 </div>
@@ -73,7 +73,7 @@
                                 <div class="col-md-6">
                                     <input t-if="cliente" t-attf-value="{{ (cliente.x_apellidos) }}" type="text" class=" o-letters form-control i_required inputDisabled" 
                                            name="x_last_name" />
-                                    <input t-elif="user" t-attf-value="{{ (user.x_last_name) }}" type="text" class=" o-letters form-control i_required inputDisabled" 
+                                    <input t-elif="user" t-attf-value="{{ (user.x_last_name) }}" type="text" class=" o-letters form-control i_required" 
                                            name="x_last_name" />
                                     <input t-else="" type="text" class="o-letters form-control i_required" name="x_last_name" maxlength="80" />
                                 </div>
@@ -382,7 +382,7 @@
                                             </option>
                                         </t>
                                     </select>
-                                    <select t-elif="user" class="form-control i_required inputDisabled" name="x_gender_ID" id="x_gender_ID">
+                                    <select t-elif="user" class="form-control i_required" name="x_gender_ID" id="x_gender_ID">
                                         <t t-foreach="request.env['x_cpnaa_gender'].search([])" t-as="gender">
                                             <option t-if="gender.x_name != user.x_gender_ID.x_name" t-att-value="gender.id">
                                                 <t t-esc="gender.x_name"/>
@@ -663,7 +663,7 @@
                                             </option>
                                         </select>
                                         <div t-else="" id="autocomplete_universidades">
-                                            <input t-if="user and origen == 1" type="text" id="universidades" placeholder="Buscar..." class="form-control inputDisabled"
+                                            <input t-if="user and origen == 1" type="text" id="universidades" placeholder="Buscar..." class="form-control"
                                                    t-attf-value="{{ (user.x_institution_ID.x_name) }}"/>
                                             <input t-else="" type="text" id="universidades" placeholder="Buscar..." class="form-control"/>
                                             <ul class="list-group" id="result_univ"></ul>
@@ -685,10 +685,10 @@
                                         <div id="fecha_grado" class="o_website_form_date input-group">
                                             <input t-if="cliente" class="form-control inputDisabled i_required" name="x_grade_date" disabled="true"
                                                t-attf-value="{{ (cliente.x_fecha_de_grado.strftime('%d-%m-%Y')) }}" readonly="true"/>
-                                            <input t-elif="user and origen == 1" class="form-control i_required hand blanco inputDisabled" name="x_grade_date"
+                                            <input t-elif="user and origen == 1" class="form-control i_required hand blanco" name="x_grade_date"
                                                t-attf-value="{{ (user.x_grade_date.strftime('%d-%m-%Y')) }}" readonly="true"/>
                                             <input t-elif="user and origen == 2" class="form-control i_required inputDisabled" name="x_grade_date" disabled="true"
-                                               t-attf-value="{{ (user.x_grade_date.strftime('%d-%m-%Y')) }}" readonly="true"/>                                            
+                                               t-attf-value="{{ (user.x_grade_date.strftime('%d-%m-%Y')) }}" readonly="true"/>
                                             <input t-else="" type="text" class="form-control i_required hand blanco" name="x_grade_date" readonly="true"/>
                                             <div class="input-group-append">
                                                 <div class="input-group-text b-rad-right">

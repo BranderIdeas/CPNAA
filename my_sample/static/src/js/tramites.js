@@ -495,7 +495,7 @@ odoo.define("website.tramites", function (require) {
         },
         label_input_file: function (elem) {
             $("#preview-" + elem.id).hide();
-            let idname = $(elem).attr("id");
+            const idname = $(elem).attr("id");
             if (
                 $(elem).hasClass("btn-file") &&
                 $(elem).hasClass("file-tramites")
@@ -504,8 +504,12 @@ odoo.define("website.tramites", function (require) {
                     let filename = $(elem).val().split("\\").pop();
                     let ext = $(elem).val().split(".").pop();
                     let fileSize = $(elem)[0].files[0].size;
-
-                    if ((ext == "pdf") & (fileSize <= 819200)) {
+                    
+                    const maxSize  = idname === "x_support_document" ? 3145728 : 819200;
+                    const mbOrKb   = idname === "x_support_document" ? 'Mb' : 'Kb';
+                    const valueMax = mbOrKb === 'Kb' ? maxSize/1024 : maxSize/1024/1024;
+                    
+                    if ((ext == "pdf") & (fileSize <= maxSize)) {
                         $('[for="' + idname + '"]')
                             .find("i")
                             .removeClass("fa-search")
@@ -522,15 +526,11 @@ odoo.define("website.tramites", function (require) {
                         $("#preview-" + elem.id).show();
                         // Mostrar modal Preview del PDF
                         $("#preview-" + elem.id).click(function () {
-                            let inputElm = $("#" + elem.id);
-                            let objElm = $("#pdfViewer");
-                            $("#viewerModal").on("show.bs.modal", function (e) {
-                                let reader = new FileReader();
-                                reader.onload = function (e) {
-                                    objElm.attr("src", e.target.result);
-                                };
-                                reader.readAsDataURL(inputElm[0].files[0]);
-                            });
+                            const inputElm = $("#" + elem.id);
+                            const objElm = $("#pdfViewer");
+                            const file = inputElm[0].files[0];
+                            objElm.attr("src", "");
+                            objElm.attr("src", URL.createObjectURL(file));
                             $("#viewerModal").modal("show");
                         });
                     } else {
@@ -548,9 +548,9 @@ odoo.define("website.tramites", function (require) {
                                 "Extensión ." + ext + " no permitida.",
                                 "center"
                             );
-                        } else if (fileSize > 819200) {
+                        } else if (fileSize > maxSize) {
                             validaciones.alert_error_toast(
-                                "El documento excede el tamaño máximo de 800Kb.",
+                                `El documento excede el tamaño máximo de ${valueMax}${mbOrKb}.`,
                                 "center"
                             );
                         }

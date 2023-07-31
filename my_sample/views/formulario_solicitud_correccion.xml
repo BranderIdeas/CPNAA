@@ -273,7 +273,7 @@
                                       <label for="x_support_document" class="file-label"><i class="fa fa-search"></i>
                                           <span> Seleccionar archivo</span>
                                       </label>
-                                      <span class="help-block">Tamaño máximo 800Kb, formato PDF</span>
+                                      <span class="help-block">Tamaño máximo 3MB, formato PDF</span>
                                       <span class="help-block preview-pdf" id="preview-x_support_document">Previsualizar</span>
                                       <input type="file" class="form-control i_required btn-file file-tramites" name="x_support_document" 
                                              id="x_support_document" accept="application/pdf"/>

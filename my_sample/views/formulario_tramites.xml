@@ -59,7 +59,7 @@
                                     <label class="col-form-label o_fake_editable" for="x_name"> Nombres </label>
                                 </div>
                                 <div class="col-md-6">
-                                    <input t-if="cliente" t-attf-value="{{ (cliente.x_nombres) }}" type="text" class=" o-letters form-control i_required inputDisabled" 
+                                    <input t-if="cliente" t-attf-value="{{ (cliente.x_nombres) }}" type="text" class=" o-letters form-control i_required" 
                                            name="x_name" /> 
                                     <input t-elif="user" t-attf-value="{{ (user.x_name) }}" type="text" class="o-letters form-control i_required" 
                                            name="x_name" maxlength="80" />
@@ -71,7 +71,7 @@
                                     <label class="col-form-label o_fake_editable" for="x_last_name"> Apellidos </label>
                                 </div>
                                 <div class="col-md-6">
-                                    <input t-if="cliente" t-attf-value="{{ (cliente.x_apellidos) }}" type="text" class=" o-letters form-control i_required inputDisabled" 
+                                    <input t-if="cliente" t-attf-value="{{ (cliente.x_apellidos) }}" type="text" class=" o-letters form-control i_required" 
                                            name="x_last_name" />
                                     <input t-elif="user" t-attf-value="{{ (user.x_last_name) }}" type="text" class=" o-letters form-control i_required" 
                                            name="x_last_name" />

@@ -1211,11 +1211,11 @@ class MySample(http.Controller):
         pdf, _ = http.request.env.ref('my_sample.cert_vigencia').sudo().render_qweb_pdf([certificado.id])
         pdf64 = base64.b64encode(pdf)
         pdfStr = pdf64.decode('ascii')
-        pdf_firmado = Certicamara.firmar_certificado(pdfStr, certificado.id, 'vigencia')
+        # pdf_firmado = Certicamara.firmar_certificado(pdfStr, certificado.id, 'vigencia')
         cert = http.request.env['ir.attachment'].sudo().create({
             'name': 'certificado-vigencia-profesional-%s.pdf' % tramite.x_studio_documento_1,
             'type': 'binary',
-            'datas': pdf_firmado,
+            'datas': pdfStr,
             'mimetype': 'application/x-pdf'
         })
         body = template_obj['body_html']
@@ -1230,7 +1230,7 @@ class MySample(http.Controller):
         try:
             http.request.env['mail.mail'].sudo().create(mail_values).send()
             return {'ok': True, 'mensaje': 'Se ha completado su solicitud exitosamente', 
-                    'cert': {'pdf':pdf_firmado, 'headers': {'Content-Type', 'application/pdf'}}}
+                    'cert': {'pdf':pdfStr, 'headers': {'Content-Type', 'application/pdf'}}}
         except:
             _logger.info(sys.exc_info())
             return {'ok': False, 'mensaje': 'No se podido completar su solicitud', 'cert': False}
@@ -1267,11 +1267,11 @@ class MySample(http.Controller):
         pdf, _ = http.request.env.ref('my_sample.cert_vigencia_exterior').sudo().render_qweb_pdf([certificado.id])
         pdf64  = base64.b64encode(pdf)
         pdfStr = pdf64.decode('ascii')
-        pdf_firmado = Certicamara.firmar_certificado(pdfStr, certificado.id, 'exterior')
+        # pdf_firmado = Certicamara.firmar_certificado(pdfStr, certificado.id, 'exterior')
         cert   = http.request.env['ir.attachment'].sudo().create({
             'name': 'certificado-vigencia-profesional-destino-exterior-%s.pdf' % tramite.x_studio_documento_1,
             'type': 'binary',
-            'datas': pdf_firmado,
+            'datas': pdfStr,
             'mimetype': 'application/x-pdf'
         })
         mail_template = http.request.env['mail.template'].sudo().search([('name','=','x_cpnaa_template_cert_dest_ext')])[0]
@@ -1290,7 +1290,7 @@ class MySample(http.Controller):
         try:
             http.request.env['mail.mail'].sudo().create(mail_values).send()
             return {'ok': True, 'mensaje': 'Se ha completado su solicitud exitosamente', 
-                    'cert': {'pdf':pdf_firmado, 'headers': {'Content-Type', 'application/pdf'}}}
+                    'cert': {'pdf':pdfStr, 'headers': {'Content-Type', 'application/pdf'}}}
         except:
             _logger.info(sys.exc_info())
             return {'ok': False, 'mensaje': 'No se podido completar su solicitud', 'cert': False}

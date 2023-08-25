@@ -1428,7 +1428,7 @@ odoo.define("website.tramites", function (require) {
     function getHtml(){
         const nombres = $('[name=x_name]').val() +' '+$('[name=x_last_name]').val();
         const nombre_tramite = getNombreTramite();
-        const nombre_institucion = $('#universidades').val();
+        const nombre_institucion = getNombreInstitucion();
         const number = parseFloat($('#tarifa').val());
         const tarifa = '$'+number.toLocaleString(['ban','id']);
         const nombre_carrera = getNombreCarrera();
@@ -1488,6 +1488,13 @@ odoo.define("website.tramites", function (require) {
           default:
             return $('#x_institute_career option:selected').text().trim();
         }
+    }
+            
+    function getNombreInstitucion(){
+        const isConvenio = location.href.indexOf('convenio') != -1;
+        return isConvenio 
+               ? $('select[name="x_institution_ID"] option:selected').text().trim()
+               : $('#universidades').val();
     }
     
     function hideLinkTramites(){

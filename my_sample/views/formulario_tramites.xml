@@ -122,7 +122,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <t t-if="cliente">
-                                        <select t-if="(cliente.x_tipo_documento_select.id != 5 or cliente.x_document_type_ID.id != 5) and form != 'renovacion'"
+                                        <select t-if="cliente.x_tipo_documento_select.id != 5 and form != 'renovacion'"
                                                 class="child_place-x_expedition_state form-control i_required" 
                                                 name="x_expedition_country" id="x_expedition_country" >
                                             <t t-foreach="request.env['x_cpnaa_country'].search_read([],order='x_name')" t-as="expedition_country">
@@ -134,7 +134,7 @@
                                                 </option>
                                             </t>
                                         </select>
-                                        <select t-elif="(cliente.x_tipo_documento_select.id == 5 or cliente.x_document_type_ID.id == 5) and form != 'renovacion'"
+                                        <select t-elif="cliente.x_tipo_documento_select.id == 5 and form != 'renovacion'"
                                                 class="child_place-x_expedition_state form-control i_required" 
                                                 name="x_expedition_country" id="x_expedition_country">
                                             <option value="">Seleccione...</option>
@@ -207,21 +207,22 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div t-if="cliente">
-                                        <select t-if="(cliente.x_tipo_documento_select.id != 5) and form != 'renovacion'" 
-                                                class="child_place-x_expedition_city form-control i_required"
-                                                name="x_expedition_state" id="x_expedition_state">
-                                            <option value="">Seleccione...</option>
-                                            <t t-foreach="request.env['x_cpnaa_state'].search([],order='x_name')" t-as="expedition_state">
-                                            <option t-att-value="expedition_state.id" style="display: none;" t-att-data-country_id="expedition_state.x_country_ID.id">
-                                                <t t-esc="expedition_state.x_name"/>
-                                            </option>
-                                            </t>
-                                        </select>
+                                        <t t-if="(cliente.x_tipo_documento_select.id != 5) and form != 'renovacion'">
+                                            <select class="child_place-x_expedition_city form-control i_required"
+                                                    name="x_expedition_state" id="x_expedition_state">
+                                                <option value="">Seleccione...</option>
+                                                <t t-foreach="request.env['x_cpnaa_state'].search([],order='x_name')" t-as="expedition_state">
+                                                <option t-att-value="expedition_state.id" style="display: none;" t-att-data-country_id="expedition_state.x_country_ID.id">
+                                                    <t t-esc="expedition_state.x_name"/>
+                                                </option>
+                                                </t>
+                                            </select>
+                                            <select id="dpto_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
+                                                <option value="555" selected="true"> NO APLICA </option>
+                                            </select>
+                                        </t>
                                         <select t-if="(cliente.x_tipo_documento_select.id == 5) and form != 'renovacion'" name="x_expedition_state"
                                                 class="form-control inputDisabled i_required">
-                                            <option value="555" selected="true"> NO APLICA </option>
-                                        </select>
-                                        <select id="dpto_otro_pais" class="form-control invisible inputDisabled" aria-hidden="true">
                                             <option value="555" selected="true"> NO APLICA </option>
                                         </select>
                                     </div>

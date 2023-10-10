@@ -214,7 +214,7 @@
                                     <div class="col-md-8">
                                         <select t-if="solicitud" class="form-control o_website_form_input i_required" name="x_issue">
                                             <option value="">Seleccione...</option>
-                                            <t t-foreach="request.env['x_data_correction_issues'].sudo().search([])" t-as="issue">
+                                            <t t-foreach="request.env['x_data_correction_issues'].sudo().search([], order='x_classification asc')" t-as="issue">
                                             <option t-if="solicitud.x_issue.x_name != issue.x_name" t-att-value="issue.id"
                                                     t-att-data-classification="issue.x_classification.x_name">
                                                 <t t-esc="issue.x_name"/>
@@ -227,7 +227,7 @@
                                         </select>  
                                         <select t-else="" class="form-control o_website_form_input i_required" name="x_issue">
                                             <option value="">Seleccione...</option>
-                                            <t t-foreach="request.env['x_data_correction_issues'].sudo().search([])" t-as="issue">
+                                            <t t-foreach="request.env['x_data_correction_issues'].sudo().search([], order='x_classification asc')" t-as="issue">
                                             <option t-att-data-classification="issue.x_classification.x_name"
                                                     t-att-value="issue.id" >
                                                 <t t-esc="issue.x_name"/>

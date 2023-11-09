@@ -599,6 +599,21 @@ odoo.define('website.validations', function(require) {
                 console.log(e)
                 return 'Formato de fecha incorrecto';
             }
+        },
+        detectBrowser: function() {
+            const isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+            const isMozilla = typeof InstallTrigger !== 'undefined';
+            let undetected = !isChrome && !isMozilla;
+
+            if (isChrome) {
+                console.log('Client based on Chrome.');
+            } else if (isMozilla) {
+                console.log('Client based on Mozilla');
+            } else {
+                console.log('Couldn\'t detect the browser.');
+            }
+            
+            return { isChrome, isMozilla, undetected }
         }
     });
 

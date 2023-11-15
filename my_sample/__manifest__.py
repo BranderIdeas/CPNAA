@@ -53,6 +53,9 @@
         'views/validacion_cert_de_vigencia.xml',
         'views/validacion_cert_de_vigencia_exterior.xml',
         'views/texto_advertencia_tramites.xml',
+        'views/profile.xml',
+        'views/siha.xml',
+        'views/calculadora.xml',
         'reports/cert_vigencia.xml',
         'reports/cert_vigencia_exterior.xml'
     ],

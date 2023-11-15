@@ -609,6 +609,7 @@ class MySample(http.Controller):
     @http.route('/cliente/tramite/consulta', auth='public', website=True)
     def estado_tramite(self):
         return http.request.render('my_sample.inicio_tramite', {'form': 'consulta', 'inicio_tramite': False})
+    
            
     # Realiza la consulta del registro online por documento o numero de tarjeta
     @http.route('/realizar_consulta', methods=["POST"], type="json", auth='public', website=True)
@@ -1045,6 +1046,8 @@ class MySample(http.Controller):
         if actualizacion:
             return { 'ok': True, 'data': { 'ok': True, 'email': data.get('x_request_email'), 
                                            'servicio': tramite.x_service_ID.x_name } }
+        else:
+            return { 'ok': False, 'message': 'No se pudo completar la autorización' }
         
     def actualizar_usuario(self, tramite, usuario, email):
         try:

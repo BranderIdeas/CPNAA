@@ -2,7 +2,7 @@
     <data>
         <template id="inicio_correccion">
             <t t-call="website.layout">
-                <t t-set="additional_title">Solicitud Duplicado Virtual</t>
+                <t t-set="additional_title">Actualización de Datos y Correción del Registro</t>
                 <h1 class="formTitle mt-5 mb-5" data-tramite="matricula">
                     <font>ACTUALIZACION DE DATOS Y CORRECCION DEL REGISTRO</font>
                 </h1>

@@ -39,24 +39,19 @@ class MySample(http.Controller):
         if http.request.session.uid == None:
             return http.request.redirect('/web/login')
         else:
-            return http.request.redirect('/profile')
+            return http.request.redirect('/my/home')
 
     @http.route(['/my','/my/home'], website=True)
     def redirect_home(self):
         user = http.request.env['res.users'].search([('login','=',http.request.session.login)])
         try:
-            # if len(user.groups_id) == 2 and  user.groups_id[0].id == 45 and user.groups_id[1].id == 8:
-            if len(user.groups_id) == 2 and all(group.id in (45, 8) for group in user.groups_id):
+            if len(user.groups_id) == 2 and  user.groups_id[0].id == 45 and user.groups_id[1].id == 8:
                 _logger.info('Client person => %s' % user.login)
-                return http.request.redirect('/profile')
+                return http.request.render('website.password_change_confirm', {})
             else:
                 return http.request.render('portal.portal_my_home', {})
         except:
             return http.request.render('portal.portal_my_home', {})
-        
-    @http.route('/reset_password_cpnaa', methods=["GET"], auth='public', website=True)
-    def reset_password_cpnaa(self):
-        return http.request.render('website.password_change_confirm', {})
 
     # Crea un usuario tipo persona desde el formulario del website
     # Activa la automatización para la creación y seguimiento del trámite
@@ -225,8 +220,6 @@ class MySample(http.Controller):
     def update_password(self, **kw):
         _logger.info(http.request.session)
         try:
-            if http.request.session.login != kw["email"]:
-                raise Exception('Unathorized')
             user = http.request.env['res.users'].sudo().search([('login','=',kw["email"])])
             if len(user.groups_id) == 2:
                 if user.groups_id[0].id == 45 or user.groups_id[0].id == 8 and user.groups_id[1].id == 45 or user.groups_id[1].id == 8:
@@ -1277,16 +1270,11 @@ class MySample(http.Controller):
         pdf, _ = http.request.env.ref('my_sample.cert_vigencia_exterior').sudo().render_qweb_pdf([certificado.id])
         pdf64  = base64.b64encode(pdf)
         pdfStr = pdf64.decode('ascii')
-        attach = None
-        try:
-            attach = Certicamara.firmar_certificado(pdfStr, certificado.id, 'exterior')
-        except:
-            _logger.info('Error: no se pudo firmar el certificado')
-            attach = pdfStr
+        # pdf_firmado = Certicamara.firmar_certificado(pdfStr, certificado.id, 'exterior')
         cert   = http.request.env['ir.attachment'].sudo().create({
             'name': 'certificado-vigencia-profesional-destino-exterior-%s.pdf' % tramite.x_studio_documento_1,
             'type': 'binary',
-            'datas': attach,
+            'datas': pdfStr,
             'mimetype': 'application/x-pdf'
         })
         mail_template = http.request.env['mail.template'].sudo().search([('name','=','x_cpnaa_template_cert_dest_ext')])[0]
@@ -1305,7 +1293,7 @@ class MySample(http.Controller):
         try:
             http.request.env['mail.mail'].sudo().create(mail_values).send()
             return {'ok': True, 'mensaje': 'Se ha completado su solicitud exitosamente', 
-                    'cert': {'pdf':attach, 'headers': {'Content-Type', 'application/pdf'}}}
+                    'cert': {'pdf':pdfStr, 'headers': {'Content-Type', 'application/pdf'}}}
         except:
             _logger.info(sys.exc_info())
             return {'ok': False, 'mensaje': 'No se podido completar su solicitud', 'cert': False}
@@ -1688,7 +1676,6 @@ class MySample(http.Controller):
         grado = http.request.env['x_cpnaa_grade'].sudo().browse(cliente.x_grado_ID.id)
         service_odoo = http.request.env['x_cpnaa_service'].sudo().search([('x_name','=',servicio)])
         tarifa = service_odoo.x_rate - service_odoo.x_discount
-        _logger.info(form)
         if not grado.x_agreement_ID.x_before_after_agreement:
             if not self.validar_fecha_limite(grado.x_date - timedelta(days=grado.x_agreement_ID.x_days_to_pay)):
                 return http.request.redirect('/cliente/tramite/'+form)
@@ -1878,12 +1865,6 @@ class MySample(http.Controller):
             'res_id': id_tramite
         }
         return http.request.env['mail.message'].sudo().create(mailthread)
-    
-    
-    # Retorna los parametros de la app
-    @http.route('/get_cpnaapp_parameters', methods=["POST"], type="json", auth='public', website=True)
-    def get_cpnaapp_parameters(self):
-        return http.request.env['x_cpnaa_parameters_app'].sudo().search_read([], ["x_name", "x_value", "x_file"])
     
     """   RUTAS CLIENTE EMPRESA   """
     

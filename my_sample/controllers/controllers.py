@@ -45,9 +45,10 @@ class MySample(http.Controller):
     def redirect_home(self):
         user = http.request.env['res.users'].search([('login','=',http.request.session.login)])
         try:
-            if len(user.groups_id) == 2 and  user.groups_id[0].id == 45 and user.groups_id[1].id == 8:
+            # if len(user.groups_id) == 2 and  user.groups_id[0].id == 45 and user.groups_id[1].id == 8:
+            if len(user.groups_id) == 2 and all(group.id in (45, 8) for group in user.groups_id):
                 _logger.info('Client person => %s' % user.login)
-                return http.request.render('website.password_change_confirm', {})
+                return http.request.redirect('/profile')
             else:
                 return http.request.render('portal.portal_my_home', {})
         except:

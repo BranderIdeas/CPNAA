@@ -204,6 +204,38 @@ class Calculadora(http.Controller):
             return { 'ok': True, 'message': 'Current value to SMLV', 'data': data }
         else:
             return { 'ok': False, 'message': 'Not found SMLV parameter' }
+
+        
+    # Enviar el certificado de vigencia al email y lo retorna al navegador para su descarga
+    @http.route('/calculadora_api/send_pdf_mail', methods=["POST"], type="json", auth='public')
+    def send_pdf_mail(self, **kw):
+        _logger.info(kw.get('subject') + ' ' +kw.get('email'))
+        template_obj = http.request.env['mail.template'].sudo().search_read([('name','=','cpnaa_template_calculadoras_pdf')])[0]
+        pdf = http.request.env['ir.attachment'].sudo().create({
+            'name': kw.get('fileName'),
+            'type': 'binary',
+            'datas': kw.get('pdfBase64'),
+            'mimetype': 'application/x-pdf'
+        })
+        body = template_obj['body_html']
+        body = body.replace('###DESTINATARIO###',kw.get('nameTo'))
+        body = body.replace('###REMITENTE###',kw.get('nameFrom'))
+        body = body.replace('###PLATAFORMA###',kw.get('calculator'))
+        if template_obj:
+            mail_values = {
+                'subject': kw.get('subject'),
+                'attachment_ids': [pdf.id],
+                'body_html': body,
+                'email_to': kw.get('email'),
+                'email_from': template_obj['email_from'],
+           }
+        try:
+            http.request.env['mail.mail'].sudo().create(mail_values).send()
+            pdf.unlink()
+            return {'ok': True, 'mensaje': 'Se ha completado su solicitud exitosamente' }
+        except:
+            _logger.info(sys.exc_info())
+            return {'ok': False, 'mensaje': 'No se podido completar su solicitud'}
     
     
     def get_fields_for_forms(self, modelo):

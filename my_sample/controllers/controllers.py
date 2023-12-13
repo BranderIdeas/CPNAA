@@ -2066,7 +2066,7 @@ class MySample(http.Controller):
         id_universidad = data['universidad']
         id_convenio = data['convenio']
         id_grado = data['grado_id']
-        grado = http.request.env['x_cpnaa_grade'].browse(id_grado)
+        grado = http.request.env['x_cpnaa_grade'].sudo().browse(id_grado)
         archivo_temp = unicodedata.normalize('NFKD', archivo)
         archivo_pdf = archivo_temp.lstrip('data:application/pdf;base64,')
         template_obj = http.request.env['mail.template'].sudo().search_read([('name','=','cpnaa_template_pdf_diplomas')])[0]
@@ -2088,11 +2088,13 @@ class MySample(http.Controller):
                     'email_from': template_obj['email_from'],
                 }
                 http.request.env['mail.mail'].sudo().create(mail_values).send()
-            update = {'x_phase_4': True, 'x_archivo_pdf_actas': archivo_pdf}
+            update = { 'x_phase_4': True, 'x_archivo_pdf_actas': archivo_pdf }
             grado.write(update)
         except:
+            _logger.info(str(sys.exc_info()[1]))
             return {'ok': False, 'error': 'Ha ocurrido un error al intentar guardar el archivo, vuelve a intentarlo más tarde'}
-        return {'ok': True, 'message': 'Listado guardado con exito', 'grado': id_grado, 'convenio': id_convenio, 'universidad': id_universidad}
+        return { 'ok': True, 'message': 'Listado guardado con exito', 'grado': id_grado, 
+                 'convenio': id_convenio, 'universidad': id_universidad }
     
     # Recibe los graduandos verificados y los agrega al grado, si no existe el grado lo crea
     @http.route('/guardar_registros', methods=['POST'], type="json", auth='user', website=True) 

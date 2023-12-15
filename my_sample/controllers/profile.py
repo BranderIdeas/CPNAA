@@ -29,8 +29,7 @@ class Profile(http.Controller):
     def data_profesional(self, **kw):
         _logger.info(http.request.session.login)
         email = http.request.session.login
-        result = http.request.env['x_cpnaa_user'].sudo().search_read([('x_email','=',email)],lists.person_fields)
-        person = result[-1] if result else None
+        person = self.get_person(email)
         if not person:
             return { 'ok': False, 'message': 'User not found' }
         person = self.get_related_data(person)
@@ -74,7 +73,20 @@ class Profile(http.Controller):
                 field_rel = '%s_ID' % modelo
                 register.write({ field_rel: new_rec.id })
         result = self.data_return(modelo, reg_id)
-        return { 'ok': True, 'message': 'Data updated successfully', 'data': result } 
+        return { 'ok': True, 'message': 'Data updated successfully', 'data': result }
+    
+    
+    @http.route('/profile_api/get_person_data', methods=['POST'], type="json", auth='user', website=True)
+    def get_person_data(self):
+        _logger.info(http.request.session.login)
+        email = http.request.session.login
+        return self.get_person(email)
+    
+    
+    def get_person(self, email):
+        result = http.request.env['x_cpnaa_user'].sudo().search_read([('x_email','=',email)],lists.person_fields)
+        person = result[-1] if result else None
+        return person
     
     
     def data_return(self, modelo, reg_id):
@@ -226,4 +238,4 @@ class Profile(http.Controller):
         result = http.request.env[modelo].sudo().search_read([('x_professional_registration_ID','=',register_id)])
         for r in result:
             self.delete_base_fields(r)
-        return result[0] if result else {}    
+        return result[0] if result else {}

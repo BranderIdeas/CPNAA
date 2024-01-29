@@ -1335,10 +1335,10 @@ class MySample(http.Controller):
                 _logger.info('dias => '+str(dias))
                 if (dias < 0):
                     #return { 'ok': 'True'}
-                    return { 'ok': 'False', 'mensaje': 'Fecha Expiracion:' + str(fecha_expiracion) + ' --- Fecha Expedicion: ' + str(fecha_expedicion) }
+                    return { 'ok': 'False', 'mensaje': 'Fecha Expiracion:' + str(fecha_expiracion) }
                 else:
                     #return { 'ok': 'False', 'messaje': 'Su solicitud de Renovación de Licencia Temporal Especial no puede ser recibida, tiempo vencido para radicar la solicitud. Favor tramitar Licencia Temporal Especial por primera vez en el link: https://cpnaa.gov.co/tramite-licencia-temporal/' + str(dias)}
-                    return { 'ok': 'False', 'mensaje': 'Fecha Expiracion:' + str(fecha_expiracion) + ' --- Fecha Expedicion: ' + str(fecha_expedicion) }
+                    return { 'ok': 'False', 'mensaje': 'Fecha Expiracion:' + str(fecha_expiracion) }
                 
             result, por_nombre, matricula, certificado, tramite_en_curso, grado, beneficiario = {}, False, False, False, False, False, False
             egresado = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select','=',int(data['doc_type'])),('x_documento','=',data['doc'])])

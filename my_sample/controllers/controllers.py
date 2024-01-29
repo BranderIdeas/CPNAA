@@ -1335,10 +1335,12 @@ class MySample(http.Controller):
                 _logger.info('dias => '+str(dias))
                 if (dias < 0):
                     #return { 'ok': 'True'}
-                    return { 'ok': 'False', 'messaje': 'va por dias < 0:  fecha expiracion' + str(fecha_expiracion) + ' dias: ' + str(dias) }
+                    #return { 'ok': 'False', 'messaje': 'va por dias < 0:  fecha expiracion' + str(fecha_expiracion) + ' dias: ' + str(dias) }
+                    return { 'ok': 'False', 'messaje': 'va por dias < 0: try: dias' + str(dias) + ' fecha expiracion: ' + str(fecha_expiracion) + ' now: ' + str(now) + '/' + str(timedelta(days=1)) + ' except: dias' + str(dias) + ' fecha expiracion: ' + str(fecha_expiracion) + ' ano: ' + str(ano) + ' now: ' + str(now) + '/' + str(timedelta(days=1)) }
                 else:
                     #return { 'ok': 'False', 'messaje': 'Su solicitud de Renovación de Licencia Temporal Especial no puede ser recibida, tiempo vencido para radicar la solicitud. Favor tramitar Licencia Temporal Especial por primera vez en el link: https://cpnaa.gov.co/tramite-licencia-temporal/' + str(dias)}
-                    return { 'ok': 'False', 'messaje': 'Fecha Expiracion:'  + str(fecha_expiracion) + ' dias: ' + str(dias) }
+                    #return { 'ok': 'False', 'messaje': 'Fecha Expiracion:'  + str(fecha_expiracion) + ' dias: ' + str(dias) }
+                    return { 'ok': 'False', 'messaje': 'false: try: dias' + str(dias) + ' fecha expiracion: ' + str(fecha_expiracion) + ' now: ' + str(now) + '/' + str(timedelta(days=1)) + ' except: dias' + str(dias) + ' fecha expiracion: ' + str(fecha_expiracion) + ' ano: ' + str(ano) + ' now: ' + str(now) + '/' + str(timedelta(days=1)) }
                 
             result, por_nombre, matricula, certificado, tramite_en_curso, grado, beneficiario = {}, False, False, False, False, False, False
             egresado = http.request.env['x_procedure_temp'].sudo().search([('x_tipo_documento_select','=',int(data['doc_type'])),('x_documento','=',data['doc'])])

@@ -1314,6 +1314,7 @@ class MySample(http.Controller):
                 vigencia = http.request.env['x_cpnaa_procedure'].sudo().search_read([('x_studio_documento_1','=',kw['data']['doc']), 
                                                                                      ('x_studio_tipo_de_documento_1.id', "=", kw['data']['doc_type']), 
                                                                                      ('x_cycle_ID.x_order','=',5)], campos)
+                dias_renovacion = int(http.request.env['x_cpnaa_parameter'].sudo().search([('x_name','=','Dias renovacion licencias')]).x_value)
                 _logger.info('yo soy el vigencia en consulta renovacion: ' + str(vigencia))
                 
                 try:
@@ -1333,7 +1334,7 @@ class MySample(http.Controller):
                     if i['x_service_ID'][1] == 'RENOVACIÓN - LICENCIA TEMPORAL ESPECIAL':
                         return { 'ok': 'False', 'messaje': 'Señor usuario usted ya solicitó una renovación de Licencia Temporal Especial, favor solicitar nuevamente Licencia Temporal Especial por primera vez, dirigirse al link: https://cpnaa.gov.co/tramite-licencia-temporal/'}
                 _logger.info('dias => '+str(dias))
-                if (dias < 0):
+                if (dias >= dias_renovacion):
                     return { 'ok': 'True'}
                 else:
                     return { 'ok': 'False', 'messaje': 'Su solicitud de Renovación de Licencia Temporal Especial no puede ser recibida, tiempo vencido para radicar la solicitud. Favor tramitar Licencia Temporal Especial por primera vez en el link: https://cpnaa.gov.co/tramite-licencia-temporal/'}                
@@ -2066,7 +2067,7 @@ class MySample(http.Controller):
         id_universidad = data['universidad']
         id_convenio = data['convenio']
         id_grado = data['grado_id']
-        grado = http.request.env['x_cpnaa_grade'].sudo().browse(id_grado)
+        grado = http.request.env['x_cpnaa_grade'].browse(id_grado)
         archivo_temp = unicodedata.normalize('NFKD', archivo)
         archivo_pdf = archivo_temp.lstrip('data:application/pdf;base64,')
         template_obj = http.request.env['mail.template'].sudo().search_read([('name','=','cpnaa_template_pdf_diplomas')])[0]
@@ -2088,13 +2089,11 @@ class MySample(http.Controller):
                     'email_from': template_obj['email_from'],
                 }
                 http.request.env['mail.mail'].sudo().create(mail_values).send()
-            update = { 'x_phase_4': True, 'x_archivo_pdf_actas': archivo_pdf }
+            update = {'x_phase_4': True, 'x_archivo_pdf_actas': archivo_pdf}
             grado.write(update)
         except:
-            _logger.info(str(sys.exc_info()[1]))
             return {'ok': False, 'error': 'Ha ocurrido un error al intentar guardar el archivo, vuelve a intentarlo más tarde'}
-        return { 'ok': True, 'message': 'Listado guardado con exito', 'grado': id_grado, 
-                 'convenio': id_convenio, 'universidad': id_universidad }
+        return {'ok': True, 'message': 'Listado guardado con exito', 'grado': id_grado, 'convenio': id_convenio, 'universidad': id_universidad}
     
     # Recibe los graduandos verificados y los agrega al grado, si no existe el grado lo crea
     @http.route('/guardar_registros', methods=['POST'], type="json", auth='user', website=True) 
